@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Barinder S. Banwait
 -/
 
-import Mathlib.Data.Int.Basic
 import Mathlib.Algebra.Parity
 import Mathlib.Data.Nat.Parity
 import Mathlib.Tactic
@@ -16,24 +15,33 @@ Stuff
 
 -/
 
+lemma thing :
+  ∀ (x : ℕ), Odd (x ^ 2) → Odd (x) := by
+  simp [parity_simps]
+
+lemma another_thing :
+  ∀ (n : ℕ), n ≠ 0 → Odd (2 ^ n - 1) := by
+  intro n h
+  rw [Nat.odd_sub]
+  simp [parity_simps]
+  exact h
+  exact Nat.one_le_two_pow
+
 lemma x_is_odd :
-  ∀ x : ℕ, ∀ n : ℕ, x ^ 2 + 7 = 2 ^ n →
+  ∀ x : ℕ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 1 = 2 ^ n →
     x % 2 = 1 := by
-    -- intros
-    -- simp [← even_iff_two_dvd, ← Nat.even_add_one, parity_simps]
-    -- ring_nf
-    intros x n h
-    have m : (x^2) = 2^n - 7 := by
+    intros x n h' h
+    have m : (x^2) = 2^n - 1 := by
       exact eq_tsub_of_add_eq h
-    -- apply Nat.odd_iff.mp
     have m₂ : (x ^ 2) % 2 = 1 := by
       rw [m]
-      sorry
+      rw [← Nat.odd_iff]
+      apply another_thing
+      exact h'
     rw [← Nat.odd_iff]
     rw [← Nat.odd_iff] at m₂
-    have obv : 2 ≠ 0 := by simp
-    -- rw [Int.odd_pow'] at m₂
-    sorry
+    apply thing
+    exact m₂
 
 
 /-- The Ramanujan-Nagell theorem: If `x` and `n` are integers satisfying `x ^ 2 + 7 = 2 ^ n`, then
