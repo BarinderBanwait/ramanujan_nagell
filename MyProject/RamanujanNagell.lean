@@ -14,33 +14,33 @@ import Mathlib.Tactic
 Stuff
 
 -/
+set_option pp.numericTypes true
 
-lemma thing :
+lemma sq_odd_then_odd :
   ∀ (x : ℕ), Odd (x ^ 2) → Odd (x) := by
   simp [parity_simps]
 
-lemma another_thing :
-  ∀ (n : ℕ), n ≠ 0 → Odd (2 ^ n - 1) := by
+lemma two_pow_min_seven_odd :
+  ∀ (n : ℕ), n ≠ 0 → Odd (2 ^ n - 7) := by
   intro n h
-  rw [Nat.odd_sub]
-  simp [parity_simps]
-  exact h
-  exact Nat.one_le_two_pow
+  -- rw [@Int.odd_sub (2^n) 7]
+  sorry
+
 
 lemma x_is_odd :
-  ∀ x : ℕ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 1 = 2 ^ n →
+  ∀ x : ℕ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 7 = 2 ^ n →
     x % 2 = 1 := by
     intros x n h' h
-    have m : (x^2) = 2^n - 1 := by
+    have m : (x^2) = 2^n - 7 := by
       exact eq_tsub_of_add_eq h
     have m₂ : (x ^ 2) % 2 = 1 := by
       rw [m]
       rw [← Nat.odd_iff]
-      apply another_thing
+      apply two_pow_min_seven_odd
       exact h'
     rw [← Nat.odd_iff]
     rw [← Nat.odd_iff] at m₂
-    apply thing
+    apply sq_odd_then_odd
     exact m₂
 
 
@@ -53,5 +53,12 @@ theorem RamanujanNagell :
   ∨ (x, n) = (5, 5)
   ∨ (x, n) = (11, 7)
   ∨ (x, n) = (181, 15) := by
-  simp
-  sorry
+  intro x n h
+  have h₂ : x % 2 = 1 := by
+    apply x_is_odd
+    · sorry -- need to prove that n is not zero
+    exact h
+  rw [← Nat.odd_iff] at h₂
+  rcases Nat.even_or_odd n with h | h
+  · sorry
+  · sorry
