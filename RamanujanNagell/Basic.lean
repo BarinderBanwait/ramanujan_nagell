@@ -25,25 +25,28 @@ theorem not_odd_two_pow (n : ℕ) : n ≠ 0 → ¬Odd ((2 : ℕ) ^ n) := by
   cases n <;> simp [pow_succ]
 
 lemma two_pow_min_seven_odd :
-  ∀ (n : ℕ), Odd ( (2 : ℤ) ^ n - 7 ) := by
-  intro n
-  rw [@Int.odd_sub (2^n) 7]
-  -- apply iff_of_false
-  -- · exact not_odd_two_pow n
-  -- · decide
-  sorry
+  ∀ (n : ℕ), n ≠ 0 → Odd ( (2 : ℤ) ^ n - 7 ) := by
+  intro n hn
+  have hn' : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr hn
+  have h_even : Even ((2 : ℤ) ^ n) := by
+    obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_le hn'
+    rw [hm, add_comm, pow_add, pow_one, mul_comm]
+    exact even_two_mul ((2 : ℤ) ^ m)
+  obtain ⟨k, hk⟩ := h_even
+  use k - 4
+  omega
 
 
 lemma x_is_odd :
   ∀ x : ℤ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 7 = 2 ^ n →
     x % 2 = 1 := by
-    intros x n _ h
+    intros x n hn h
     have m : (x^2) = 2^n - 7 := by
       exact eq_tsub_of_add_eq h
     have m₂ : (x ^ 2) % 2 = 1 := by
       rw [m]
       rw [← Int.odd_iff]
-      apply two_pow_min_seven_odd n
+      exact two_pow_min_seven_odd n hn
     rw [← Int.odd_iff]
     rw [← Int.odd_iff] at m₂
     apply sq_odd_then_odd
