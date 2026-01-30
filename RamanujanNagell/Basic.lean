@@ -6,6 +6,81 @@ Authors: Barinder S. Banwait
 
 import Mathlib.Analysis.Normed.Field.Lemmas
 import Mathlib.Data.Int.Star
+import Mathlib
+import Mathlib.NumberTheory.KummerDedekind
+import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.Ideal.Int
+
+set_option linter.style.longLine false
+set_option diagnostics true
+open Polynomial NumberField QuadraticAlgebra RingOfIntegers Algebra Nat Ideal
+  UniqueFactorizationMonoid
+
+notation "K" => QuadraticAlgebra ℚ (-2) 1
+
+-- ω² = -2 + 1*ω, i.e. ω = (1 + √(-7))/2, the generator of the ring of integers of Q(√(-7)).
+-- The Fact says the polynomial x² - x + 2 has no rational roots (discriminant = -7 < 0).
+instance : Fact (∀ (r : ℚ), r ^ 2 ≠ (-2 : ℚ) + (1 : ℚ) * r) := by
+  constructor
+  intro r h
+  have h1 : r ^ 2 - r + 2 = 0 := by linarith
+  have h2 : 4 * (r ^ 2 - r + 2) = (2 * r - 1) ^ 2 + 7 := by ring
+  have h3 : (2 * r - 1) ^ 2 + 7 = 0 := by linarith
+  have h4 : (2 * r - 1) ^ 2 ≥ 0 := sq_nonneg _
+  linarith
+
+instance : NumberField K := by
+  admit
+
+-- Field instance is provided automatically by QuadraticAlgebra.instField
+
+notation "R" => (𝓞 K)
+
+lemma is_integral_ω : IsIntegral ℤ (ω : K) := by
+  -- ω satisfies X² - X + 2 = 0 (since ω² = -2 + ω in QuadraticAlgebra ℚ (-2) 1)
+  refine ⟨X ^ 2 - X + C 2, ?_, ?_⟩
+  · -- Monic: rewrite as X² - (X - 2) and use degree argument
+    rw [show (X ^ 2 - X + C (2 : ℤ) : ℤ[X]) = X ^ 2 - (X - C 2) from by ring]
+    exact monic_X_pow_sub (by rw [degree_X_sub_C]; norm_num)
+  · -- Evaluation: ω² - ω + 2 = (-2 + ω) - ω + 2 = 0
+    rw [← aeval_def]
+    simp only [map_add, map_sub, aeval_X_pow, aeval_X, aeval_C]
+    rw [sq, omega_mul_omega_eq_mk]
+    ext <;> simp
+
+set_option quotPrecheck false in
+notation "θ" => (⟨ω, is_integral_ω⟩ : 𝓞 K)
+
+lemma is_integral_one_sub_ω : IsIntegral ℤ ((1 : K) - ω) := by
+  sorry
+
+-- θ' = (1 - √-7)/2, the conjugate of θ in the ring of integers
+set_option quotPrecheck false in
+notation "θ'" => (⟨1 - ω, is_integral_one_sub_ω⟩ : 𝓞 K)
+
+lemma my_minpoly : minpoly ℤ θ = X ^ 2 - X + 2 := by
+  admit
+
+lemma span_eq_top : adjoin ℤ {θ} = ⊤ := by
+  admit
+
+lemma class_number_one : UniqueFactorizationMonoid R := by
+  admit
+
+lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
+  admit
+
+lemma exponent : exponent θ = 1 := by
+  rw [exponent_eq_one_iff, span_eq_top]
+
+lemma ne_dvd_exponent (p : ℕ) [hp : Fact p.Prime] : ¬ (p ∣ RingOfIntegers.exponent θ) := by
+  rw [exponent, dvd_one]
+  exact hp.1.ne_one
+
+lemma two_factorisation_R : θ * (1 - θ) = 2 := by
+  admit
+
 
 /-!
 # The Ramanujan-Nagell equation
@@ -36,6 +111,106 @@ axiom two_factors_in_Q_sqrt_neg7 : True
 /-- The only units in the ring of integers of ℚ(√-7) are ±1. -/
 axiom units_of_Q_sqrt_neg7 : True
 
+/--
+Summary
+
+PROVIDED SOLUTION
+We begin by applying `main_factorisation_lemma` below. The relationship between `m` here and `n` there is `m = n - 2`.
+We then have the factorization
+((x + √-7)/2) * ((x - √-7)/2) = 2^m = ((1 + √-7)/2)^m * ((1 - √-7)/2)^m
+which is written in Lean as ((↑x + 2*(↑θ : K) - 1) / 2) * ((↑x - 2*(↑θ : K) + 1) / 2) = (↑θ : K) ^ m * (1 - (↑θ : K)) ^ m.
+This is a factorization into irreducible elements in the ring of integers of ℚ(√-7) (which is ℤ[θ]).
+Since the class number is 1, we have unique factorization into irreducibles. Equivalently, the prime elements are the same as the irreducible elements.
+One shows that the two factors (↑x + 2*(↑θ : K) - 1) / 2) and ((↑x - 2*(↑θ : K) + 1) / 2) are coprime as follows: by uniqueness of factorization,
+we only need to consider the elements θ and (1 - θ) (the prime factors of 2 in this ring). If either of these divided both factors, then it would divide their difference,
+which is 2*θ - 1 = √-7, which by taking norms is seen to not be the case. Therefore, by unique factorization, each factor must be equal to one of the two factors on the right up to multiplication by a unit.
+The units in this ring are just ±1 (use `units_pm_one` above). Therefore, we obtain the important equation
+(x ± √-7)/2 = \pm ((1 ± √-7)/2)^m.
+Eliminating x by taking the difference of these two equations, we obtain the two cases stated in the lemma. There might be several similar
+cases to deal with at the end to keep track of the signs.
+The relevant results about unique factorization and UFDs can be found in the NumberTheory and RingTheory folders of mathlib.
+-/
+
+/- Exercise 1: The conjugate factors (x ± √-7)/2 lie in R (since x is odd) and
+    their product equals (x²+7)/4 = 2^m = θ^m · (1-θ)^m. The division by 4 is
+    deliberate: it makes the difference of the factors equal to √-7 = 2θ-1 (rather
+    than 2√-7), which simplifies the coprimality argument. -/
+lemma factors_in_R_with_product (x : ℤ) (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
+    (h : (x ^ 2 + 7) / 4 = 2 ^ m) :
+    ∃ α β : R, α * β = θ ^ m * θ' ^ m ∧
+      (↑α : K) - ↑β = 2 * (↑θ : K) - 1 := by
+  sorry
+
+/-- Exercise 2: The conjugate factors are coprime in R. The only prime factors of 2
+    in R are θ and θ' (since 2 = θ·θ' by `two_factorisation_R`). If either
+    divided both α and β, it would divide their difference 2θ-1 = √(-7), but
+    N(√-7) = 7 is not divisible by N(θ) = 2 or N(θ') = 2. -/
+lemma conjugate_factors_coprime (α β : R) (m : ℕ)
+    (h_prod : α * β = θ ^ m * θ' ^ m)
+    (h_diff : (↑α : K) - ↑β = 2 * (↑θ : K) - 1) :
+    IsCoprime α β := by
+  sorry
+
+/-- Exercise 3: In the UFD R, if α · β = θ^m · θ'^m and gcd(α, β) = 1, then
+    α = ±θ^m or α = ±θ'^m. This combines two steps: (1) unique factorization
+    (`class_number_one`) implies α is associate to θ^m or θ'^m, and (2) the only
+    units are ±1 (`units_pm_one`), pinning down the sign. -/
+lemma ufd_power_association (α β : R) (m : ℕ)
+    (h_prod : α * β = θ ^ m * θ' ^ m)
+    (h_coprime : IsCoprime α β) :
+    (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) := by
+  haveI := class_number_one
+  sorry
+
+/-- Exercise 4: From α = ±θ^m or α = ±θ'^m, use the product relation to determine β,
+    then take the difference α - β = 2θ-1 to eliminate x and obtain the conclusion. -/
+lemma eliminate_x_conclude (α β : R) (m : ℕ)
+    (h_diff : (↑α : K) - ↑β = 2 * (↑θ : K) - 1)
+    (h_assoc : (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)))
+    (h_prod : α * β = θ ^ m * θ' ^ m) :
+    (2 * θ - 1 = θ ^ m - θ' ^ m) ∨ (-2 * θ + 1 = θ ^ m - θ' ^ m) := by
+  sorry
+
+lemma main_m_condition :
+  ∀ x : ℤ, ∀ m : ℕ, Odd m → m ≥ 3 → (x ^ 2 + 7) / 4 = 2 ^ m →
+    (2*θ - 1 = θ^m - θ'^m) ∨ (-2*θ + 1 = θ^m - θ'^m)  := by
+  intro x m hm_odd hm_ge h_eq
+  -- Step 1: Get conjugate factors α = (x+√-7)/2, β = (x-√-7)/2 in R
+  --         with α · β = θ^m · θ'^m and α - β = 2θ-1 = √-7
+  obtain ⟨α, β, h_prod, h_diff⟩ := factors_in_R_with_product x m hm_odd hm_ge h_eq
+  -- Step 2: α and β are coprime (θ and θ' don't divide √-7, by norms)
+  have h_coprime := conjugate_factors_coprime α β m h_prod h_diff
+  -- Step 3: By UFD property (class number 1), α is associate to θ^m or θ'^m
+  have h_assoc := ufd_power_association α β m h_prod h_coprime
+  -- Step 4: Units are ±1, take difference to eliminate x and conclude
+  exact eliminate_x_conclude α β m h_diff h_assoc h_prod
+
+
+/--
+Summary
+
+PROVIDED SOLUTION
+Thing
+-/
+lemma main_factorisation_lemma :
+  ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
+    ((↑x + 2*(↑θ : K) - 1) / 2) * ((↑x - 2*(↑θ : K) + 1) / 2) = (↑θ : K) ^ (n - 2) * (1 - (↑θ : K)) ^ (n - 2) := by
+  admit
+
+/--
+Given x ^ 2 + 7 = 2 ^ n, show that (x ^ 2 + 7) / 4 = 2 ^ (n - 2).
+
+PROVIDED SOLUTION
+Divide both sides of the equation x^2 + 7 = 2^n by 4.
+-/
+lemma reduction_divide_by_4 :
+  ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
+    (x ^ 2 + 7) / 4 = 2 ^ (n - 2) := by
+  intro x n _ hn hx
+  rw [hx]
+  exact Int.ediv_eq_of_eq_mul_left (by norm_num)
+    (by rw [show n = n - 2 + 2 from by omega, pow_add]; norm_num)
+
 /-- Key consequence of unique factorization in ℤ[(1+√-7)/2]:
     For odd n ≥ 5, if x² + 7 = 2ⁿ, then setting m = n - 2, we have
     -2^(m-1) ≡ m (mod 7).
@@ -45,17 +220,19 @@ axiom units_of_Q_sqrt_neg7 : True
     and unique factorization implies (x±√-7)/2 = ±((1±√-7)/2)^m.
     The negative sign must occur (proved by considering mod b² where b = (1-√-7)/2).
     Expanding via binomial theorem yields -2^(m-1) ≡ m (mod 7). -/
-axiom odd_case_mod_seven_constraint :
+lemma odd_case_mod_seven_constraint :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
-    (-(2 : ℤ)) ^ (n - 3) % 7 = ((n : ℤ) - 2) % 7
+    (-(2 : ℤ)) ^ (n - 3) % 7 = ((n : ℤ) - 2) % 7 := by
+      admit
 
 /-- From -2^(m-1) ≡ m (mod 7) and 2⁶ ≡ 1 (mod 7), the only solutions are
     m ≡ 3, 5, or 13 (mod 42). Moreover, no two distinct solutions can be
     congruent mod 42 (proved by a contradiction argument using powers of 7).
     Therefore the only possible values are m = 3, 5, 13, i.e., n = 5, 7, 15. -/
-axiom odd_case_only_three_values :
+theorem odd_case_only_three_values :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
-    n = 5 ∨ n = 7 ∨ n = 15
+    n = 5 ∨ n = 7 ∨ n = 15 := by
+      admit
 
 lemma sq_odd_then_odd :
   ∀ (x : ℤ), Odd (x ^ 2) → Odd (x) := by
