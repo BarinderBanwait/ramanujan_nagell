@@ -76,6 +76,25 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   $\frac{1+\sqrt{-7}}{2} \cdot \frac{1-\sqrt{-7}}{2} = 2$.
 \end{lemma}
 
+\begin{lemma}[Exponent of $\theta$]
+  \label{lem:exponent}
+  \lean{exponent}
+  \uses{lem:span_eq_top}
+  \leanok
+  The exponent of $\theta$ (in the sense of Kummer--Dedekind) is $1$.
+  This follows immediately from the fact that $\mathbb{Z}[\theta] = R$
+  (Lemma~\ref{lem:span_eq_top}).
+\end{lemma}
+
+\begin{lemma}[No prime divides the exponent]
+  \label{lem:ne_dvd_exponent}
+  \lean{ne_dvd_exponent}
+  \uses{lem:exponent}
+  \leanok
+  For any prime $p$, $p$ does not divide the exponent of $\theta$.
+  This is immediate since the exponent equals $1$ (Lemma~\ref{lem:exponent}).
+\end{lemma}
+
 \section{Parity lemmas}
 
 \begin{lemma}[Odd square implies odd root]
@@ -132,6 +151,19 @@ to obtain $(x^2 + 7)/4 = 2^m$, which factors in $R$ as
 \]
 The division by $4$ is deliberate: it makes the difference of the two factors equal to
 $\sqrt{-7} = 2\theta - 1$ (rather than $2\sqrt{-7}$), which simplifies the coprimality argument.
+
+\begin{lemma}[Main factorization in $K$]
+  \label{lem:main_factorisation_lemma}
+  \lean{main_factorisation_lemma}
+  \uses{lem:is_integral_omega, lem:two_factorisation_R}
+  For odd $n \geq 5$, if $x^2 + 7 = 2^n$, then
+  \[
+    \frac{x + 2\theta - 1}{2} \cdot \frac{x - 2\theta + 1}{2}
+    = \theta^{n-2} \cdot (1 - \theta)^{n-2}
+  \]
+  in $K$. This expresses the factorization of $2^{n-2} = (x^2+7)/4$ in terms
+  of the conjugate factors $(x \pm \sqrt{-7})/2$.
+\end{lemma}
 
 \subsection{Key intermediate result}
 
@@ -228,10 +260,54 @@ lemmas, each sorry'd for now. These are intended as exercises.
 
 \section{Main theorem}
 
+\subsection{Direct computation helpers}
+
+Once the possible values of $n$ are determined (either by the even-case factorization or
+the odd-case modular argument), it remains to solve for $x$ by direct computation.
+Each helper below takes an equation $x^2 = c$ (where $c = 2^n - 7$) and the value of $n$,
+then identifies the solution pair $(x, n)$ in the list of solutions.
+
+\begin{lemma}[Even case: $n = 4$, $x^2 = 9$]
+  \label{lem:helper_1}
+  \lean{helper_1}
+  \leanok
+  If $x^2 = 9$ and $n = 4$, then $(x, n) = (\pm 3, 4)$.
+\end{lemma}
+
+\begin{lemma}[Odd case: $n = 3$, $x^2 = 1$]
+  \label{lem:helper_2}
+  \lean{helper_2}
+  \leanok
+  If $x^2 = 1$ and $n = 3$, then $(x, n) = (\pm 1, 3)$.
+\end{lemma}
+
+\begin{lemma}[Odd case: $n = 5$, $x^2 = 25$]
+  \label{lem:helper_3}
+  \lean{helper_3}
+  \leanok
+  If $x^2 = 25$ and $n = 5$, then $(x, n) = (\pm 5, 5)$.
+\end{lemma}
+
+\begin{lemma}[Odd case: $n = 7$, $x^2 = 121$]
+  \label{lem:helper_4}
+  \lean{helper_4}
+  \leanok
+  If $x^2 = 121$ and $n = 7$, then $(x, n) = (\pm 11, 7)$.
+\end{lemma}
+
+\begin{lemma}[Odd case: $n = 15$, $x^2 = 32761$]
+  \label{lem:helper_5}
+  \lean{helper_5}
+  \leanok
+  If $x^2 = 32761$ and $n = 15$, then $(x, n) = (\pm 181, 15)$.
+\end{lemma}
+
+\subsection{The theorem}
+
 \begin{theorem}[Ramanujan--Nagell]
   \label{thm:RamanujanNagell}
   \lean{RamanujanNagell}
-  \uses{lem:x_is_odd, lem:my_amazing_thing, thm:odd_case_only_three_values}
+  \uses{lem:x_is_odd, lem:my_amazing_thing, thm:odd_case_only_three_values, lem:helper_1, lem:helper_2, lem:helper_3, lem:helper_4, lem:helper_5}
   \leanok
   The only integer solutions to $x^2 + 7 = 2^n$ are
   \[
@@ -244,11 +320,13 @@ lemmas, each sorry'd for now. These are intended as exercises.
 
   \textbf{Case 1: $n$ even.} Write $n = 2k$. Then $(2^k+x)(2^k-x) = 7$.
   By Lemma~\ref{lem:my_amazing_thing}, the only possibility is $2^k = 4$,
-  giving $n = 4$ and $x = \pm 3$.
+  giving $n = 4$ and $x = \pm 3$ (Lemma~\ref{lem:helper_1}).
 
-  \textbf{Case 2: $n$ odd, $n = 3$.} Direct computation gives $x^2 = 1$, so $x = \pm 1$.
+  \textbf{Case 2: $n$ odd, $n = 3$.} Direct computation gives $x^2 = 1$, so $x = \pm 1$
+  (Lemma~\ref{lem:helper_2}).
 
   \textbf{Case 3: $n$ odd, $n \geq 5$.} By Theorem~\ref{thm:odd_case_only_three_values},
-  $n \in \{5, 7, 15\}$, and direct computation gives the remaining solutions.
+  $n \in \{5, 7, 15\}$, and direct computation gives the remaining solutions
+  (Lemmas~\ref{lem:helper_3}, \ref{lem:helper_4}, \ref{lem:helper_5}).
   \end{proof}
 \end{theorem}

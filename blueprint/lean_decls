@@ -5,11 +5,14 @@ span_eq_top
 class_number_one
 units_pm_one
 two_factorisation_R
+exponent
+ne_dvd_exponent
 sq_odd_then_odd
 not_odd_two_pow
 two_pow_min_seven_odd
 x_is_odd
 my_amazing_thing
+main_factorisation_lemma
 factors_in_R_with_product
 conjugate_factors_coprime
 ufd_power_association
@@ -18,4 +21,9 @@ main_m_condition
 reduction_divide_by_4
 odd_case_mod_seven_constraint
 odd_case_only_three_values
+helper_1
+helper_2
+helper_3
+helper_4
+helper_5
 RamanujanNagell
