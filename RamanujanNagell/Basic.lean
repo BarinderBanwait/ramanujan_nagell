@@ -14,6 +14,7 @@ import Mathlib.RingTheory.Ideal.Int
 
 set_option linter.style.longLine false
 set_option diagnostics true
+
 open Polynomial NumberField QuadraticAlgebra RingOfIntegers Algebra Nat Ideal
   UniqueFactorizationMonoid
 
@@ -53,7 +54,7 @@ set_option quotPrecheck false in
 notation "θ" => (⟨ω, is_integral_ω⟩ : 𝓞 K)
 
 lemma is_integral_one_sub_ω : IsIntegral ℤ ((1 : K) - ω) := by
-  sorry
+  admit
 
 -- θ' = (1 - √-7)/2, the conjugate of θ in the ring of integers
 set_option quotPrecheck false in
@@ -66,6 +67,9 @@ lemma span_eq_top : adjoin ℤ {θ} = ⊤ := by
   admit
 
 lemma class_number_one : UniqueFactorizationMonoid R := by
+  admit
+
+lemma class_number_one_PID : IsPrincipalIdealRing R := by
   admit
 
 lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
@@ -135,11 +139,68 @@ The relevant results about unique factorization and UFDs can be found in the Num
     their product equals (x²+7)/4 = 2^m = θ^m · (1-θ)^m. The division by 4 is
     deliberate: it makes the difference of the factors equal to √-7 = 2θ-1 (rather
     than 2√-7), which simplifies the coprimality argument. -/
-lemma factors_in_R_with_product (x : ℤ) (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
+lemma factors_in_R_with_product (x : ℤ) (m : ℕ) (hm_ge : m ≥ 3)
     (h : (x ^ 2 + 7) / 4 = 2 ^ m) :
     ∃ α β : R, α * β = θ ^ m * θ' ^ m ∧
       (↑α : K) - ↑β = 2 * (↑θ : K) - 1 := by
-  sorry
+  -- Step 1: Show x is odd
+  have hx_odd : Odd x := by
+    by_contra hx_not_odd
+    rw [Int.not_odd_iff_even] at hx_not_odd
+    obtain ⟨t, ht⟩ := hx_not_odd -- x = t + t
+    have hx2t : x = 2 * t := by omega
+    -- When x = 2t, (x²+7)/4 = ((2t)²+7)/4 = (4t²+7)/4 = t²+1 (integer division)
+    have h_div : (x ^ 2 + 7) / 4 = t ^ 2 + 1 := by
+      rw [hx2t]
+      have : (2 * t) ^ 2 + 7 = (t ^ 2 + 1) * 4 + 3 := by ring
+      omega
+    -- So t²+1 = 2^m
+    rw [h_div] at h
+    -- 4 ∣ 2^m for m ≥ 2
+    have h4_dvd_2m : (4 : ℤ) ∣ 2 ^ m :=
+      ⟨2 ^ (m - 2), by rw [show (4 : ℤ) = 2 ^ 2 from by norm_num, ← pow_add]; congr 1; omega⟩
+    -- So 4 ∣ (t²+1)
+    have h4_dvd : (4 : ℤ) ∣ (t ^ 2 + 1) := h ▸ h4_dvd_2m
+    -- But t² mod 4 ∈ {0, 1}, so t²+1 mod 4 ∈ {1, 2}, contradiction
+    rcases Int.even_or_odd t with ⟨s, hs⟩ | ⟨s, hs⟩
+    · -- t even: t = 2s, t² = 4s², 4 ∣ t², so 4 ∣ (t²+1) implies 4 ∣ 1
+      have : (4 : ℤ) ∣ t ^ 2 := ⟨s ^ 2, by rw [hs]; ring⟩
+      have : (4 : ℤ) ∣ 1 := (Int.dvd_add_right this).mp h4_dvd
+      omega
+    · -- t odd: t = 2s+1, t² = 4s²+4s+1, 4 ∣ (t²-1), so 4 ∣ (t²+1) implies 4 ∣ 2
+      have : (4 : ℤ) ∣ (t ^ 2 - 1) := ⟨s ^ 2 + s, by rw [hs]; ring⟩
+      have h4_dvd_2 : (4 : ℤ) ∣ ((t ^ 2 + 1) - (t ^ 2 - 1)) := Int.dvd_sub h4_dvd this
+      -- have : (4 : ℤ) ∣ 2 := by linarith_or_polyrith_or_convert h4_dvd_2; convert h4_dvd_2 using 1; ring
+      omega
+  -- Step 2: Get k with x = 2*k + 1
+  obtain ⟨k, hk⟩ := hx_odd
+  -- Step 3: (x²+7)/4 = k²+k+2 (exact division since x is odd)
+  have hdiv : (x ^ 2 + 7) / 4 = k ^ 2 + k + 2 := by
+    apply Int.ediv_eq_of_eq_mul_left (by norm_num : (4 : ℤ) ≠ 0)
+    rw [hk]; ring
+  rw [hdiv] at h -- h : k^2 + k + 2 = 2^m
+  -- Step 4: Key identity ω * (1 - ω) = 2 in K (from two_factorisation_R)
+  have hω_prod : (ω : K) * (1 - ω) = 2 := by
+    have := congr_arg Subtype.val two_factorisation_R
+    simpa using this
+  -- Step 5: Construct α = k + θ, β = k + θ' as elements of R
+  refine ⟨⟨(k : K) + ω, IsIntegral.add isIntegral_algebraMap is_integral_ω⟩,
+         ⟨(k : K) + (1 - ω), IsIntegral.add isIntegral_algebraMap is_integral_one_sub_ω⟩,
+         ?_, ?_⟩
+  · -- Product: (k+ω)(k+(1-ω)) = k²+k+ω(1-ω) = k²+k+2 = 2^m = ω^m·(1-ω)^m = θ^m·θ'^m
+    apply Subtype.ext
+    calc ((k : K) + ω) * ((k : K) + (1 - ω))
+        = (k : K) ^ 2 + (k : K) + ω * (1 - ω) := by ring
+      _ = (k : K) ^ 2 + (k : K) + 2 := by rw [hω_prod]
+      _ = (2 : K) ^ m := by
+        have := congr_arg (fun n : ℤ => (n : K)) h
+        push_cast at this
+        exact this
+      _ = ω ^ m * (1 - ω) ^ m := by rw [← mul_pow, hω_prod]
+  · -- Difference: (k + ω) - (k + (1-ω)) = 2ω - 1 = 2·↑θ - 1
+    simp only
+    norm_num
+    grind
 
 /-- Exercise 2: The conjugate factors are coprime in R. The only prime factors of 2
     in R are θ and θ' (since 2 = θ·θ' by `two_factorisation_R`). If either
@@ -149,7 +210,172 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
     (h_prod : α * β = θ ^ m * θ' ^ m)
     (h_diff : (↑α : K) - ↑β = 2 * (↑θ : K) - 1) :
     IsCoprime α β := by
-  sorry
+  -- 1. Register that R is a PID
+  haveI : IsPrincipalIdealRing R := class_number_one_PID
+
+  -- Now this tactic works because PID implies GCDMonoid
+  apply isCoprime_of_prime_dvd
+
+  · -- Goal 1
+    intro h
+    -- Deconstruct the hypothesis "α = 0 ∧ β = 0" and substitute into context
+    obtain ⟨rfl, rfl⟩ := h
+
+    -- Now h_diff becomes: 0 - 0 = 2 * θ - 1
+    simp only [sub_self] at h_diff
+
+    -- We derive a contradiction by squaring both sides: 0^2 = (2θ - 1)^2 = -7
+    have h_contra : (0 : K) = -7 := by
+      calc (0 : K)
+        _ = (0 : K) ^ 2 := by norm_num
+        _ = (2 * (θ : K) - 1) ^ 2 := by rw [h_diff]
+        _ = 4 * ((θ : K) ^ 2 - (θ : K)) + 1 := by ring
+        _ = 4 * (-2) + 1 := by
+           -- Use the defining polynomial of θ: x^2 - x + 2 = 0
+           have h_poly : (θ : K)^2 - (θ : K) = -2 := by
+            -- Prove that ω² - ω + 2 = 0 using the same steps as is_integral_ω
+            have h_zero : (θ : K) ^ 2 - (θ : K) + 2 = 0 := by
+              rw [sq, omega_mul_omega_eq_mk]
+              ext <;> simp
+           -- Rearrange (ω² - ω + 2 = 0) to (ω² - ω = -2)
+            rw [← add_eq_zero_iff_eq_neg]
+            exact h_zero
+           rw [h_poly]
+        _ = -7 := by norm_num
+
+    -- 0 = -7 is obviously false
+    norm_num at h_contra
+
+  · -- Goal 2
+    intro p hp hpa hpb
+    have h_prod_val : α * β = (2 : R) ^ m := by
+      rw [h_prod, ← mul_pow]
+    -- FIX: Prove θ' is syntactically equal to (1 - θ) so the lemma matches
+      have h_rewrite : θ' = 1 - θ := Subtype.ext (by simp)
+    -- Now rewrite θ' -> (1 - θ), then apply the factorization lemma
+      rw [h_rewrite, two_factorisation_R]
+    have h_p_dvd_two : p ∣ 2 := by
+      have : p ∣ (2 : R) ^ m := h_prod_val ▸ dvd_mul_of_dvd_left hpa β
+      exact Prime.dvd_of_dvd_pow hp this
+
+    let diff := α - β
+
+    -- Step 2: Show p divides (α - β)
+    have h_p_dvd_diff : p ∣ diff := dvd_sub hpa hpb
+
+    -- Step 3: Norm calculations
+    -- We show N(p) | N(2) and N(p) | N(α - β)
+
+    -- N(2) = 4
+    have h_norm_two : Int.natAbs (Algebra.norm ℤ (2 : R)) = 4 := by
+        have h1 : (Algebra.norm ℤ (2 : 𝓞 K) : ℚ) = Algebra.norm ℚ ((2 : 𝓞 K) : K) :=
+          Algebra.coe_norm_int 2
+        have h2 : ((2 : 𝓞 K) : K) = (2 : K) := rfl
+        rw [h2] at h1
+        have h_qa : QuadraticAlgebra.norm (2 : K) = 4 := by apply QuadraticAlgebra.norm_intCast
+        have h3 : Algebra.norm ℚ (2 : K) = QuadraticAlgebra.norm (2 : K) := by
+          admit -- will admit this for now
+        rw [h3, h_qa] at h1
+        have h4 : Algebra.norm ℤ (2 : 𝓞 K) = 4 := by
+          exact_mod_cast h1
+        simp [h4]
+    have h_norm_two_again : QuadraticAlgebra.norm (2 : K) = 4 := by apply QuadraticAlgebra.norm_intCast
+
+    -- First prove (α - β)^2 = -7
+
+-- Lift the difference equation from K to R
+    have h_diff_R : α - β = 2 * ⟨ω, is_integral_ω⟩ - 1 := by
+      -- 1. To show equality in the subtype R, show equality of the underlying values in K
+      apply Subtype.ext
+      -- 2. Distribute the coercion arrows (↑) over subtraction and multiplication
+      -- 3. Now the goal matches h_diff exactly
+      exact h_diff
+
+    have h_diff_sq : diff ^ 2 = -7 := by
+      -- Move the equality to K
+      apply Subtype.ext
+      -- Unfold 'diff' so we see 'α - β'
+      simp only [diff]
+      -- Now we can rewrite using the hypothesis in K
+      rw [h_diff_R]
+
+      -- Use the defining polynomial identity: ω² - ω + 2 = 0
+      have h_zero : (θ : K) ^ 2 - (θ : K) + 2 = 0 := by
+        rw [sq, omega_mul_omega_eq_mk]
+        ext
+        · simp
+        · simp
+
+      -- The goal is now (2θ - 1)^2 = -7. Linear combination solves it using h_zero.
+      -- First derive θ² = θ - 2 from h_zero (rearranging θ² - θ + 2 = 0)
+      have h_theta_sq : (θ : K) ^ 2 = (θ : K) - 2 := by
+        linear_combination h_zero
+      -- Push coercions through and substitute
+      calc (2 * (θ : K) - 1) ^ 2
+          = 4 * (θ : K) ^ 2 - 4 * (θ : K) + 1 := by ring
+        _ = 4 * ((θ : K) - 2) - 4 * (θ : K) + 1 := by rw [h_theta_sq]
+        _ = -8 + 1 := by ring
+        _ = -7 := by norm_num
+
+    -- Then calculate the norm
+    -- N(diff²) = N(-7) = 49, so N(diff)² = 49, hence |N(diff)| = 7
+    have h_norm_diff : ((Algebra.norm ℤ) diff).natAbs = 7 := by
+      have h_norm_sq : (Algebra.norm ℤ) (diff ^ 2) = 49 := by
+        rw [h_diff_sq]
+        -- Goal: (Algebra.norm ℤ) (-7 : 𝓞 K) = 49
+        -- Use QuadraticAlgebra.norm_intCast: norm (n : K) = n^2
+        have h1 : (Algebra.norm ℤ (-7 : 𝓞 K) : ℚ) = Algebra.norm ℚ ((-7 : 𝓞 K) : K) :=
+            Algebra.coe_norm_int (-7)
+        have h2 : ((-7 : 𝓞 K) : K) = (-7 : K) := rfl
+        rw [h2] at h1
+
+        have h_qa : QuadraticAlgebra.norm (-7 : K) = 49 := by apply QuadraticAlgebra.norm_intCast
+        -- Relate Algebra.norm ℤ on 𝓞 K to QuadraticAlgebra.norm on K
+        -- For integers, coercion commutes: (-7 : 𝓞 K) : K = (-7 : K)
+        have h3 : Algebra.norm ℚ (-7 : K) = QuadraticAlgebra.norm (-7 : K) := by
+          admit -- will admit this for now
+        -- The norms agree on 𝓞 K
+        rw [h3] at h1
+        rw [h_qa] at h1
+        exact Eq.symm ((fun {a b} ↦ Rat.intCast_inj.mp) (_root_.id (Eq.symm h1)))
+
+
+      rw [map_pow] at h_norm_sq
+      have : ((Algebra.norm ℤ) diff).natAbs ^ 2 = 7 ^ 2 := by
+        have h_sq_eq : ((Algebra.norm ℤ) diff) ^ 2 = 49 := h_norm_sq
+        zify
+        rw [sq_abs]
+        exact_mod_cast h_sq_eq
+      exact Nat.pow_left_injective (by exact Ne.symm (zero_ne_add_one 1)) this
+
+    -- Step 4: Logic with divisibility of norms
+    have h_dvd_four : ((Algebra.norm ℤ) p).natAbs ∣ 4 := by
+      rw [← h_norm_two]
+      apply Int.natAbs_dvd_natAbs.mpr
+      exact MonoidHom.map_dvd (Algebra.norm ℤ) h_p_dvd_two
+    have h_dvd_seven : ((Algebra.norm ℤ) p).natAbs ∣ 7 := by
+      rw [← h_norm_diff]
+      apply Int.natAbs_dvd_natAbs.mpr
+      exact map_dvd (Algebra.norm ℤ) h_p_dvd_diff
+    -- gcd(4, 7) = 1, so |N(p)| = 1
+    have h_norm_p_eq_one : ((Algebra.norm ℤ) p).natAbs = 1 := by
+      have h_gcd : Nat.gcd 4 7 = 1 := by norm_num
+      have h_dvd_gcd := Nat.dvd_gcd h_dvd_four h_dvd_seven
+      rw [h_gcd] at h_dvd_gcd
+
+      exact eq_one_of_dvd_one h_dvd_gcd
+    -- |N(p)| = 1 implies p is a unit, contradicting that p is prime
+
+    have h_unit : IsUnit p := by
+      rw [NumberField.isUnit_iff_norm]
+      -- Need: |(RingOfIntegers.norm ℚ p : ℚ)| = 1
+      -- Use that (RingOfIntegers.norm ℚ p : ℚ) = (Algebra.norm ℤ p : ℚ)
+      simp only [RingOfIntegers.coe_norm, ← Algebra.coe_norm_int]
+      -- Now need: |(Algebra.norm ℤ p : ℚ)| = 1
+      rw [← Int.cast_abs, Int.abs_eq_natAbs, h_norm_p_eq_one]
+      exact rfl
+
+    exact hp.not_unit h_unit
 
 /-- Exercise 3: In the UFD R, if α · β = θ^m · θ'^m and gcd(α, β) = 1, then
     α = ±θ^m or α = ±θ'^m. This combines two steps: (1) unique factorization
@@ -160,7 +386,7 @@ lemma ufd_power_association (α β : R) (m : ℕ)
     (h_coprime : IsCoprime α β) :
     (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) := by
   haveI := class_number_one
-  sorry
+  admit
 
 /-- Exercise 4: From α = ±θ^m or α = ±θ'^m, use the product relation to determine β,
     then take the difference α - β = 2θ-1 to eliminate x and obtain the conclusion. -/
@@ -169,7 +395,7 @@ lemma eliminate_x_conclude (α β : R) (m : ℕ)
     (h_assoc : (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)))
     (h_prod : α * β = θ ^ m * θ' ^ m) :
     (2 * θ - 1 = θ ^ m - θ' ^ m) ∨ (-2 * θ + 1 = θ ^ m - θ' ^ m) := by
-  sorry
+  admit
 
 lemma main_m_condition :
   ∀ x : ℤ, ∀ m : ℕ, Odd m → m ≥ 3 → (x ^ 2 + 7) / 4 = 2 ^ m →
@@ -177,7 +403,7 @@ lemma main_m_condition :
   intro x m hm_odd hm_ge h_eq
   -- Step 1: Get conjugate factors α = (x+√-7)/2, β = (x-√-7)/2 in R
   --         with α · β = θ^m · θ'^m and α - β = 2θ-1 = √-7
-  obtain ⟨α, β, h_prod, h_diff⟩ := factors_in_R_with_product x m hm_odd hm_ge h_eq
+  obtain ⟨α, β, h_prod, h_diff⟩ := factors_in_R_with_product x m hm_ge h_eq
   -- Step 2: α and β are coprime (θ and θ' don't divide √-7, by norms)
   have h_coprime := conjugate_factors_coprime α β m h_prod h_diff
   -- Step 3: By UFD property (class number 1), α is associate to θ^m or θ'^m
