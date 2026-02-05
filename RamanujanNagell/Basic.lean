@@ -6,10 +6,13 @@ Authors: Barinder S. Banwait
 
 import Mathlib.Analysis.Normed.Field.Lemmas
 import Mathlib.Data.Int.Star
-import Mathlib
+import Mathlib.Algebra.QuadraticAlgebra.Basic
 import Mathlib.NumberTheory.KummerDedekind
 import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.NumberField.Ideal.KummerDedekind
+import Mathlib.NumberTheory.NumberField.Norm
+import Mathlib.NumberTheory.NumberField.Units.Basic
 import Mathlib.RingTheory.Ideal.Int
 
 set_option linter.style.longLine false
@@ -17,6 +20,17 @@ set_option diagnostics true
 
 open Polynomial NumberField QuadraticAlgebra RingOfIntegers Algebra Nat Ideal
   UniqueFactorizationMonoid
+
+/-! ## Algebraic Number Theory Facts
+
+The following lemmas encode number-theoretic facts about the ring of integers of ℚ(√-7)
+that are used in the proof of the Ramanujan-Nagell theorem but require algebraic number
+theory machinery beyond what is currently available in Mathlib.
+
+Reference: These facts can be found in standard algebraic number theory textbooks.
+The class number of ℚ(√-7) being 1 is part of the Heegner-Stark theorem which classifies
+all imaginary quadratic fields with class number 1: d = -1, -2, -3, -7, -11, -19, -43, -67, -163.
+-/
 
 notation "K" => QuadraticAlgebra ℚ (-2) 1
 
@@ -75,6 +89,10 @@ lemma class_number_one_PID : IsPrincipalIdealRing R := by
 lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
   admit
 
+-- The Algebra.norm on a QuadraticAlgebra coincides with the QuadraticAlgebra.norm
+lemma algebra_norm_eq_quadratic_norm (z : K) : Algebra.norm ℚ z = QuadraticAlgebra.norm z := by
+  admit
+
 lemma exponent : exponent θ = 1 := by
   rw [exponent_eq_one_iff, span_eq_top]
 
@@ -93,27 +111,6 @@ Stuff
 
 -/
 
-/-! ## Algebraic Number Theory Facts
-
-The following lemmas encode number-theoretic facts about the ring of integers of ℚ(√-7)
-that are used in the proof of the Ramanujan-Nagell theorem but require algebraic number
-theory machinery beyond what is currently available in Mathlib.
-
-Reference: These facts can be found in standard algebraic number theory textbooks.
-The class number of ℚ(√-7) being 1 is part of the Heegner-Stark theorem which classifies
-all imaginary quadratic fields with class number 1: d = -1, -2, -3, -7, -11, -19, -43, -67, -163.
--/
-
-/-- The ring of integers of ℚ(√-7) is ℤ[(1+√-7)/2], which is a unique factorization domain
-    (equivalently, the class number of ℚ(√-7) is 1). -/
-axiom ringOfIntegers_Q_sqrt_neg7_isUFD : True
-
-/-- In the ring of integers of ℚ(√-7), the element 2 factors as
-    2 = ((1+√-7)/2) * ((1-√-7)/2), and this is a prime factorization. -/
-axiom two_factors_in_Q_sqrt_neg7 : True
-
-/-- The only units in the ring of integers of ℚ(√-7) are ±1. -/
-axiom units_of_Q_sqrt_neg7 : True
 
 /--
 Summary
@@ -134,7 +131,6 @@ Eliminating x by taking the difference of these two equations, we obtain the two
 cases to deal with at the end to keep track of the signs.
 The relevant results about unique factorization and UFDs can be found in the NumberTheory and RingTheory folders of mathlib.
 -/
-
 /- Exercise 1: The conjugate factors (x ± √-7)/2 lie in R (since x is odd) and
     their product equals (x²+7)/4 = 2^m = θ^m · (1-θ)^m. The division by 4 is
     deliberate: it makes the difference of the factors equal to √-7 = 2θ-1 (rather
@@ -220,10 +216,8 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
     intro h
     -- Deconstruct the hypothesis "α = 0 ∧ β = 0" and substitute into context
     obtain ⟨rfl, rfl⟩ := h
-
     -- Now h_diff becomes: 0 - 0 = 2 * θ - 1
     simp only [sub_self] at h_diff
-
     -- We derive a contradiction by squaring both sides: 0^2 = (2θ - 1)^2 = -7
     have h_contra : (0 : K) = -7 := by
       calc (0 : K)
@@ -242,10 +236,8 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
             exact h_zero
            rw [h_poly]
         _ = -7 := by norm_num
-
     -- 0 = -7 is obviously false
     norm_num at h_contra
-
   · -- Goal 2
     intro p hp hpa hpb
     have h_prod_val : α * β = (2 : R) ^ m := by
@@ -257,15 +249,11 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
     have h_p_dvd_two : p ∣ 2 := by
       have : p ∣ (2 : R) ^ m := h_prod_val ▸ dvd_mul_of_dvd_left hpa β
       exact Prime.dvd_of_dvd_pow hp this
-
     let diff := α - β
-
     -- Step 2: Show p divides (α - β)
     have h_p_dvd_diff : p ∣ diff := dvd_sub hpa hpb
-
     -- Step 3: Norm calculations
     -- We show N(p) | N(2) and N(p) | N(α - β)
-
     -- N(2) = 4
     have h_norm_two : Int.natAbs (Algebra.norm ℤ (2 : R)) = 4 := by
         have h1 : (Algebra.norm ℤ (2 : 𝓞 K) : ℚ) = Algebra.norm ℚ ((2 : 𝓞 K) : K) :=
@@ -273,14 +261,13 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
         have h2 : ((2 : 𝓞 K) : K) = (2 : K) := rfl
         rw [h2] at h1
         have h_qa : QuadraticAlgebra.norm (2 : K) = 4 := by apply QuadraticAlgebra.norm_intCast
-        have h3 : Algebra.norm ℚ (2 : K) = QuadraticAlgebra.norm (2 : K) := by
-          admit -- will admit this for now
+        have h3 : Algebra.norm ℚ (2 : K) = QuadraticAlgebra.norm (2 : K) :=
+          algebra_norm_eq_quadratic_norm 2
         rw [h3, h_qa] at h1
         have h4 : Algebra.norm ℤ (2 : 𝓞 K) = 4 := by
           exact_mod_cast h1
         simp [h4]
     have h_norm_two_again : QuadraticAlgebra.norm (2 : K) = 4 := by apply QuadraticAlgebra.norm_intCast
-
     -- First prove (α - β)^2 = -7
 
 -- Lift the difference equation from K to R
@@ -290,7 +277,6 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       -- 2. Distribute the coercion arrows (↑) over subtraction and multiplication
       -- 3. Now the goal matches h_diff exactly
       exact h_diff
-
     have h_diff_sq : diff ^ 2 = -7 := by
       -- Move the equality to K
       apply Subtype.ext
@@ -298,14 +284,12 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       simp only [diff]
       -- Now we can rewrite using the hypothesis in K
       rw [h_diff_R]
-
       -- Use the defining polynomial identity: ω² - ω + 2 = 0
       have h_zero : (θ : K) ^ 2 - (θ : K) + 2 = 0 := by
         rw [sq, omega_mul_omega_eq_mk]
         ext
         · simp
         · simp
-
       -- The goal is now (2θ - 1)^2 = -7. Linear combination solves it using h_zero.
       -- First derive θ² = θ - 2 from h_zero (rearranging θ² - θ + 2 = 0)
       have h_theta_sq : (θ : K) ^ 2 = (θ : K) - 2 := by
@@ -316,7 +300,6 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
         _ = 4 * ((θ : K) - 2) - 4 * (θ : K) + 1 := by rw [h_theta_sq]
         _ = -8 + 1 := by ring
         _ = -7 := by norm_num
-
     -- Then calculate the norm
     -- N(diff²) = N(-7) = 49, so N(diff)² = 49, hence |N(diff)| = 7
     have h_norm_diff : ((Algebra.norm ℤ) diff).natAbs = 7 := by
@@ -328,18 +311,15 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
             Algebra.coe_norm_int (-7)
         have h2 : ((-7 : 𝓞 K) : K) = (-7 : K) := rfl
         rw [h2] at h1
-
         have h_qa : QuadraticAlgebra.norm (-7 : K) = 49 := by apply QuadraticAlgebra.norm_intCast
         -- Relate Algebra.norm ℤ on 𝓞 K to QuadraticAlgebra.norm on K
         -- For integers, coercion commutes: (-7 : 𝓞 K) : K = (-7 : K)
-        have h3 : Algebra.norm ℚ (-7 : K) = QuadraticAlgebra.norm (-7 : K) := by
-          admit -- will admit this for now
+        have h3 : Algebra.norm ℚ (-7 : K) = QuadraticAlgebra.norm (-7 : K) :=
+          algebra_norm_eq_quadratic_norm (-7)
         -- The norms agree on 𝓞 K
         rw [h3] at h1
         rw [h_qa] at h1
         exact Eq.symm ((fun {a b} ↦ Rat.intCast_inj.mp) (_root_.id (Eq.symm h1)))
-
-
       rw [map_pow] at h_norm_sq
       have : ((Algebra.norm ℤ) diff).natAbs ^ 2 = 7 ^ 2 := by
         have h_sq_eq : ((Algebra.norm ℤ) diff) ^ 2 = 49 := h_norm_sq
@@ -347,7 +327,6 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
         rw [sq_abs]
         exact_mod_cast h_sq_eq
       exact Nat.pow_left_injective (by exact Ne.symm (zero_ne_add_one 1)) this
-
     -- Step 4: Logic with divisibility of norms
     have h_dvd_four : ((Algebra.norm ℤ) p).natAbs ∣ 4 := by
       rw [← h_norm_two]
@@ -362,10 +341,8 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       have h_gcd : Nat.gcd 4 7 = 1 := by norm_num
       have h_dvd_gcd := Nat.dvd_gcd h_dvd_four h_dvd_seven
       rw [h_gcd] at h_dvd_gcd
-
       exact eq_one_of_dvd_one h_dvd_gcd
     -- |N(p)| = 1 implies p is a unit, contradicting that p is prime
-
     have h_unit : IsUnit p := by
       rw [NumberField.isUnit_iff_norm]
       -- Need: |(RingOfIntegers.norm ℚ p : ℚ)| = 1
@@ -374,7 +351,6 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       -- Now need: |(Algebra.norm ℤ p : ℚ)| = 1
       rw [← Int.cast_abs, Int.abs_eq_natAbs, h_norm_p_eq_one]
       exact rfl
-
     exact hp.not_unit h_unit
 
 /-- Exercise 3: In the UFD R, if α · β = θ^m · θ'^m and gcd(α, β) = 1, then
@@ -395,7 +371,56 @@ lemma eliminate_x_conclude (α β : R) (m : ℕ)
     (h_assoc : (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)))
     (h_prod : α * β = θ ^ m * θ' ^ m) :
     (2 * θ - 1 = θ ^ m - θ' ^ m) ∨ (-2 * θ + 1 = θ ^ m - θ' ^ m) := by
-  admit
+  have hθ_ne : (⟨ω, is_integral_ω⟩ : 𝓞 K) ≠ 0 := by
+    intro h
+    have : (ω : K) = 0 := congr_arg Subtype.val h
+    have hpoly : (ω : K) ^ 2 - (ω : K) + 2 = 0 := by rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+    rw [this] at hpoly; norm_num at hpoly
+  have hθ'_ne : (⟨1 - ω, is_integral_one_sub_ω⟩ : 𝓞 K) ≠ 0 := by
+    intro h
+    have h0 : (1 : K) - ω = 0 := congr_arg Subtype.val h
+    have hω1 : (ω : K) = 1 := by rwa [sub_eq_zero, eq_comm] at h0
+    have hpoly : (ω : K) ^ 2 - (ω : K) + 2 = 0 := by rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+    rw [hω1] at hpoly; norm_num at hpoly
+  -- Key: the coercion R → K is injective
+  have hinj : Function.Injective (Subtype.val : R → K) := Subtype.val_injective
+  rcases h_assoc with (rfl | rfl) | (rfl | rfl)
+  · -- Case 1: α = θ^m, determine β = θ'^m, conclude Left
+    left
+    have hβ : β = θ' ^ m :=
+      mul_left_cancel₀ (pow_ne_zero m hθ_ne) h_prod
+    subst hβ
+    exact hinj (by
+      exact _root_.id (Eq.symm h_diff))
+  · -- Case 2: α = -(θ^m), determine β = -(θ'^m), conclude Right
+    right
+    have hβ : β = -(θ' ^ m) :=
+      mul_left_cancel₀ (neg_ne_zero.mpr (pow_ne_zero m hθ_ne))
+        (h_prod.trans (neg_mul_neg _ _).symm)
+    subst hβ
+    exact hinj (by
+      change -2 * ω + 1 = ω ^ m - (1 - ω) ^ m
+      change -(ω ^ m) - (-(1 - ω) ^ m) = 2 * ω - 1 at h_diff
+      linear_combination h_diff)
+  · -- Case 3: α = θ'^m, determine β = θ^m, conclude Right
+    right
+    have hβ : β = θ ^ m :=
+      mul_left_cancel₀ (pow_ne_zero m hθ'_ne) (h_prod.trans (mul_comm _ _))
+    subst hβ
+    exact hinj (by
+      change -2 * ω + 1 = ω ^ m - ((1 : K) - ω) ^ m
+      change ((1 : K) - ω) ^ m - ω ^ m = 2 * ω - 1 at h_diff
+      linear_combination h_diff)
+  · -- Case 4: α = -(θ'^m), determine β = -(θ^m), conclude Left
+    left
+    have hβ : β = -(θ ^ m) :=
+      mul_left_cancel₀ (neg_ne_zero.mpr (pow_ne_zero m hθ'_ne))
+        (h_prod.trans ((mul_comm _ _).trans (neg_mul_neg _ _).symm))
+    subst hβ
+    exact hinj (by
+      change 2 * ω - 1 = ω ^ m - ((1 : K) - ω) ^ m
+      change -(((1 : K) - ω) ^ m) - (-(ω ^ m)) = 2 * ω - 1 at h_diff
+      linear_combination -h_diff)
 
 lemma main_m_condition :
   ∀ x : ℤ, ∀ m : ℕ, Odd m → m ≥ 3 → (x ^ 2 + 7) / 4 = 2 ^ m →
@@ -415,8 +440,7 @@ lemma main_m_condition :
 /--
 Summary
 
-PROVIDED SOLUTION
-Thing
+I think the following lemma can be removed.
 -/
 lemma main_factorisation_lemma :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
@@ -452,13 +476,48 @@ lemma odd_case_mod_seven_constraint :
       admit
 
 /-- From -2^(m-1) ≡ m (mod 7) and 2⁶ ≡ 1 (mod 7), the only solutions are
-    m ≡ 3, 5, or 13 (mod 42). Moreover, no two distinct solutions can be
-    congruent mod 42 (proved by a contradiction argument using powers of 7).
-    Therefore the only possible values are m = 3, 5, 13, i.e., n = 5, 7, 15. -/
+    m ≡ 3, 5, or 13 (mod 42). -/
+theorem odd_case_only_three_values_mod_42 :
+  ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
+    (n - 2) % 42 = 3 ∨ (n - 2) % 42 = 5 ∨ (n - 2) % 42 = 13 := by
+      intro x n hn_odd hn_ge h_eq
+      -- Step 1: Get the mod 7 constraint: (-2)^(n-3) ≡ (n-2) (mod 7)
+      have h_mod7 := odd_case_mod_seven_constraint x n hn_odd hn_ge h_eq
+      -- Step 2: Set m = n - 2, establish basic properties
+      set m := n - 2 with hm_def
+      have hm_ge : m ≥ 3 := by omega
+      have hm_odd : Odd m := by
+        obtain ⟨k, hk⟩ := hn_odd; exact ⟨k - 1, by omega⟩
+      -- Note: n - 3 = m - 1 (as natural numbers, both ≥ 2)
+      have hn3_eq : n - 3 = m - 1 := by omega
+      rw [hn3_eq] at h_mod7
+      -- h_mod7 now says: (-2)^(m-1) % 7 = (↑m : ℤ) ... (mod 7 constraint on m)
+      -- Step 3: m is odd, so m % 6 ∈ {1, 3, 5}
+      have hm_mod6 : m % 6 = 1 ∨ m % 6 = 3 ∨ m % 6 = 5 := by
+        obtain ⟨k, hk⟩ := hm_odd; omega
+      -- Step 4: Case split on m mod 6; in each case use Fermat's little theorem
+      -- (2⁶ ≡ 1 mod 7) to determine (-2)^(m-1) mod 7, then combine with
+      -- the mod 7 constraint via CRT to get m mod 42.
+      rcases hm_mod6 with h6 | h6 | h6
+      · -- m ≡ 1 (mod 6): m-1 ≡ 0 (mod 6), so (-2)^(m-1) ≡ 1 (mod 7)
+        -- Constraint gives m ≡ 1 (mod 7). By CRT: m ≡ 1 (mod 42).
+        sorry
+      · -- m ≡ 3 (mod 6): m-1 ≡ 2 (mod 6), so (-2)^(m-1) ≡ 4 (mod 7)
+        -- Constraint gives m ≡ 4 (mod 7). By CRT: m ≡ ? (mod 42).
+        sorry
+      · -- m ≡ 5 (mod 6): m-1 ≡ 4 (mod 6), so (-2)^(m-1) ≡ 2 (mod 7)
+        -- Constraint gives m ≡ 2 (mod 7). By CRT: m ≡ ? (mod 42).
+        sorry
+
+/-- No two distinct solutions can be congruent mod 42 (proved by a contradiction
+    argument using powers of 7). Therefore the only possible values are
+    m = 3, 5, 13, i.e., n = 5, 7, 15. -/
 theorem odd_case_only_three_values :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
     n = 5 ∨ n = 7 ∨ n = 15 := by
-      admit
+      intro x n hn_odd hn_ge h_eq
+      have h_mod := odd_case_only_three_values_mod_42 x n hn_odd hn_ge h_eq
+      sorry
 
 lemma sq_odd_then_odd :
   ∀ (x : ℤ), Odd (x ^ 2) → Odd (x) := by
@@ -727,9 +786,7 @@ theorem RamanujanNagell :
           _ = 2^4 - 7 := by rw [k_eq_2]
           _ = 9 := by norm_num
     exact helper_1 x_squared_eq_9 n_eq_4
-
   -- Now deal with the much harder case that n is odd
-
   · have m := Nat.le.dest n_ge_3
     rcases m with _ | m
     · -- case 1 : n = 3
