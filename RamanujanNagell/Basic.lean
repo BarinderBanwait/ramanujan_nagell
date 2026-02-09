@@ -14,6 +14,7 @@ import Mathlib.NumberTheory.NumberField.Ideal.KummerDedekind
 import Mathlib.NumberTheory.NumberField.Norm
 import Mathlib.NumberTheory.NumberField.Units.Basic
 import Mathlib.RingTheory.Ideal.Int
+import Mathlib.NumberTheory.Multiplicity
 
 set_option linter.style.longLine false
 set_option diagnostics true
@@ -208,10 +209,8 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
     IsCoprime α β := by
   -- 1. Register that R is a PID
   haveI : IsPrincipalIdealRing R := class_number_one_PID
-
   -- Now this tactic works because PID implies GCDMonoid
   apply isCoprime_of_prime_dvd
-
   · -- Goal 1
     intro h
     -- Deconstruct the hypothesis "α = 0 ∧ β = 0" and substitute into context
@@ -422,9 +421,105 @@ lemma eliminate_x_conclude (α β : R) (m : ℕ)
       change -(((1 : K) - ω) ^ m) - (-(ω ^ m)) = 2 * ω - 1 at h_diff
       linear_combination -h_diff)
 
+set_option maxHeartbeats 400000 in -- long proof with many case splits and polynomial checks
+/-- If we know one of (2*θ - 1 = θ^m - θ'^m) ∨ (-2*θ + 1 = θ^m - θ'^m), then in fact
+    the minus sign must hold: -2*θ + 1 = θ^m - θ'^m. This is proved by reducing modulo
+    θ'^2 and checking which sign is consistent. -/
+lemma must_have_minus_sign (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
+    (h : (2 * θ - 1 = θ ^ m - θ' ^ m) ∨ (-2 * θ + 1 = θ ^ m - θ' ^ m)) :
+    (-2 * θ + 1 = θ ^ m - θ' ^ m) := by
+  -- It suffices to rule out the plus sign case
+  rcases h with h_plus | h_minus
+  · -- Suppose for contradiction that the plus sign holds:
+    -- 2*θ - 1 = θ^m - θ'^m, i.e., θ^m - θ'^m = θ - θ'
+    exfalso
+    -- Step 1: (A) θ + θ' = 1; (B) θ - θ' = 2*θ - 1 (= √-7)
+    have hA : θ + θ' = 1 := by exact add_eq_of_eq_sub' rfl
+    have h_theta' : θ' = 1 - θ := Subtype.ext (by simp)
+    have hB : θ - θ' = 2 * θ - 1 := by
+      calc θ - θ' = θ - (1 - θ) := by rw [h_theta']
+        _ = 2 * θ - 1 := by ring
+    -- Step 2: From h_plus and (B), we get (C): θ^m - θ'^m = θ - θ'
+    have hC : θ ^ m - θ' ^ m = θ - θ' := by grind
+    -- Step 3: From (A), θ = 1 - θ', so θ^2 = (1-θ')^2 ≡ 1 - 2θ' (mod θ'^2).
+    --         Since θ'∣2, we get θ^2 ≡ 1 (mod θ'^2).
+    have step3 : θ' ^ 2 ∣ (θ ^ 2 - 1) := by
+      -- θ^2 - 1 = (1 - θ')^2 - 1 = θ'(θ' - 2) by ring
+      have h_eq : θ ^ 2 - 1 = θ' * (θ' - 2) := by rw [h_theta']; ring
+      rw [h_eq, sq]
+      -- Need: θ' * θ' ∣ θ' * (θ' - 2), suffices θ' ∣ (θ' - 2)
+      apply mul_dvd_mul_left
+      -- θ' ∣ 2 since θ * θ' = 2 (two_factorisation_R)
+      have h_dvd_2 : θ' ∣ (2 : R) := by
+        refine ⟨θ, ?_⟩
+        have h := two_factorisation_R
+        rw [← h_theta', mul_comm] at h
+        exact h.symm
+      -- θ' ∣ θ' and θ' ∣ 2, so θ' ∣ (θ' - 2)
+      exact dvd_sub dvd_rfl h_dvd_2
+    -- Step 4: Since m is odd and θ^2 ≡ 1 (mod θ'^2), we get θ^m ≡ θ (mod θ'^2).
+    have step4 : θ' ^ 2 ∣ (θ ^ m - θ) := by
+      obtain ⟨k, hk⟩ := hm_odd
+      -- θ^m - θ = θ · ((θ²)^k - 1)
+      have h_eq : θ ^ m - θ = θ * ((θ ^ 2) ^ k - 1) := by
+        rw [hk, show 2 * k + 1 = 1 + 2 * k from by ring,
+            pow_add, pow_one, pow_mul, mul_sub, mul_one]
+      rw [h_eq]
+      -- θ'^2 ∣ (θ² - 1) from step3, and (θ² - 1) ∣ ((θ²)^k - 1) by geometric sum
+      exact dvd_mul_of_dvd_right
+        (dvd_trans step3 (sub_one_dvd_pow_sub_one (θ ^ 2) k)) θ
+    -- Step 5: Applying step4 to (C): θ - θ'^m ≡ θ - θ' (mod θ'^2),
+    --         so θ'^2 ∣ (θ'^m - θ'). Since m ≥ 3, θ'^2 ∣ θ'^m, hence θ'^2 ∣ θ'.
+    have step5 : θ' ^ 2 ∣ θ' := by
+      -- From hC (θ^m - θ'^m = θ - θ'), rearranging: θ^m - θ = θ'^m - θ'
+      have h_eq : θ ^ m - θ = θ' ^ m - θ' := by linear_combination hC
+      -- So θ'^2 ∣ (θ'^m - θ') (from step4 and h_eq)
+      have h_dvd_diff : θ' ^ 2 ∣ (θ' ^ m - θ') := by rwa [← h_eq]
+      -- Since m ≥ 3 ≥ 2, θ'^2 ∣ θ'^m
+      have h_dvd_pow : θ' ^ 2 ∣ θ' ^ m := pow_dvd_pow θ' (by omega : 2 ≤ m)
+      -- θ'^2 ∣ θ'^m and θ'^2 ∣ (θ'^m - θ'), so θ'^2 ∣ θ'^m - (θ'^m - θ') = θ'
+      have h := dvd_sub h_dvd_pow h_dvd_diff
+      rwa [show θ' ^ m - (θ' ^ m - θ') = θ' from by ring] at h
+    -- Step 6: θ'^2 ∣ θ' implies θ' is a unit, but θ' is not ±1. Contradiction.
+    -- First, θ' ≠ 0
+    have hθ'_ne : θ' ≠ 0 := by
+      intro h_zero
+      have h0 : (1 : K) - ω = 0 := congr_arg Subtype.val h_zero
+      have hω1 : (ω : K) = 1 := by rwa [sub_eq_zero, eq_comm] at h0
+      have hpoly : (ω : K) ^ 2 - (ω : K) + 2 = 0 := by
+        rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+      rw [hω1] at hpoly; norm_num at hpoly
+    -- From θ'^2 ∣ θ', cancel θ' to get θ' ∣ 1
+    have h_dvd_one : θ' ∣ 1 := by
+      rw [sq] at step5
+      have : θ' * θ' ∣ θ' * 1 := by rwa [mul_one]
+      exact (mul_dvd_mul_iff_left hθ'_ne).mp this
+    -- So θ' is a unit
+    have h_unit := isUnit_of_dvd_one h_dvd_one
+    -- By units_pm_one, θ' = ±1
+    obtain ⟨u, hu⟩ := h_unit
+    rcases units_pm_one u with rfl | rfl
+    · -- u = 1: θ' = 1, so 1 - ω = 1, hence ω = 0, contradicting ω²-ω+2=0
+      have h_K : (1 : K) - ω = 1 := by
+        have h := congr_arg Subtype.val hu; simp at h; exact h.symm
+      have hω : (ω : K) = 0 := by linear_combination -h_K
+      have hpoly : (ω : K) ^ 2 - (ω : K) + 2 = 0 := by
+        rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+      rw [hω] at hpoly; norm_num at hpoly
+    · -- u = -1: θ' = -1, so 1 - ω = -1, hence ω = 2, contradicting ω²-ω+2=0
+      have h_K : (1 : K) - ω = -1 := by
+        have h := congr_arg Subtype.val hu; simp at h; exact h.symm
+      have hω : (ω : K) = 2 := by linear_combination -h_K
+      have hpoly : (ω : K) ^ 2 - (ω : K) + 2 = 0 := by
+        rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+      rw [hω] at hpoly; norm_num at hpoly
+  · -- The minus sign case is what we want
+    exact h_minus
+
+
 lemma main_m_condition :
   ∀ x : ℤ, ∀ m : ℕ, Odd m → m ≥ 3 → (x ^ 2 + 7) / 4 = 2 ^ m →
-    (2*θ - 1 = θ^m - θ'^m) ∨ (-2*θ + 1 = θ^m - θ'^m)  := by
+    (-2*θ + 1 = θ^m - θ'^m) := by
   intro x m hm_odd hm_ge h_eq
   -- Step 1: Get conjugate factors α = (x+√-7)/2, β = (x-√-7)/2 in R
   --         with α · β = θ^m · θ'^m and α - β = 2θ-1 = √-7
@@ -433,25 +528,13 @@ lemma main_m_condition :
   have h_coprime := conjugate_factors_coprime α β m h_prod h_diff
   -- Step 3: By UFD property (class number 1), α is associate to θ^m or θ'^m
   have h_assoc := ufd_power_association α β m h_prod h_coprime
-  -- Step 4: Units are ±1, take difference to eliminate x and conclude
-  exact eliminate_x_conclude α β m h_diff h_assoc h_prod
-
-
-/--
-Summary
-
-I think the following lemma can be removed.
--/
-lemma main_factorisation_lemma :
-  ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
-    ((↑x + 2*(↑θ : K) - 1) / 2) * ((↑x - 2*(↑θ : K) + 1) / 2) = (↑θ : K) ^ (n - 2) * (1 - (↑θ : K)) ^ (n - 2) := by
-  admit
+  -- Step 4: Units are ±1, take difference to eliminate x and get the disjunction
+  have h_disj := eliminate_x_conclude α β m h_diff h_assoc h_prod
+  -- Step 5: The minus sign must hold
+  exact must_have_minus_sign m hm_odd hm_ge h_disj
 
 /--
-Given x ^ 2 + 7 = 2 ^ n, show that (x ^ 2 + 7) / 4 = 2 ^ (n - 2).
-
-PROVIDED SOLUTION
-Divide both sides of the equation x^2 + 7 = 2^n by 4.
+comment
 -/
 lemma reduction_divide_by_4 :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
@@ -460,6 +543,202 @@ lemma reduction_divide_by_4 :
   rw [hx]
   exact Int.ediv_eq_of_eq_mul_left (by norm_num)
     (by rw [show n = n - 2 + 2 from by omega, pow_add]; norm_num)
+
+
+/-- From -2*θ + 1 = θ^m - θ'^m, expand via the binomial theorem and reduce
+    modulo 7 to obtain -2^(m-1) ≡ m (mod 7). -/
+lemma expand_by_binomial (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
+    (h : -2 * θ + 1 = θ ^ m - θ' ^ m) :
+    -(2 : ℤ) ^ (m - 1) % 7 = (m : ℤ) % 7 := by
+  -- Step 1: Multiply h by 2^m. Since 2θ = 1+√-7 and 2θ' = 1-√-7, we get
+  --         -2^m * √-7 = (1+√-7)^m - (1-√-7)^m.
+  -- Equivalently (using √-7 = 2θ - 1):
+  have step1 : -(2 : K) ^ m * (2 * (↑θ : K) - 1) =
+      (2 * (↑θ : K)) ^ m - (2 * (1 - (↑θ : K))) ^ m := by
+    have h_K : -(2 : K) * ω + 1 = ω ^ m - (1 - ω) ^ m := by
+      have h0 := congr_arg Subtype.val h
+      simpa using h0
+    simp only [mul_pow]
+    linear_combination (2 : K) ^ m * h_K
+  -- Step 2: Expand the RHS via the binomial theorem. The even-power terms cancel,
+  --         and we can cancel √-7 from both sides, giving:
+  --         -2^(m-1) = m - C(m,3)*7 + C(m,5)*7² - ...
+  --         i.e., ∃ q : ℤ, -(2:ℤ)^(m-1) = m + 7*q
+  have step2 : ∃ q : ℤ, -(2 : ℤ) ^ (m - 1) = ↑m + 7 * q := by
+    -- Step 1: Write 2θ = 1 + √-7 and 2θ' = 1 - √-7.
+    -- In our algebra, √-7 = 2ω - 1, so (2ω - 1)² = -7.
+    have hsq : (2 * (↑θ : K) - 1) ^ 2 = (-7 : K) := by
+      calc (2 * (↑θ : K) - 1) ^ 2
+          = 4 * (↑θ : K) ^ 2 - 4 * (↑θ : K) + 1 := by ring
+        _ = 4 * ((↑θ : K) - 2) - 4 * (↑θ : K) + 1 := by
+          rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+        _ = -8 + 1 := by ring
+        _ = -7 := by norm_num
+    -- Step 2: Use the binomial expansion to expand:
+    --   (1+√-7)^m = (2θ)^m = (1 + (2θ-1))^m = Σ_{k=0}^{m} C(m,k) · (2θ-1)^k
+    --   (1-√-7)^m = (2θ')^m = (1 - (2θ-1))^m = Σ_{k=0}^{m} C(m,k) · (-(2θ-1))^k
+    have hbinom_plus : (2 * (↑θ : K)) ^ m =
+        Finset.sum (Finset.range (m + 1))
+          (fun k => (↑(m.choose k) : K) * (2 * (↑θ : K) - 1) ^ k) := by
+      have h := add_pow (2 * (↑θ : K) - 1) 1 m
+      simp only [one_pow, mul_one] at h
+      rw [show (2 * (↑θ : K) - 1) + 1 = 2 * (↑θ : K) from by ring] at h
+      rw [h]
+      exact Finset.sum_congr rfl (fun k _ => mul_comm _ _)
+    have hbinom_minus : (2 * (1 - (↑θ : K))) ^ m =
+        Finset.sum (Finset.range (m + 1))
+          (fun k => (↑(m.choose k) : K) * (-(2 * (↑θ : K) - 1)) ^ k) := by
+      have h := add_pow (-(2 * (↑θ : K) - 1)) 1 m
+      simp only [one_pow, mul_one] at h
+      rw [show -(2 * (↑θ : K) - 1) + 1 = 2 * (1 - (↑θ : K)) from by ring] at h
+      rw [h]
+      exact Finset.sum_congr rfl (fun k _ => mul_comm _ _)
+    -- Step 3: Take the difference. Even-indexed terms cancel (since (-x)^k = x^k for even k),
+    --   and odd-indexed terms double. Using (2θ-1)^(2j+1) = (2θ-1)·((2θ-1)²)^j = (2θ-1)·(-7)^j,
+    --   we factor out 2·(2θ-1) to get:
+    --     (2θ)^m - (2θ')^m = 2·(2θ-1)·S
+    --   where S = Σ_{j=0}^{(m-1)/2} C(m, 2j+1)·(-7)^j is an integer.
+    have hdiff : ∃ S : ℤ, (2 * (↑θ : K)) ^ m - (2 * (1 - (↑θ : K))) ^ m =
+        (2 : K) * (2 * (↑θ : K) - 1) * (S : K) := by
+      refine ⟨-(2 : ℤ) ^ (m - 1), ?_⟩
+      rw [← step1]
+      push_cast
+      have h2m : (2 : K) ^ m = 2 ^ (m - 1) * 2 := by
+        conv_lhs => rw [← Nat.sub_add_cancel (show 1 ≤ m by omega)]
+        rw [pow_succ]
+      rw [h2m]
+      ring
+    -- Step 4: From step1: -2^m·(2θ-1) = (2θ)^m - (2θ')^m = 2·(2θ-1)·S.
+    --   Since 2θ - 1 = √-7 ≠ 0, cancel it and divide by 2 to get -2^(m-1) = S.
+    obtain ⟨S, hS⟩ := hdiff
+    have hcancel : -(2 : ℤ) ^ (m - 1) = S := by
+      have hne : (2 * (↑θ : K) - 1) ≠ 0 := by
+        intro h0; rw [h0, zero_pow two_ne_zero] at hsq; norm_num at hsq
+      have h1 : -(2 : K) ^ m = 2 * ↑S :=
+        mul_right_cancel₀ hne (by linear_combination step1.trans hS)
+      have h5 : -(2 : ℤ) ^ m = 2 * S := by
+        apply Int.cast_injective (α := K)
+        push_cast; exact h1
+      have h6 : (2 : ℤ) ^ m = 2 * 2 ^ (m - 1) := by
+        conv_lhs => rw [← Nat.sub_add_cancel (show 1 ≤ m by omega)]
+        rw [pow_succ]; ring
+      linarith
+    -- Step 5: Read the equation -2^(m-1) = S modulo 7. Since
+    --   S = C(m,1) + C(m,3)·(-7) + C(m,5)·(-7)² + ⋯ + C(m,m)·(-7)^((m-1)/2),
+    --   all terms with j ≥ 1 are divisible by 7, and the j = 0 term is C(m,1) = m.
+    --   Hence -2^(m-1) ≡ m (mod 7).
+    have hmod : ∃ q : ℤ, S = ↑m + 7 * q := by
+      -- Define T = Σ_{j=0}^{(m-1)/2} C(m, 2j+1) * (-7)^j (an integer)
+      set T := ∑ j ∈ Finset.range ((m + 1) / 2),
+        (m.choose (2 * j + 1) : ℤ) * (-7 : ℤ) ^ j with hT_def
+      -- Step A: Show T = m + 7 * q (splitting off j=0 term)
+      have hT_mod : ∃ q : ℤ, T = ↑m + 7 * q := by
+        rw [hT_def, show (m + 1) / 2 = ((m + 1) / 2 - 1) + 1 from by omega,
+          Finset.sum_range_succ']
+        have hfirst : (m.choose (2 * 0 + 1) : ℤ) * (-7 : ℤ) ^ 0 = (m : ℤ) := by
+          simp [Nat.choose_one_right]
+        rw [hfirst]
+        refine ⟨∑ j ∈ Finset.range ((m + 1) / 2 - 1),
+          (m.choose (2 * (j + 1) + 1) : ℤ) * (-1) * (-7 : ℤ) ^ j, ?_⟩
+        have key : ∑ j ∈ Finset.range ((m + 1) / 2 - 1),
+          (m.choose (2 * (j + 1) + 1) : ℤ) * (-7 : ℤ) ^ (j + 1) =
+          7 * ∑ j ∈ Finset.range ((m + 1) / 2 - 1),
+            (m.choose (2 * (j + 1) + 1) : ℤ) * (-1) * (-7 : ℤ) ^ j := by
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl (fun j _ => by ring)
+        linarith
+      -- Step B: Show S = T by proving the K identity and canceling
+      -- The binomial difference also equals 2*(2θ-1)*(T:K)
+      have hK_identity : (2 * (↑θ : K)) ^ m - (2 * (1 - (↑θ : K))) ^ m =
+          (2 : K) * (2 * (↑θ : K) - 1) * (↑T : K) := by
+        rw [hbinom_plus, hbinom_minus]
+        set α := 2 * (↑θ : K) - 1 with hα_def
+        -- Step B1: Combine the two sums into a single sum of differences
+        rw [← Finset.sum_sub_distrib]
+        -- Step B2: For each k, C(m,k)*α^k - C(m,k)*(-α)^k = C(m,k)*(α^k - (-α)^k)
+        conv_lhs => arg 2; ext k; rw [show (↑(m.choose k) : K) * α ^ k -
+          (↑(m.choose k) : K) * (-α) ^ k =
+          (↑(m.choose k) : K) * (α ^ k - (-α) ^ k) from by ring]
+        -- Step B3: Split into even and odd k, show even terms vanish
+        -- For even k: α^k - (-α)^k = 0 (by Even.neg_pow)
+        -- For odd k: α^k - (-α)^k = 2*α^k (by Odd.neg_pow)
+        -- Step B4: For odd k=2j+1: α^(2j+1) = α*(α²)^j = α*(-7)^j
+        -- Step B5: Reindex from k ∈ range(m+1) to j ∈ range((m+1)/2)
+        -- and factor out 2*α to get the result
+
+        -- 1. Split the sum into Even and Odd indices
+        rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.range (m + 1)) (p := Odd)]
+
+        -- 2. Prove the Even terms are all zero
+        have h_even_zero : ∑ k ∈ Finset.filter (fun x => ¬Odd x) (Finset.range (m + 1)),
+            ↑(m.choose k) * (α ^ k - (-α) ^ k) = 0 := by
+          refine Finset.sum_eq_zero (fun k hk => ?_)
+          simp only [Finset.mem_filter] at hk
+          -- Use the fact that k is even to show (-α)^k = α^k
+          have h_ev : Even k := (Nat.even_or_odd k).resolve_right hk.2
+          simp [Even.neg_pow h_ev, sub_self]
+
+        -- 3. Simplify LHS using the zero result
+        rw [h_even_zero, add_zero]
+
+        -- 4. Rewrite RHS: expand T and distribute 2 * α
+        rw [hT_def]
+        rw [Int.cast_sum]    -- Moves the ↑ inside: ↑(∑ ...) becomes ∑ ↑(...)
+        rw [Finset.mul_sum]  -- Now we can distribute: c * ∑ ... becomes ∑ c * ...
+        simp only [Int.cast_mul, Int.cast_pow, Int.cast_natCast]
+
+        -- 5. Swap sides so we map FROM the simple set (RHS) TO the complex set (LHS)
+        symm
+        refine Finset.sum_bij (fun j _ => 2 * j + 1) ?_ ?_ ?_ ?_
+
+        -- Goal 5.1: "Into" - Show 2j+1 is in the LHS range (Odd and < m+1)
+        · intro j hj
+          simp only [Finset.mem_range] at hj ⊢
+          simp only [Finset.mem_filter, Finset.mem_range]
+          exact ⟨by omega, ⟨j, by ring⟩⟩
+
+        -- Goal 5.2: Injectivity (If 2i+1 = 2j+1, then i=j)
+        · intro a b _ _ h_eq
+          linarith
+
+        -- Goal 5.3: Surjectivity (Every odd k in LHS comes from some j in RHS)
+        · intro k hk
+          simp only [Finset.mem_filter, Finset.mem_range] at hk
+          obtain ⟨j, hj⟩ := hk.2
+          obtain ⟨n, hn⟩ := hm_odd
+          exact ⟨j, Finset.mem_range.mpr (by omega), hj.symm⟩
+
+        -- Goal 5.4: Algebraic Equality
+        · intro j hj
+          simp only [Odd.neg_pow ⟨j, rfl⟩, sub_neg_eq_add]
+          have hpow : α ^ (2 * j + 1) = α * (α ^ 2) ^ j := by ring_nf
+          rw [hpow, hsq]
+          push_cast
+          ring
+
+      -- Cancel 2*(2θ-1) from both sides of hS and hK_identity
+      have hne : (2 : K) * (2 * (↑θ : K) - 1) ≠ 0 := by
+        intro h0
+        have : (2 * (↑θ : K) - 1) = 0 ∨ (2 : K) = 0 := by
+          rcases mul_eq_zero.mp h0 with h | h
+          · right; exact h
+          · left; exact h
+        rcases this with h | h
+        · rw [h, zero_pow two_ne_zero] at hsq; norm_num at hsq
+        · have : (2 : ℚ) = 0 := by exact_mod_cast h
+          norm_num at this
+      have hST : (↑S : K) = (↑T : K) :=
+        mul_left_cancel₀ hne (hS.symm.trans hK_identity)
+      have hST_int : S = T := Int.cast_injective (α := K) hST
+      rw [hST_int]
+      exact hT_mod
+    obtain ⟨q, hq⟩ := hmod
+    exact ⟨q, by linarith⟩
+  -- Step 3: Read mod 7 to get the conclusion
+  obtain ⟨q, hq⟩ := step2
+  rw [hq]
+  omega
+
 
 /-- Key consequence of unique factorization in ℤ[(1+√-7)/2]:
     For odd n ≥ 5, if x² + 7 = 2ⁿ, then setting m = n - 2, we have
@@ -472,8 +751,22 @@ lemma reduction_divide_by_4 :
     Expanding via binomial theorem yields -2^(m-1) ≡ m (mod 7). -/
 lemma odd_case_mod_seven_constraint :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
-    (-(2 : ℤ)) ^ (n - 3) % 7 = ((n : ℤ) - 2) % 7 := by
-      admit
+    -(2 : ℤ) ^ (n - 3) % 7 = ((n : ℤ) - 2) % 7 := by
+      intro x n hn_odd hn_ge h_eq
+      -- Step 1: Divide by 4 to get (x^2 + 7)/4 = 2^(n-2)
+      have h_div := reduction_divide_by_4 x n hn_odd hn_ge h_eq
+      -- Step 2: Establish properties of m = n - 2
+      have hm_odd : Odd (n - 2) := by
+        obtain ⟨k, hk⟩ := hn_odd; exact ⟨k - 1, by omega⟩
+      have hm_ge : n - 2 ≥ 3 := by omega
+      -- Step 3: Apply main_m_condition to get -2*θ + 1 = θ^(n-2) - θ'^(n-2)
+      have h_theta := main_m_condition x (n - 2) hm_odd hm_ge h_div
+      -- Step 4: Expand by binomial theorem to get the mod 7 constraint
+      have h_mod := expand_by_binomial (n - 2) hm_odd hm_ge h_theta
+      -- Step 5: Convert from m = n-2 to the n-based statement
+      rw [show n - 3 = (n - 2) - 1 from by omega]
+      rw [show ((n : ℤ) - 2) = ((n - 2 : ℕ) : ℤ) from by omega]
+      exact h_mod
 
 /-- From -2^(m-1) ≡ m (mod 7) and 2⁶ ≡ 1 (mod 7), the only solutions are
     m ≡ 3, 5, or 13 (mod 42). -/
@@ -496,20 +789,69 @@ theorem odd_case_only_three_values_mod_42 :
       have hm_mod6 : m % 6 = 1 ∨ m % 6 = 3 ∨ m % 6 = 5 := by
         obtain ⟨k, hk⟩ := hm_odd; omega
       -- Step 4: Case split on m mod 6; in each case use Fermat's little theorem
-      -- (2⁶ ≡ 1 mod 7) to determine (-2)^(m-1) mod 7, then combine with
-      -- the mod 7 constraint via CRT to get m mod 42.
+      -- (2⁶ ≡ 1 mod 7) to determine -2^(m-1) mod 7, then combine with
+      -- the mod 7 constraint `h_mod7` via the Chinese Remainder Theorem (CRT)
+      -- to get m mod 42.
       rcases hm_mod6 with h6 | h6 | h6
-      · -- m ≡ 1 (mod 6): m-1 ≡ 0 (mod 6), so (-2)^(m-1) ≡ 1 (mod 7)
-        -- Constraint gives m ≡ 1 (mod 7). By CRT: m ≡ 1 (mod 42).
-        sorry
-      · -- m ≡ 3 (mod 6): m-1 ≡ 2 (mod 6), so (-2)^(m-1) ≡ 4 (mod 7)
-        -- Constraint gives m ≡ 4 (mod 7). By CRT: m ≡ ? (mod 42).
-        sorry
-      · -- m ≡ 5 (mod 6): m-1 ≡ 4 (mod 6), so (-2)^(m-1) ≡ 2 (mod 7)
-        -- Constraint gives m ≡ 2 (mod 7). By CRT: m ≡ ? (mod 42).
-        sorry
+      · -- m ≡ 1 (mod 6): m-1 ≡ 0 (mod 6), so -2^(m-1) ≡ -1 (mod 7)
+        -- Hypothesis `h_mod7` then gives m ≡ -1 (mod 7). By CRT:
+        -- m ≡ 13 (mod 42).
+        right; right
+        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
+        rw [hcast] at h_mod7
+        -- Show 2^(m-1) ≡ 1 (mod 7) via 2^6 ≡ 1 (mod 7)
+        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
+          intro q; induction q with
+          | zero => norm_num
+          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
+        have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 1 := by
+          obtain ⟨q, hq⟩ : 6 ∣ (m - 1) := ⟨(m - 1) / 6, by omega⟩
+          rw [show (m : ℕ) - 1 = 6 * q from by omega, pow_mul]
+          exact h64 q
+        omega
+      · -- m ≡ 3 (mod 6): m-1 ≡ 2 (mod 6), so -2^(m-1) ≡ -4 (mod 7)
+        -- Hypothesis `h_mod7` then gives m ≡ -4 (mod 7). By CRT:
+        -- m ≡ 3 (mod 42).
+        left
+        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
+        rw [hcast] at h_mod7
+        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
+          intro q; induction q with
+          | zero => norm_num
+          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
+        have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 4 := by
+          obtain ⟨q, hq⟩ : ∃ q, m - 1 = 6 * q + 2 := ⟨(m - 1) / 6, by omega⟩
+          rw [hq, pow_add, pow_mul, Int.mul_emod, h64 q]; norm_num
+        omega
+      · -- m ≡ 5 (mod 6): m-1 ≡ 4 (mod 6), so -2^(m-1) ≡ -2 (mod 7)
+        -- Hypothesis `h_mod7` then gives m ≡ -2 (mod 7). By CRT:
+        -- m ≡ 5 (mod 42).
+        right; left
+        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
+        rw [hcast] at h_mod7
+        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
+          intro q; induction q with
+          | zero => norm_num
+          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
+        have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 2 := by
+          obtain ⟨q, hq⟩ : ∃ q, m - 1 = 6 * q + 4 := ⟨(m - 1) / 6, by omega⟩
+          rw [hq, pow_add, pow_mul, Int.mul_emod, h64 q]; norm_num
+        omega
 
-/-- No two distinct solutions can be congruent mod 42 (proved by a contradiction
+/-- For the original equation x² + 7 = 2ⁿ with odd n ≥ 5, the only possible values of n are
+    5, 7, and 15.
+
+    PROOF: From the mod 7 constraint `odd_case_only_three_values_mod_42`, we get
+    m = n - 2 ≡ 3, 5, or 13 (mod 42).
+
+    It suffices to show that no two distinct solutions for `n` can be congruent mod 42, since we have
+    already found three solutions (n = 5, 7, 15) that satisfy the equation.
+
+    Suppose for a contradiction that there are two distinct solutions n₁ and n₂ with n₁ ≡ n₂ (mod 42).
+
+    Let l be the largest power of 7 dividing n₂ - n₁. Then n₂ - n₁ = 7^l * k for some integer k not divisible by 7.
+
+    No two distinct solutions can be congruent mod 42 (proved by a contradiction
     argument using powers of 7). Therefore the only possible values are
     m = 3, 5, 13, i.e., n = 5, 7, 15. -/
 theorem odd_case_only_three_values :
