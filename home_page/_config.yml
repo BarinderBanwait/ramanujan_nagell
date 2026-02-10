@@ -20,7 +20,7 @@
 
 title: Ramanujan Nagell in Lean
 #email: your-email@example.com
-description: by Barinder S. Banwait
+description: "by Barinder S. Banwait\n(with help from Aristotle and Claude)"
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://BarinderBanwait.github.io/ramanujan_nagell" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username:
