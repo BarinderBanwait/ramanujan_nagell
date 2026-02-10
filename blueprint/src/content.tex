@@ -145,53 +145,21 @@ $n = 4$ and $x = \pm 3$.
 When $n$ is odd and $n \geq 5$, the proof works in the ring of integers of
 $\mathbb{Q}(\sqrt{-7})$. Setting $m = n - 2$, we divide the equation by $4$
 to obtain $(x^2 + 7)/4 = 2^m$, which factors in $R$ as
-\[
-  \frac{x + \sqrt{-7}}{2} \cdot \frac{x - \sqrt{-7}}{2}
-  = \theta^m \cdot \theta'^{\,m}.
-\]
-The division by $4$ is deliberate: it makes the difference of the two factors equal to
-$\sqrt{-7} = 2\theta - 1$ (rather than $2\sqrt{-7}$), which simplifies the coprimality argument.
+$\theta^m \cdot \theta'^{\,m}$.
+The conjugate factors $(x \pm \sqrt{-7})/2$ lie in $R$ (since $x$ is odd) and
+their product equals $\theta^m \cdot \theta'^{\,m}$. Using unique factorization
+and coprimality, one deduces the key identity $-2\theta + 1 = \theta^m - \theta'^{\,m}$.
 
-\begin{lemma}[Main factorization in $K$]
-  \label{lem:main_factorisation_lemma}
-  \lean{main_factorisation_lemma}
-  \uses{lem:is_integral_omega, lem:two_factorisation_R}
-  For odd $n \geq 5$, if $x^2 + 7 = 2^n$, then
-  \[
-    \frac{x + 2\theta - 1}{2} \cdot \frac{x - 2\theta + 1}{2}
-    = \theta^{n-2} \cdot (1 - \theta)^{n-2}
-  \]
-  in $K$. This expresses the factorization of $2^{n-2} = (x^2+7)/4$ in terms
-  of the conjugate factors $(x \pm \sqrt{-7})/2$.
-\end{lemma}
+\subsection{Exercises: from factorization to sign condition}
 
-\subsection{Key intermediate result}
-
-The following lemma is the heart of the odd case. Its proof is decomposed into four
-exercises (Lemmas~\ref{lem:factors_in_R}--\ref{lem:eliminate_x}).
-
-\begin{lemma}[Main $m$-condition]
-  \label{lem:main_m_condition}
-  \lean{main_m_condition}
-  \uses{lem:factors_in_R, lem:coprime, lem:ufd_association, lem:eliminate_x}
-  \leanok
-  For all integers $x$ and odd $m \geq 3$, if $(x^2 + 7)/4 = 2^m$, then
-  \[
-    2\theta - 1 = \theta^m - \theta'^{\,m}
-    \quad\text{or}\quad
-    -2\theta + 1 = \theta^m - \theta'^{\,m}.
-  \]
-\end{lemma}
-
-\subsection{Exercises}
-
-The proof of Lemma~\ref{lem:main_m_condition} is structured as a chain of four
-lemmas, each sorry'd for now. These are intended as exercises.
+The proof of the main $m$-condition is structured as a chain of four
+lemmas (exercises), followed by a sign-determination step.
 
 \begin{lemma}[Conjugate factors in $R$]
   \label{lem:factors_in_R}
   \lean{factors_in_R_with_product}
   \uses{lem:is_integral_omega, lem:is_integral_one_sub_omega, lem:two_factorisation_R}
+  \leanok
   The conjugate factors $(x \pm \sqrt{-7})/2$ lie in $R$ (since $x$ is odd),
   and their product equals $\theta^m \cdot \theta'^{\,m}$.
   Their difference is $2\theta - 1 = \sqrt{-7}$.
@@ -201,6 +169,7 @@ lemmas, each sorry'd for now. These are intended as exercises.
   \label{lem:coprime}
   \lean{conjugate_factors_coprime}
   \uses{lem:factors_in_R, lem:two_factorisation_R}
+  \leanok
   The conjugate factors are coprime in $R$.
   The only prime factors of $2$ in $R$ are $\theta$ and $\theta'$
   (since $2 = \theta \cdot \theta'$). If either divided both factors,
@@ -222,9 +191,35 @@ lemmas, each sorry'd for now. These are intended as exercises.
   \label{lem:eliminate_x}
   \lean{eliminate_x_conclude}
   \uses{lem:ufd_association}
+  \leanok
   From $\alpha = \pm\theta^m$ or $\alpha = \pm\theta'^{\,m}$, use the product relation to
   determine $\beta$, then take the difference $\alpha - \beta = 2\theta - 1$ to
-  eliminate $x$ and obtain the conclusion of Lemma~\ref{lem:main_m_condition}.
+  eliminate $x$ and obtain: either $2\theta - 1 = \theta^m - \theta'^{\,m}$ or
+  $-2\theta + 1 = \theta^m - \theta'^{\,m}$.
+\end{lemma}
+
+\begin{lemma}[Must have minus sign]
+  \label{lem:must_have_minus_sign}
+  \lean{must_have_minus_sign}
+  \uses{lem:eliminate_x}
+  \leanok
+  If either $2\theta - 1 = \theta^m - \theta'^{\,m}$ or $-2\theta + 1 = \theta^m - \theta'^{\,m}$
+  holds for odd $m \geq 3$, then in fact the minus sign must hold:
+  $-2\theta + 1 = \theta^m - \theta'^{\,m}$.
+  This is proved by reducing modulo $\theta'^2$ and checking which sign is consistent.
+\end{lemma}
+
+\subsection{Key intermediate result}
+
+\begin{lemma}[Main $m$-condition]
+  \label{lem:main_m_condition}
+  \lean{main_m_condition}
+  \uses{lem:factors_in_R, lem:coprime, lem:ufd_association, lem:eliminate_x, lem:must_have_minus_sign}
+  \leanok
+  For all integers $x$ and odd $m \geq 3$, if $(x^2 + 7)/4 = 2^m$, then
+  \[
+    -2\theta + 1 = \theta^m - \theta'^{\,m}.
+  \]
 \end{lemma}
 
 \subsection{From the $m$-condition to finitely many solutions}
@@ -236,10 +231,24 @@ lemmas, each sorry'd for now. These are intended as exercises.
   If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then $(x^2 + 7)/4 = 2^{n-2}$.
 \end{lemma}
 
+\begin{lemma}[Binomial expansion mod $7$]
+  \label{lem:expand_by_binomial}
+  \lean{expand_by_binomial}
+  \uses{lem:main_m_condition}
+  \leanok
+  From $-2\theta + 1 = \theta^m - \theta'^{\,m}$, expand via the binomial theorem
+  and reduce modulo $7$ to obtain $-2^{m-1} \equiv m \pmod{7}$.
+
+  The proof multiplies both sides by $2^m$, expands $(1 + \sqrt{-7})^m - (1 - \sqrt{-7})^m$
+  via the binomial theorem, observes that even-index terms cancel and odd-index terms
+  involve powers of $(\sqrt{-7})^2 = -7$, then reads the result modulo $7$.
+\end{lemma}
+
 \begin{lemma}[Mod $7$ constraint]
   \label{lem:odd_case_mod_seven_constraint}
   \lean{odd_case_mod_seven_constraint}
-  \uses{lem:main_m_condition, lem:reduction_divide_by_4}
+  \uses{lem:main_m_condition, lem:reduction_divide_by_4, lem:expand_by_binomial}
+  \leanok
   If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then
   $(-2)^{n-3} \equiv n - 2 \pmod{7}$.
 
@@ -247,15 +256,111 @@ lemmas, each sorry'd for now. These are intended as exercises.
   $\theta^m - \theta'^{\,m}$ via the binomial theorem and reducing modulo $7$.
 \end{lemma}
 
-\begin{theorem}[Odd case: only three values]
-  \label{thm:odd_case_only_three_values}
-  \lean{odd_case_only_three_values}
+\begin{theorem}[Mod $42$ constraint]
+  \label{thm:odd_case_mod_42}
+  \lean{odd_case_only_three_values_mod_42}
   \uses{lem:odd_case_mod_seven_constraint}
-  If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then $n \in \{5, 7, 15\}$.
+  \leanok
+  If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then
+  $(n - 2) \bmod 42 \in \{3, 5, 13\}$.
 
   This follows from $(-2)^{n-3} \equiv n - 2 \pmod{7}$ together with
   Fermat's little theorem $2^6 \equiv 1 \pmod{7}$. Checking residues modulo $42$
-  and a bounding argument shows $n$ can only be $5$, $7$, or $15$.
+  (combining mod $6$ and mod $7$) yields the three residue classes.
+\end{theorem}
+
+\subsection{Uniqueness per residue class}
+
+The mod $42$ constraint narrows $m = n - 2$ to three residue classes.
+To show that each class contains at most one solution, we use a $7$-adic argument.
+
+\begin{lemma}[Corollary C: theta expression is universal]
+  \label{lem:corollary_C}
+  \lean{corollary_C}
+  \uses{lem:main_m_condition}
+  \leanok
+  Any two solutions of the Ramanujan--Nagell equation produce the same
+  theta expression: if $(x_1^2 + 7)/4 = 2^{m_1}$ and $(x_2^2 + 7)/4 = 2^{m_2}$
+  for odd $m_1, m_2 \geq 3$, then $\theta^{m_1} - \theta'^{\,m_1} = \theta^{m_2} - \theta'^{\,m_2}$.
+\end{lemma}
+
+\begin{definition}[Binomial sum $B_d$]
+  \label{def:binomial_B}
+  \lean{binomial_B}
+  \leanok
+  Define the odd-indexed binomial sum
+  \[
+    B_d = \sum_{j=0}^{(d-1)/2} \binom{d}{2j+1} \cdot (-7)^j.
+  \]
+  This arises from expanding $(1+\sqrt{-7})^d = A_d + \sqrt{-7} \cdot B_d$.
+\end{definition}
+
+\begin{lemma}[7-adic valuation of $B_d$]
+  \label{lem:lemma_A_valuation}
+  \lean{lemma_A_binomial_valuation}
+  \uses{def:binomial_B}
+  The $7$-adic valuation of $B_d$ equals $v_7(d)$: if $7^l \| d$
+  (i.e.\ $7^l \mid d$ but $7^{l+1} \nmid d$), then $7^l \mid B_d$
+  and $7^{l+1} \nmid B_d$.
+
+  This is the core of the $7$-adic analysis: the $j=0$ term of $B_d$ equals $d$,
+  and all higher terms have strictly larger $7$-adic valuation.
+\end{lemma}
+
+\begin{lemma}[At most one solution per residue class]
+  \label{lem:at_most_one_m}
+  \lean{at_most_one_m_per_class}
+  \uses{lem:corollary_C, lem:lemma_A_valuation}
+  If $m_1, m_2$ are both odd, $\geq 3$, satisfy $m_1 \equiv m_2 \pmod{42}$,
+  and both give $-2\theta + 1 = \theta^{m_i} - \theta'^{\,m_i}$, then $m_1 = m_2$.
+
+  Proof sketch: if $m_1 \neq m_2$, let $d = |m_2 - m_1|$, which is divisible by $42$
+  (hence by $7$). The $7$-adic analysis of Lemma~\ref{lem:lemma_A_valuation} combined
+  with Corollary~C yields a contradiction on the valuation of $\sqrt{-7} \cdot B_d$.
+\end{lemma}
+
+\subsection{Verification of known solutions}
+
+\begin{lemma}[Verification: $m = 3$ (i.e.\ $n = 5$)]
+  \label{lem:theta_eq_at_3}
+  \lean{theta_eq_at_3}
+  \uses{lem:main_m_condition}
+  \leanok
+  $-2\theta + 1 = \theta^3 - \theta'^{\,3}$.
+  Verified via $x = 5$: $(25 + 7)/4 = 8 = 2^3$.
+\end{lemma}
+
+\begin{lemma}[Verification: $m = 5$ (i.e.\ $n = 7$)]
+  \label{lem:theta_eq_at_5}
+  \lean{theta_eq_at_5}
+  \uses{lem:main_m_condition}
+  \leanok
+  $-2\theta + 1 = \theta^5 - \theta'^{\,5}$.
+  Verified via $x = 11$: $(121 + 7)/4 = 32 = 2^5$.
+\end{lemma}
+
+\begin{lemma}[Verification: $m = 13$ (i.e.\ $n = 15$)]
+  \label{lem:theta_eq_at_13}
+  \lean{theta_eq_at_13}
+  \uses{lem:main_m_condition}
+  \leanok
+  $-2\theta + 1 = \theta^{13} - \theta'^{\,13}$.
+  Verified via $x = 181$: $(32761 + 7)/4 = 8192 = 2^{13}$.
+\end{lemma}
+
+\subsection{Combining}
+
+\begin{theorem}[Odd case: only three values]
+  \label{thm:odd_case_only_three_values}
+  \lean{odd_case_only_three_values}
+  \uses{thm:odd_case_mod_42, lem:reduction_divide_by_4, lem:main_m_condition, lem:at_most_one_m, lem:theta_eq_at_3, lem:theta_eq_at_5, lem:theta_eq_at_13}
+  \leanok
+  If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then $n \in \{5, 7, 15\}$.
+
+  From the mod $42$ constraint, $m = n - 2$ lies in one of three residue classes
+  ($3$, $5$, or $13$ mod $42$). The verification lemmas show these are actual solutions
+  (at $m = 3, 5, 13$). The uniqueness lemma shows each residue class has at most one
+  solution. Therefore $n \in \{5, 7, 15\}$.
 \end{theorem}
 
 \section{Main theorem}

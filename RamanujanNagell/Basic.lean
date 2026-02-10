@@ -517,7 +517,7 @@ lemma must_have_minus_sign (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
     exact h_minus
 
 
-lemma main_m_condition :
+theorem main_m_condition :
   ∀ x : ℤ, ∀ m : ℕ, Odd m → m ≥ 3 → (x ^ 2 + 7) / 4 = 2 ^ m →
     (-2*θ + 1 = θ^m - θ'^m) := by
   intro x m hm_odd hm_ge h_eq
@@ -838,28 +838,122 @@ theorem odd_case_only_three_values_mod_42 :
           rw [hq, pow_add, pow_mul, Int.mul_emod, h64 q]; norm_num
         omega
 
+/-! ## Skeleton for the uniqueness argument
+
+The following lemmas establish that each residue class mod 42 has at most one solution,
+via a 7-adic contradiction argument. Together with the mod 42 constraint and known
+solutions at m = 3, 5, 13, this completes the proof of `odd_case_only_three_values`.
+-/
+
+/-- Corollary C: Any two solutions of the Ramanujan-Nagell equation produce the same
+    theta expression θ^m - θ'^m = -2θ + 1, since `main_m_condition` shows the RHS
+    is independent of the particular solution. -/
+lemma corollary_C (x₁ x₂ : ℤ) (m₁ m₂ : ℕ)
+    (h₁_odd : Odd m₁) (h₂_odd : Odd m₂)
+    (h₁_ge : m₁ ≥ 3) (h₂_ge : m₂ ≥ 3)
+    (h₁_eq : (x₁ ^ 2 + 7) / 4 = 2 ^ m₁)
+    (h₂_eq : (x₂ ^ 2 + 7) / 4 = 2 ^ m₂) :
+    θ ^ m₁ - θ' ^ m₁ = θ ^ m₂ - θ' ^ m₂ := by
+  have h1 := main_m_condition x₁ m₁ h₁_odd h₁_ge h₁_eq
+  have h2 := main_m_condition x₂ m₂ h₂_odd h₂_ge h₂_eq
+  rw [← h1, ← h2]
+
+/-- The odd-indexed binomial sum: B_d = Σ_{j=0}^{(d-1)/2} C(d, 2j+1) · (-7)^j.
+    This arises from expanding (1+√-7)^d = A_d + √-7 · B_d. -/
+noncomputable def binomial_B (d : ℕ) : ℤ :=
+  ∑ j ∈ Finset.range ((d + 1) / 2), (d.choose (2 * j + 1)) * (-7) ^ j
+
+/-- Lemma A: The 7-adic valuation of B_d is exactly l when 7^l ∥ d.
+    This is the core of the 7-adic analysis: the j=0 term of B_d equals d,
+    and all higher terms have strictly larger 7-adic valuation. -/
+lemma lemma_A_binomial_valuation (d l : ℕ) (hd : d > 0)
+    (h_div : (7 : ℤ) ^ l ∣ ↑d) (h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d) :
+    (7 : ℤ) ^ l ∣ binomial_B d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_B d := by
+  sorry
+
+/-- Lemma B: Same valuation result as Lemma A, used for the conjugate θ'.
+    The sign difference (- instead of +) in (1-√-7)^d = A_d - √-7·B_d is what
+    creates the contradiction when combined with Corollary C. -/
+lemma lemma_B_binomial_valuation (d l : ℕ) (hd : d > 0)
+    (h_div : (7 : ℤ) ^ l ∣ ↑d) (h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d) :
+    (7 : ℤ) ^ l ∣ binomial_B d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_B d := by
+  exact lemma_A_binomial_valuation d l hd h_div h_ndiv
+
+/-- If two solutions m₁, m₂ satisfy m₁ ≡ m₂ (mod 42) and both give
+    θ^m - θ'^m = -2θ+1, then m₁ = m₂. This is proved by contradiction:
+    if m₁ ≠ m₂, the difference d = |m₂ - m₁| is divisible by 42 (hence by 7),
+    and the 7-adic analysis of Lemmas A and B combined with Corollary C yields
+    a contradiction on the valuation of √-7 · B_d. -/
+lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
+    (h₁_odd : Odd m₁) (h₂_odd : Odd m₂)
+    (h₁_ge : m₁ ≥ 3) (h₂_ge : m₂ ≥ 3)
+    (h_cong : m₁ % 42 = m₂ % 42)
+    (h₁_theta : -2 * θ + 1 = θ ^ m₁ - θ' ^ m₁)
+    (h₂_theta : -2 * θ + 1 = θ ^ m₂ - θ' ^ m₂) :
+    m₁ = m₂ := by
+    -- │ 1. WLOG m₂ > m₁ (else swap or they're equal).                                                                           │
+    -- │ 2. Let d = m₂ - m₁, which is divisible by 42, hence by 7.                                                               │
+    -- │ 3. Let l = v₇(d).                                                                                                       │
+    -- │ 4. From corollary_C (via h₁_theta, h₂_theta): θ^m₁ - θ'^m₁ = θ^m₂ - θ'^m₂.                                              │
+    -- │ 5. Expand using binomial sums: this forces B_{m₂} = 2^d · B_{m₁}, equivalently B_d has certain 7-adic properties.       │
+    -- │ 6. From lemma_A_binomial_valuation: v₇(B_d) = l exactly.                                                                │
+    -- │ 7. The identity (2θ-1)² = -7 means v_p(√-7) = 1 where p = (2θ-1).                                                       │
+    -- │ 8. For d ∈ ℤ: v_p(d) = 2·v₇(d) = 2l (always even).                                                                      │
+    -- │ 9. Need v_p(d · √-7) ≥ 2(l+1) but v_p(d · √-7) = 2l+1 < 2l+2. Contradiction.
+    sorry
+
+/-- Verification: m = 3 (i.e. n = 5) is a solution, via x = 5: (25+7)/4 = 8 = 2³. -/
+lemma theta_eq_at_3 : -2 * θ + 1 = θ ^ 3 - θ' ^ 3 := by
+  have h : (5 : ℤ) ^ 2 + 7 = 32 := by norm_num
+  have h_div : ((5 : ℤ) ^ 2 + 7) / 4 = 2 ^ 3 := by norm_num
+  exact main_m_condition 5 3 ⟨1, by omega⟩ (by omega) h_div
+
+/-- Verification: m = 5 (i.e. n = 7) is a solution, via x = 11: (121+7)/4 = 32 = 2⁵. -/
+lemma theta_eq_at_5 : -2 * θ + 1 = θ ^ 5 - θ' ^ 5 := by
+  have h_div : ((11 : ℤ) ^ 2 + 7) / 4 = 2 ^ 5 := by norm_num
+  exact main_m_condition 11 5 ⟨2, by omega⟩ (by omega) h_div
+
+/-- Verification: m = 13 (i.e. n = 15) is a solution, via x = 181: (32761+7)/4 = 8192 = 2¹³. -/
+lemma theta_eq_at_13 : -2 * θ + 1 = θ ^ 13 - θ' ^ 13 := by
+  have h_div : ((181 : ℤ) ^ 2 + 7) / 4 = 2 ^ 13 := by norm_num
+  exact main_m_condition 181 13 ⟨6, by omega⟩ (by omega) h_div
+
 /-- For the original equation x² + 7 = 2ⁿ with odd n ≥ 5, the only possible values of n are
     5, 7, and 15.
 
-    PROOF: From the mod 7 constraint `odd_case_only_three_values_mod_42`, we get
-    m = n - 2 ≡ 3, 5, or 13 (mod 42).
-
-    It suffices to show that no two distinct solutions for `n` can be congruent mod 42, since we have
-    already found three solutions (n = 5, 7, 15) that satisfy the equation.
-
-    Suppose for a contradiction that there are two distinct solutions n₁ and n₂ with n₁ ≡ n₂ (mod 42).
-
-    Let l be the largest power of 7 dividing n₂ - n₁. Then n₂ - n₁ = 7^l * k for some integer k not divisible by 7.
-
-    No two distinct solutions can be congruent mod 42 (proved by a contradiction
-    argument using powers of 7). Therefore the only possible values are
-    m = 3, 5, 13, i.e., n = 5, 7, 15. -/
+    PROOF: From the mod 42 constraint, m = n-2 is congruent to 3, 5, or 13 mod 42.
+    The verification lemmas show these are actual solutions (at m=3,5,13).
+    The uniqueness lemma `at_most_one_m_per_class` shows each residue class has at most
+    one solution. Therefore n ∈ {5, 7, 15}. -/
 theorem odd_case_only_three_values :
   ∀ x : ℤ, ∀ n : ℕ, Odd n → n ≥ 5 → x ^ 2 + 7 = 2 ^ n →
     n = 5 ∨ n = 7 ∨ n = 15 := by
-      intro x n hn_odd hn_ge h_eq
-      have h_mod := odd_case_only_three_values_mod_42 x n hn_odd hn_ge h_eq
-      sorry
+  intro x n hn_odd hn_ge h_eq
+  have h_mod := odd_case_only_three_values_mod_42 x n hn_odd hn_ge h_eq
+  set m := n - 2 with hm_def
+  have hm_odd : Odd m := by
+    obtain ⟨k, hk⟩ := hn_odd
+    refine ⟨k - 1, ?_⟩
+    omega
+  have hm_ge : m ≥ 3 := by omega
+  have h_div := reduction_divide_by_4 x n hn_odd hn_ge h_eq
+  have h_theta := main_m_condition x m hm_odd hm_ge h_div
+  rcases h_mod with h3 | h5 | h13
+  · -- m % 42 = 3 → m = 3 → n = 5
+    left
+    have : m = 3 := (at_most_one_m_per_class 3 m (by decide) hm_odd
+      (by omega) hm_ge (by omega) theta_eq_at_3 h_theta).symm
+    omega
+  · -- m % 42 = 5 → m = 5 → n = 7
+    right; left
+    have : m = 5 := (at_most_one_m_per_class 5 m (by decide) hm_odd
+      (by omega) hm_ge (by omega) theta_eq_at_5 h_theta).symm
+    omega
+  · -- m % 42 = 13 → m = 13 → n = 15
+    right; right
+    have : m = 13 := (at_most_one_m_per_class 13 m (by decide) hm_odd
+      (by omega) hm_ge (by omega) theta_eq_at_13 h_theta).symm
+    omega
 
 lemma sq_odd_then_odd :
   ∀ (x : ℤ), Odd (x ^ 2) → Odd (x) := by
