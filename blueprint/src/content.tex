@@ -154,7 +154,7 @@ over $\mathbb{Z}$ as $(2^k + x)(2^k - x) = 7$. Since $7$ is prime, this forces
 $n = 4$ and $x = \pm 3$.
 
 \begin{lemma}[Factorization over $\mathbb{Z}$]
-  \label{lem:my_amazing_thing}
+  \label{lem:ramanujan_nagell_even_pow_factors}
   \lean{ramanujan_nagell_even_pow_factors}
   \leanok
   If $(2^k + x)(2^k - x) = 7$, then either $2^k - x = 1$ and $2^k + x = 7$,
@@ -501,7 +501,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
 \begin{theorem}[Ramanujan--Nagell]
   \label{thm:RamanujanNagell}
   \lean{RamanujanNagell}
-  \uses{lem:x_is_odd, lem:my_amazing_thing, thm:odd_case_only_three_values, lem:helper_1, lem:helper_2, lem:helper_3, lem:helper_4, lem:helper_5}
+  \uses{lem:x_is_odd, lem:ramanujan_nagell_even_pow_factors, thm:odd_case_only_three_values, lem:helper_1, lem:helper_2, lem:helper_3, lem:helper_4, lem:helper_5}
   \leanok
   The only integer solutions to $x^2 + 7 = 2^n$ are
   \[
@@ -514,7 +514,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Then $x$ must be odd (Lemma~\ref{lem:x_is_odd}).
 
   \textbf{Case 1: $n$ even.} Write $n = 2k$. Then $(2^k+x)(2^k-x) = 7$.
-  By Lemma~\ref{lem:my_amazing_thing}, the only possibility is $2^k = 4$,
+  By Lemma~\ref{lem:ramanujan_nagell_even_pow_factors}, the only possibility is $2^k = 4$,
   giving $n = 4$ and $x = \pm 3$ (Lemma~\ref{lem:helper_1}).
 
   \textbf{Case 2: $n$ odd, $n = 3$.} Direct computation gives $x^2 = 1$, so $x = \pm 1$

@@ -643,36 +643,6 @@
 
 
     
-    <div class="dep-modal-container" id="lem:my_amazing_thing_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="lem:my_amazing_thing" style="display: none">
-    <div class="thm_thmheading">
-      <span class="lemma_thmcaption">
-      Lemma
-      </span>
-      <span class="lemma_thmlabel">14</span><span class="lemma_thmtitle">Factorization over \(\mathbb {Z}\)</span></div>
-    <div class="thm_thmcontent"><p>   If \((2^k + x)(2^k - x) = 7\), then either \(2^k - x = 1\) and \(2^k + x = 7\), or \(2^k - x = 7\) and \(2^k + x = 1\). </p>
-</div>
-
-    <a class="latex_link" href="sect0001.html#lem:my_amazing_thing">LaTeX</a>
-    
-    
-  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/ramanujan_nagell_even_pow_factors">Lean</a>
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
     <div class="dep-modal-container" id="lem:my_minpoly_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -783,6 +753,36 @@
     
     
   <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/odd_case_mod_seven_constraint">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:ramanujan_nagell_even_pow_factors_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:ramanujan_nagell_even_pow_factors" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">14</span><span class="lemma_thmtitle">Factorization over \(\mathbb {Z}\)</span></div>
+    <div class="thm_thmcontent"><p>   If \((2^k + x)(2^k - x) = 7\), then either \(2^k - x = 1\) and \(2^k + x = 7\), or \(2^k - x = 7\) and \(2^k + x = 1\). </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#lem:ramanujan_nagell_even_pow_factors">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/ramanujan_nagell_even_pow_factors">Lean</a>
     
     
   
@@ -1235,7 +1235,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"def:binomial_B"	[color=green,		fillcolor="#B0ECA3",		label=binomial_B,		shape=box,		style=filled];	"lem:lemma_A_valuation"	[color=green,		fillcolor="#1CAC78",		label=lemma_A_valuation,		shape=ellipse,		style=filled];	"def:binomial_B" -> "lem:lemma_A_valuation"	[style=dashed];	"lem:at_most_one_m"	[color=green,		fillcolor="#9CEC8B",		label=at_most_one_m,		shape=ellipse,		style=filled];	"lem:lemma_A_valuation" -> "lem:at_most_one_m"	[style=dashed];	"thm:odd_case_only_three_values"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_only_three_values,		shape=ellipse,		style=filled];	"lem:at_most_one_m" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:is_integral_omega"	[color=green,		fillcolor="#1CAC78",		label=is_integral_omega,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega"	[color=blue,		label=is_integral_one_sub_omega,		shape=ellipse];	"lem:is_integral_omega" -> "lem:is_integral_one_sub_omega"	[style=dashed];	"lem:my_minpoly"	[color=blue,		label=my_minpoly,		shape=ellipse];	"lem:is_integral_omega" -> "lem:my_minpoly"	[style=dashed];	"lem:span_eq_top"	[color=blue,		label=span_eq_top,		shape=ellipse];	"lem:is_integral_omega" -> "lem:span_eq_top"	[style=dashed];	"lem:two_factorisation_R"	[color=blue,		label=two_factorisation_R,		shape=ellipse];	"lem:is_integral_omega" -> "lem:two_factorisation_R"	[style=dashed];	"lem:factors_in_R"	[color=green,		fillcolor="#9CEC8B",		label=factors_in_R,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega" -> "lem:factors_in_R"	[style=dashed];	"lem:exponent"	[color=green,		fillcolor="#9CEC8B",		label=exponent,		shape=ellipse,		style=filled];	"lem:span_eq_top" -> "lem:exponent"	[style=dashed];	"lem:two_factorisation_R" -> "lem:factors_in_R"	[style=dashed];	"lem:coprime"	[color=green,		fillcolor="#9CEC8B",		label=coprime,		shape=ellipse,		style=filled];	"lem:factors_in_R" -> "lem:coprime"	[style=dashed];	"lem:ne_dvd_exponent"	[color=green,		fillcolor="#9CEC8B",		label=ne_dvd_exponent,		shape=ellipse,		style=filled];	"lem:exponent" -> "lem:ne_dvd_exponent"	[style=dashed];	"lem:ufd_association"	[label=ufd_association,		shape=ellipse];	"lem:coprime" -> "lem:ufd_association"	[style=dashed];	"lem:class_number_one"	[color=blue,		label=class_number_one,		shape=ellipse];	"lem:class_number_one" -> "lem:ufd_association"	[style=dashed];	"lem:eliminate_x"	[color=green,		fillcolor="#9CEC8B",		label=eliminate_x,		shape=ellipse,		style=filled];	"lem:ufd_association" -> "lem:eliminate_x"	[style=dashed];	"lem:must_have_minus_sign"	[color=green,		fillcolor="#9CEC8B",		label=must_have_minus_sign,		shape=ellipse,		style=filled];	"lem:eliminate_x" -> "lem:must_have_minus_sign"	[style=dashed];	"lem:units_pm_one"	[color=blue,		label=units_pm_one,		shape=ellipse];	"lem:units_pm_one" -> "lem:ufd_association"	[style=dashed];	"lem:sq_odd_then_odd"	[color=green,		fillcolor="#1CAC78",		label=sq_odd_then_odd,		shape=ellipse,		style=filled];	"lem:x_is_odd"	[color=green,		fillcolor="#1CAC78",		label=x_is_odd,		shape=ellipse,		style=filled];	"lem:sq_odd_then_odd" -> "lem:x_is_odd"	[style=dashed];	"thm:RamanujanNagell"	[color=green,		fillcolor="#9CEC8B",		label=RamanujanNagell,		shape=ellipse,		style=filled];	"lem:x_is_odd" -> "thm:RamanujanNagell"	[style=dashed];	"lem:not_odd_two_pow"	[color=green,		fillcolor="#1CAC78",		label=not_odd_two_pow,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd"	[color=green,		fillcolor="#1CAC78",		label=two_pow_min_seven_odd,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd" -> "lem:x_is_odd"	[style=dashed];	"lem:my_amazing_thing"	[color=green,		fillcolor="#1CAC78",		label=my_amazing_thing,		shape=ellipse,		style=filled];	"lem:my_amazing_thing" -> "thm:RamanujanNagell"	[style=dashed];	"lem:main_m_condition"	[color=green,		fillcolor="#9CEC8B",		label=main_m_condition,		shape=ellipse,		style=filled];	"lem:expand_by_binomial"	[color=green,		fillcolor="#9CEC8B",		label=expand_by_binomial,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:expand_by_binomial"	[style=dashed];	"lem:corollary_C"	[color=green,		fillcolor="#9CEC8B",		label=corollary_C,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:corollary_C"	[style=dashed];	"lem:theta_eq_at_3"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_3,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_3"	[style=dashed];	"lem:theta_eq_at_5"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_5,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_5"	[style=dashed];	"lem:theta_eq_at_13"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_13,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_13"	[style=dashed];	"lem:odd_case_mod_seven_constraint"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_seven_constraint,		shape=ellipse,		style=filled];	"lem:expand_by_binomial" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:corollary_C" -> "lem:at_most_one_m"	[style=dashed];	"lem:theta_eq_at_3" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_5" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_13" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:must_have_minus_sign" -> "lem:main_m_condition"	[style=dashed];	"thm:odd_case_mod_42"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_42,		shape=ellipse,		style=filled];	"lem:odd_case_mod_seven_constraint" -> "thm:odd_case_mod_42"	[style=dashed];	"thm:odd_case_mod_42" -> "thm:odd_case_only_three_values"	[style=dashed];	"thm:odd_case_only_three_values" -> "thm:RamanujanNagell"	[style=dashed];	"lem:reduction_divide_by_4"	[color=green,		fillcolor="#1CAC78",		label=reduction_divide_by_4,		shape=ellipse,		style=filled];	"lem:reduction_divide_by_4" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:helper_1"	[color=green,		fillcolor="#1CAC78",		label=helper_1,		shape=ellipse,		style=filled];	"lem:helper_1" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_2"	[color=green,		fillcolor="#1CAC78",		label=helper_2,		shape=ellipse,		style=filled];	"lem:helper_2" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_3"	[color=green,		fillcolor="#1CAC78",		label=helper_3,		shape=ellipse,		style=filled];	"lem:helper_3" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_4"	[color=green,		fillcolor="#1CAC78",		label=helper_4,		shape=ellipse,		style=filled];	"lem:helper_4" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_5"	[color=green,		fillcolor="#1CAC78",		label=helper_5,		shape=ellipse,		style=filled];	"lem:helper_5" -> "thm:RamanujanNagell"	[style=dashed];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"def:binomial_B"	[color=green,		fillcolor="#B0ECA3",		label=binomial_B,		shape=box,		style=filled];	"lem:lemma_A_valuation"	[color=green,		fillcolor="#1CAC78",		label=lemma_A_valuation,		shape=ellipse,		style=filled];	"def:binomial_B" -> "lem:lemma_A_valuation"	[style=dashed];	"lem:at_most_one_m"	[color=green,		fillcolor="#9CEC8B",		label=at_most_one_m,		shape=ellipse,		style=filled];	"lem:lemma_A_valuation" -> "lem:at_most_one_m"	[style=dashed];	"thm:odd_case_only_three_values"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_only_three_values,		shape=ellipse,		style=filled];	"lem:at_most_one_m" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:is_integral_omega"	[color=green,		fillcolor="#1CAC78",		label=is_integral_omega,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega"	[color=blue,		label=is_integral_one_sub_omega,		shape=ellipse];	"lem:is_integral_omega" -> "lem:is_integral_one_sub_omega"	[style=dashed];	"lem:my_minpoly"	[color=blue,		label=my_minpoly,		shape=ellipse];	"lem:is_integral_omega" -> "lem:my_minpoly"	[style=dashed];	"lem:span_eq_top"	[color=blue,		label=span_eq_top,		shape=ellipse];	"lem:is_integral_omega" -> "lem:span_eq_top"	[style=dashed];	"lem:two_factorisation_R"	[color=blue,		label=two_factorisation_R,		shape=ellipse];	"lem:is_integral_omega" -> "lem:two_factorisation_R"	[style=dashed];	"lem:factors_in_R"	[color=green,		fillcolor="#9CEC8B",		label=factors_in_R,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega" -> "lem:factors_in_R"	[style=dashed];	"lem:exponent"	[color=green,		fillcolor="#9CEC8B",		label=exponent,		shape=ellipse,		style=filled];	"lem:span_eq_top" -> "lem:exponent"	[style=dashed];	"lem:two_factorisation_R" -> "lem:factors_in_R"	[style=dashed];	"lem:coprime"	[color=green,		fillcolor="#9CEC8B",		label=coprime,		shape=ellipse,		style=filled];	"lem:factors_in_R" -> "lem:coprime"	[style=dashed];	"lem:ne_dvd_exponent"	[color=green,		fillcolor="#9CEC8B",		label=ne_dvd_exponent,		shape=ellipse,		style=filled];	"lem:exponent" -> "lem:ne_dvd_exponent"	[style=dashed];	"lem:ufd_association"	[label=ufd_association,		shape=ellipse];	"lem:coprime" -> "lem:ufd_association"	[style=dashed];	"lem:class_number_one"	[color=blue,		label=class_number_one,		shape=ellipse];	"lem:class_number_one" -> "lem:ufd_association"	[style=dashed];	"lem:eliminate_x"	[color=green,		fillcolor="#9CEC8B",		label=eliminate_x,		shape=ellipse,		style=filled];	"lem:ufd_association" -> "lem:eliminate_x"	[style=dashed];	"lem:must_have_minus_sign"	[color=green,		fillcolor="#9CEC8B",		label=must_have_minus_sign,		shape=ellipse,		style=filled];	"lem:eliminate_x" -> "lem:must_have_minus_sign"	[style=dashed];	"lem:units_pm_one"	[color=blue,		label=units_pm_one,		shape=ellipse];	"lem:units_pm_one" -> "lem:ufd_association"	[style=dashed];	"lem:sq_odd_then_odd"	[color=green,		fillcolor="#1CAC78",		label=sq_odd_then_odd,		shape=ellipse,		style=filled];	"lem:x_is_odd"	[color=green,		fillcolor="#1CAC78",		label=x_is_odd,		shape=ellipse,		style=filled];	"lem:sq_odd_then_odd" -> "lem:x_is_odd"	[style=dashed];	"thm:RamanujanNagell"	[color=green,		fillcolor="#9CEC8B",		label=RamanujanNagell,		shape=ellipse,		style=filled];	"lem:x_is_odd" -> "thm:RamanujanNagell"	[style=dashed];	"lem:not_odd_two_pow"	[color=green,		fillcolor="#1CAC78",		label=not_odd_two_pow,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd"	[color=green,		fillcolor="#1CAC78",		label=two_pow_min_seven_odd,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd" -> "lem:x_is_odd"	[style=dashed];	"lem:ramanujan_nagell_even_pow_factors"	[color=green,		fillcolor="#1CAC78",		label=ramanujan_nagell_even_pow_factors,		shape=ellipse,		style=filled];	"lem:ramanujan_nagell_even_pow_factors" -> "thm:RamanujanNagell"	[style=dashed];	"lem:main_m_condition"	[color=green,		fillcolor="#9CEC8B",		label=main_m_condition,		shape=ellipse,		style=filled];	"lem:expand_by_binomial"	[color=green,		fillcolor="#9CEC8B",		label=expand_by_binomial,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:expand_by_binomial"	[style=dashed];	"lem:corollary_C"	[color=green,		fillcolor="#9CEC8B",		label=corollary_C,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:corollary_C"	[style=dashed];	"lem:theta_eq_at_3"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_3,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_3"	[style=dashed];	"lem:theta_eq_at_5"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_5,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_5"	[style=dashed];	"lem:theta_eq_at_13"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_13,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_13"	[style=dashed];	"lem:odd_case_mod_seven_constraint"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_seven_constraint,		shape=ellipse,		style=filled];	"lem:expand_by_binomial" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:corollary_C" -> "lem:at_most_one_m"	[style=dashed];	"lem:theta_eq_at_3" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_5" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_13" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:must_have_minus_sign" -> "lem:main_m_condition"	[style=dashed];	"thm:odd_case_mod_42"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_42,		shape=ellipse,		style=filled];	"lem:odd_case_mod_seven_constraint" -> "thm:odd_case_mod_42"	[style=dashed];	"thm:odd_case_mod_42" -> "thm:odd_case_only_three_values"	[style=dashed];	"thm:odd_case_only_three_values" -> "thm:RamanujanNagell"	[style=dashed];	"lem:reduction_divide_by_4"	[color=green,		fillcolor="#1CAC78",		label=reduction_divide_by_4,		shape=ellipse,		style=filled];	"lem:reduction_divide_by_4" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:helper_1"	[color=green,		fillcolor="#1CAC78",		label=helper_1,		shape=ellipse,		style=filled];	"lem:helper_1" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_2"	[color=green,		fillcolor="#1CAC78",		label=helper_2,		shape=ellipse,		style=filled];	"lem:helper_2" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_3"	[color=green,		fillcolor="#1CAC78",		label=helper_3,		shape=ellipse,		style=filled];	"lem:helper_3" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_4"	[color=green,		fillcolor="#1CAC78",		label=helper_4,		shape=ellipse,		style=filled];	"lem:helper_4" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_5"	[color=green,		fillcolor="#1CAC78",		label=helper_5,		shape=ellipse,		style=filled];	"lem:helper_5" -> "thm:RamanujanNagell"	[style=dashed];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

@@ -1277,12 +1277,6 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
       -- (a+b)(c-e) + (a-b)(c+e-2) = 2(ac-be) - 2(a-b) = 0 by h_eq_K
       linear_combination -2 * h_eq_K
     -- From h₁_theta: θ^m₁ - θ'^m₁ = -(2θ - 1) = -α_K
-    -- have h_diff_eq : (θ : K) ^ m₁ - (θ' : K) ^ m₁ = -α_K := by
-    --   have h0 := congr_arg Subtype.val h₁_theta
-    --   simp at h0
-    --   -- h0 : -2 * ω + 1 = ω ^ m₁ - (1 - ω) ^ m₁
-    --   -- Goal: ω ^ m₁ - (1 - ω) ^ m₁ = -(2 * ω - 1)
-    --   linarith
     have h_diff_eq : (θ : K) ^ m₁ - (θ' : K) ^ m₁ = -α_K := by
       have h0 := congr_arg Subtype.val h₁_theta
       simp at h0
@@ -1354,12 +1348,6 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
       simp only [Int.cast_mul, Int.cast_pow, Int.cast_natCast, Int.cast_neg, Int.cast_ofNat]
       -- Reindex: even filter = image of (fun j => 2*j) over range(d/2+1)
       symm
-      -- rw [show (2 : K) * (1 - 7 * ∑ j ∈ Finset.range (d / 2),
-      --     (↑(d.choose (2 * (j + 1))) : K) * ((-7 : K)) ^ j) =
-      --   2 + ∑ j ∈ Finset.range (d / 2),
-      --     2 * (↑(d.choose (2 * (j + 1))) : K) * (-7 : K) ^ (j + 1) from by
-      --     rw [Finset.mul_sum]; congr 1; ext; push_cast; ring_nf; sorry; sorry]
-
       -- Replace your existing 'rw [show ... ]' block with this:
       rw [show (2 : K) * (1 - 7 * ∑ j ∈ Finset.range (d / 2),
              (↑(d.choose (2 * (j + 1))) : K) * ((-7 : K)) ^ j) =
