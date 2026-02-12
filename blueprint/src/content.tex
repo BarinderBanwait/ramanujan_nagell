@@ -41,8 +41,12 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \label{lem:is_integral_one_sub_omega}
   \lean{is_integral_one_sub_ω}
   \uses{lem:is_integral_omega}
+  \leanok
   The element $1 - \omega \in K$ is integral over $\mathbb{Z}$.
 \end{lemma}
+\begin{proof}\leanok
+  Exhibit the same monic polynomial $X^2 - X + 2$ and verify $(1-\omega)^2 - (1-\omega) + 2 = 0$.
+\end{proof}
 
 \begin{lemma}[Minimal polynomial]
   \label{lem:my_minpoly}
@@ -63,6 +67,20 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \lean{class_number_one}
   The ring of integers $R$ is a unique factorization domain
   (equivalently, the class number of $\mathbb{Q}(\sqrt{-7})$ is $1$).
+\end{lemma}
+
+\begin{lemma}[Class number one implies PID]
+  \label{lem:class_number_one_PID}
+  \lean{class_number_one_PID}
+  \uses{lem:class_number_one}
+  The ring of integers $R$ is a principal ideal ring.
+\end{lemma}
+
+\begin{lemma}[Algebra norm equals quadratic norm]
+  \label{lem:algebra_norm_eq_quadratic_norm}
+  \lean{algebra_norm_eq_quadratic_norm}
+  For any $z \in K$, the Mathlib algebra norm $\mathrm{Norm}_{\mathbb{Q}}(z)$
+  coincides with the quadratic algebra norm $z \cdot \bar{z}$.
 \end{lemma}
 
 \begin{lemma}[Units are $\pm 1$]
@@ -373,10 +391,89 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   sum has valuation exactly $l$.
 \end{proof}
 
+\begin{lemma}[7-adic valuation of $B_d$ (conjugate)]
+  \label{lem:lemma_B_valuation}
+  \lean{lemma_B_binomial_valuation}
+  \uses{lem:lemma_A_valuation}
+  \leanok
+  Same valuation result as Lemma~\ref{lem:lemma_A_valuation}, used for the conjugate $\theta'$.
+  Since $B_d$ appears in both $(1+\sqrt{-7})^d$ and $(1-\sqrt{-7})^d$ (with only a sign change
+  on $\sqrt{-7}$), the valuation is identical.
+\end{lemma}
+\begin{proof}\leanok
+  Identical to Lemma~\ref{lem:lemma_A_valuation}.
+\end{proof}
+
+\begin{definition}[Even-indexed binomial sum $A'_d$]
+  \label{def:binomial_A_prime}
+  \lean{binomial_A'}
+  \leanok
+  Define the even-indexed binomial sum
+  \[
+    A'_d = \sum_{j=0}^{d/2-1} \binom{d}{2(j+1)} \cdot (-7)^j.
+  \]
+  This arises from the even-index part of the expansion of $(1+\sqrt{-7})^d$.
+\end{definition}
+
+\begin{lemma}[7-adic valuation of $A'_d$]
+  \label{lem:even_binomial_valuation}
+  \lean{even_binomial_valuation}
+  \uses{def:binomial_A_prime}
+  \leanok
+  If $7^l \| d$ and $7 \mid d$, then $7^l \mid A'_d$ and $7^{l+1} \nmid A'_d$.
+  The $j=0$ term $\binom{d}{2} = d(d-1)/2$ has valuation $l$, and all higher terms
+  have strictly larger $7$-adic valuation.
+\end{lemma}
+\begin{proof}\leanok
+  Same structure as for $B_d$: the leading term $\binom{d}{2}$ has valuation $l$,
+  and higher terms are absorbed.
+\end{proof}
+
+\begin{definition}[Trace sequence]
+  \label{def:trace_seq}
+  \lean{trace_seq}
+  \leanok
+  Define the integer recurrence $a(0) = 2$, $a(1) = 1$, $a(n+2) = a(n+1) - 2\,a(n)$.
+  This is the trace sequence: $a(n) = \theta^n + \theta'^{\,n}$ in $R$.
+\end{definition}
+
+\begin{lemma}[Trace sequence equals $\theta^n + \theta'^{\,n}$]
+  \label{lem:trace_seq_eq}
+  \lean{trace_seq_eq}
+  \uses{def:trace_seq, lem:two_factorisation_R}
+  \leanok
+  For all $n$, $\mathrm{trace\_seq}(n) = \theta^n + \theta'^{\,n}$ in $R$.
+\end{lemma}
+\begin{proof}\leanok
+  Induction on $n$ using the recurrence, with $\theta + \theta' = 1$ and $\theta \cdot \theta' = 2$.
+\end{proof}
+
+\begin{lemma}[Trace sequence not divisible by $7$]
+  \label{lem:trace_seq_not_dvd_seven}
+  \lean{trace_seq_not_dvd_seven}
+  \uses{def:trace_seq}
+  \leanok
+  For all $n$, $7 \nmid a(n)$. The recurrence has period $3$ modulo $7$,
+  and the three residues $a(0) \equiv 2$, $a(1) \equiv 1$, $a(2) \equiv -3$ are all nonzero mod $7$.
+\end{lemma}
+\begin{proof}\leanok
+  Show the recurrence is periodic mod $7$ with period $3$, then check all three residues.
+\end{proof}
+
+\begin{lemma}[Even iff not odd]
+  \label{lem:nat_even_iff_not_odd}
+  \lean{nat_even_iff_not_odd}
+  \leanok
+  For natural numbers, $n$ is even if and only if $n$ is not odd.
+\end{lemma}
+\begin{proof}\leanok
+  Immediate from \texttt{not\_odd\_iff\_even}.
+\end{proof}
+
 \begin{lemma}[At most one solution per residue class]
   \label{lem:at_most_one_m}
   \lean{at_most_one_m_per_class}
-  \uses{lem:corollary_C, lem:lemma_A_valuation}
+  \uses{lem:corollary_C, lem:lemma_A_valuation, lem:lemma_B_valuation, lem:even_binomial_valuation, lem:trace_seq_eq, lem:trace_seq_not_dvd_seven, lem:nat_even_iff_not_odd}
   \leanok
   If $m_1, m_2$ are both odd, $\geq 3$, satisfy $m_1 \equiv m_2 \pmod{42}$,
   and both give $-2\theta + 1 = \theta^{m_i} - \theta'^{\,m_i}$, then $m_1 = m_2$.
@@ -448,6 +545,16 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
 \end{proof}
 
 \section{Main theorem}
+
+\begin{lemma}[Auxiliary: $n \geq 4$ and $n \neq 4$ implies $n \geq 5$]
+  \label{lem:omg}
+  \lean{omg}
+  \leanok
+  If $n \geq 4$ and $n \neq 4$, then $n \geq 5$.
+\end{lemma}
+\begin{proof}\leanok
+  Immediate by \texttt{omega}.
+\end{proof}
 
 \subsection{Direct computation helpers}
 
