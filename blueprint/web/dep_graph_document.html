@@ -63,24 +63,29 @@
 <div id="statements">
 
     
-    <div class="dep-modal-container" id="a0000000010_modal">
+    <div class="dep-modal-container" id="def:binomial_B_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000010" style="display: none">
+  <div class="thm" id="def:binomial_B" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="definition_thmcaption">
+      Definition
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="definition_thmlabel">26</span><span class="definition_thmtitle">Binomial sum \(B_d\)</span></div>
+    <div class="thm_thmcontent"><p>   Define the odd-indexed binomial sum </p>
+<div class="displaymath" id="a0000000031">
+  \[  B_d = \sum _{j=0}^{(d-1)/2} \binom {d}{2j+1} \cdot (-7)^j.  \]
+</div>
+<p> This arises from expanding \((1+\sqrt{-7})^d = A_d + \sqrt{-7} \cdot B_d\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000010">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#def:binomial_B">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/binomial_B">Lean</a>
     
     
   
@@ -92,24 +97,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000011_modal">
+    <div class="dep-modal-container" id="lem:at_most_one_m_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000011" style="display: none">
+  <div class="thm" id="lem:at_most_one_m" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">28</span><span class="lemma_thmtitle">At most one solution per residue class</span></div>
+    <div class="thm_thmcontent"><p>    If \(m_1, m_2\) are both odd, \(\geq 3\), satisfy \(m_1 \equiv m_2 \pmod{42}\), and both give \(-2\theta + 1 = \theta ^{m_i} - \theta '^{\, m_i}\), then \(m_1 = m_2\). </p>
+<p>Proof sketch: if \(m_1 \neq m_2\), let \(d = |m_2 - m_1|\), which is divisible by \(42\) (hence by \(7\)). The \(7\)-adic analysis of Lemma&#160;<a href="sect0001.html#lem:lemma_A_valuation">27</a> combined with Corollary&#160;C yields a contradiction on the valuation of \(\sqrt{-7} \cdot B_d\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000011">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:at_most_one_m">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/at_most_one_m_per_class">Lean</a>
     
     
   
@@ -121,24 +128,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000012_modal">
+    <div class="dep-modal-container" id="lem:class_number_one_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000012" style="display: none">
+  <div class="thm" id="lem:class_number_one" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">5</span><span class="lemma_thmtitle">Class number one</span></div>
+    <div class="thm_thmcontent"><p>   The ring of integers \(R\) is a unique factorization domain (equivalently, the class number of \(\mathbb {Q}(\sqrt{-7})\) is \(1\)). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000012">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:class_number_one">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/class_number_one">Lean</a>
     
     
   
@@ -150,24 +158,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000013_modal">
+    <div class="dep-modal-container" id="lem:coprime_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000013" style="display: none">
+  <div class="thm" id="lem:coprime" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">16</span><span class="lemma_thmtitle">Coprimality</span></div>
+    <div class="thm_thmcontent"><p>    The conjugate factors are coprime in \(R\). The only prime factors of \(2\) in \(R\) are \(\theta \) and \(\theta '\) (since \(2 = \theta \cdot \theta '\)). If either divided both factors, it would divide their difference \(\sqrt{-7}\), but \(N(\sqrt{-7}) = 7\) is not divisible by \(N(\theta ) = N(\theta ') = 2\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000013">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:coprime">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/conjugate_factors_coprime">Lean</a>
     
     
   
@@ -179,24 +188,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000014_modal">
+    <div class="dep-modal-container" id="lem:corollary_C_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000014" style="display: none">
+  <div class="thm" id="lem:corollary_C" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">25</span><span class="lemma_thmtitle">Corollary C: theta expression is universal</span></div>
+    <div class="thm_thmcontent"><p>    Any two solutions of the Ramanujan–Nagell equation produce the same theta expression: if \((x_1^2 + 7)/4 = 2^{m_1}\) and \((x_2^2 + 7)/4 = 2^{m_2}\) for odd \(m_1, m_2 \geq 3\), then \(\theta ^{m_1} - \theta '^{\, m_1} = \theta ^{m_2} - \theta '^{\, m_2}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000014">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:corollary_C">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/corollary_C">Lean</a>
     
     
   
@@ -208,24 +218,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000015_modal">
+    <div class="dep-modal-container" id="lem:eliminate_x_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000015" style="display: none">
+  <div class="thm" id="lem:eliminate_x" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">18</span><span class="lemma_thmtitle">Eliminate \(x\)</span></div>
+    <div class="thm_thmcontent"><p>    From \(\alpha = \pm \theta ^m\) or \(\alpha = \pm \theta '^{\, m}\), use the product relation to determine \(\beta \), then take the difference \(\alpha - \beta = 2\theta - 1\) to eliminate \(x\) and obtain: either \(2\theta - 1 = \theta ^m - \theta '^{\, m}\) or \(-2\theta + 1 = \theta ^m - \theta '^{\, m}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000015">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:eliminate_x">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/eliminate_x_conclude">Lean</a>
     
     
   
@@ -237,24 +248,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000016_modal">
+    <div class="dep-modal-container" id="lem:expand_by_binomial_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000016" style="display: none">
+  <div class="thm" id="lem:expand_by_binomial" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">22</span><span class="lemma_thmtitle">Binomial expansion mod \(7\)</span></div>
+    <div class="thm_thmcontent"><p>    From \(-2\theta + 1 = \theta ^m - \theta '^{\, m}\), expand via the binomial theorem and reduce modulo \(7\) to obtain \(-2^{m-1} \equiv m \pmod{7}\). </p>
+<p>The proof multiplies both sides by \(2^m\), expands \((1 + \sqrt{-7})^m - (1 - \sqrt{-7})^m\) via the binomial theorem, observes that even-index terms cancel and odd-index terms involve powers of \((\sqrt{-7})^2 = -7\), then reads the result modulo \(7\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000016">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:expand_by_binomial">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/expand_by_binomial">Lean</a>
     
     
   
@@ -266,24 +279,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000017_modal">
+    <div class="dep-modal-container" id="lem:exponent_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000017" style="display: none">
+  <div class="thm" id="lem:exponent" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">8</span><span class="lemma_thmtitle">Exponent of \(\theta \)</span></div>
+    <div class="thm_thmcontent"><p>    The exponent of \(\theta \) (in the sense of Kummer–Dedekind) is \(1\). This follows immediately from the fact that \(\mathbb {Z}[\theta ] = R\) (Lemma&#160;<a href="sect0001.html#lem:span_eq_top">4</a>). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000017">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:exponent">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/exponent">Lean</a>
     
     
   
@@ -295,24 +309,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000018_modal">
+    <div class="dep-modal-container" id="lem:factors_in_R_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000018" style="display: none">
+  <div class="thm" id="lem:factors_in_R" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">15</span><span class="lemma_thmtitle">Conjugate factors in \(R\)</span></div>
+    <div class="thm_thmcontent"><p>    The conjugate factors \((x \pm \sqrt{-7})/2\) lie in \(R\) (since \(x\) is odd), and their product equals \(\theta ^m \cdot \theta '^{\, m}\). Their difference is \(2\theta - 1 = \sqrt{-7}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000018">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:factors_in_R">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/factors_in_R_with_product">Lean</a>
     
     
   
@@ -324,24 +339,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000019_modal">
+    <div class="dep-modal-container" id="lem:helper_1_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000019" style="display: none">
+  <div class="thm" id="lem:helper_1" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">33</span><span class="lemma_thmtitle">Even case: \(n = 4\), \(x^2 = 9\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2 = 9\) and \(n = 4\), then \((x, n) = (\pm 3, 4)\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000019">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:helper_1">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/helper_1">Lean</a>
     
     
   
@@ -353,24 +369,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000020_modal">
+    <div class="dep-modal-container" id="lem:helper_2_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000020" style="display: none">
+  <div class="thm" id="lem:helper_2" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">34</span><span class="lemma_thmtitle">Odd case: \(n = 3\), \(x^2 = 1\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2 = 1\) and \(n = 3\), then \((x, n) = (\pm 1, 3)\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000020">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:helper_2">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/helper_2">Lean</a>
     
     
   
@@ -382,24 +399,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000021_modal">
+    <div class="dep-modal-container" id="lem:helper_3_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000021" style="display: none">
+  <div class="thm" id="lem:helper_3" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">35</span><span class="lemma_thmtitle">Odd case: \(n = 5\), \(x^2 = 25\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2 = 25\) and \(n = 5\), then \((x, n) = (\pm 5, 5)\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000021">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:helper_3">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/helper_3">Lean</a>
     
     
   
@@ -411,24 +429,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000022_modal">
+    <div class="dep-modal-container" id="lem:helper_4_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000022" style="display: none">
+  <div class="thm" id="lem:helper_4" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">36</span><span class="lemma_thmtitle">Odd case: \(n = 7\), \(x^2 = 121\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2 = 121\) and \(n = 7\), then \((x, n) = (\pm 11, 7)\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000022">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:helper_4">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/helper_4">Lean</a>
     
     
   
@@ -440,24 +459,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000023_modal">
+    <div class="dep-modal-container" id="lem:helper_5_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000023" style="display: none">
+  <div class="thm" id="lem:helper_5" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">37</span><span class="lemma_thmtitle">Odd case: \(n = 15\), \(x^2 = 32761\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2 = 32761\) and \(n = 15\), then \((x, n) = (\pm 181, 15)\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000023">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:helper_5">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/helper_5">Lean</a>
     
     
   
@@ -469,24 +489,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000024_modal">
+    <div class="dep-modal-container" id="lem:is_integral_omega_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000024" style="display: none">
+  <div class="thm" id="lem:is_integral_omega" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">1</span><span class="lemma_thmtitle">Integrality of \(\omega \)</span></div>
+    <div class="thm_thmcontent"><p>   The element \(\omega \in K\) is integral over \(\mathbb {Z}\): it satisfies \(X^2 - X + 2 = 0\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000024">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:is_integral_omega">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/is_integral_ω">Lean</a>
     
     
   
@@ -498,24 +519,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000025_modal">
+    <div class="dep-modal-container" id="lem:is_integral_one_sub_omega_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000025" style="display: none">
+  <div class="thm" id="lem:is_integral_one_sub_omega" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">2</span><span class="lemma_thmtitle">Integrality of \(1 - \omega \)</span></div>
+    <div class="thm_thmcontent"><p>    The element \(1 - \omega \in K\) is integral over \(\mathbb {Z}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000025">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:is_integral_one_sub_omega">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/is_integral_one_sub_ω">Lean</a>
     
     
   
@@ -527,24 +549,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000026_modal">
+    <div class="dep-modal-container" id="lem:lemma_A_valuation_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000026" style="display: none">
+  <div class="thm" id="lem:lemma_A_valuation" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">27</span><span class="lemma_thmtitle">7-adic valuation of \(B_d\)</span></div>
+    <div class="thm_thmcontent"><p>    The \(7\)-adic valuation of \(B_d\) equals \(v_7(d)\): if \(7^l \|  d\) (i.e. \(7^l \mid d\) but \(7^{l+1} \nmid d\)), then \(7^l \mid B_d\) and \(7^{l+1} \nmid B_d\). </p>
+<p>This is the core of the \(7\)-adic analysis: the \(j=0\) term of \(B_d\) equals \(d\), and all higher terms have strictly larger \(7\)-adic valuation. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000026">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:lemma_A_valuation">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/lemma_A_binomial_valuation">Lean</a>
     
     
   
@@ -556,24 +580,28 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000027_modal">
+    <div class="dep-modal-container" id="lem:main_m_condition_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000027" style="display: none">
+  <div class="thm" id="lem:main_m_condition" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">20</span><span class="lemma_thmtitle">Main \(m\)-condition</span></div>
+    <div class="thm_thmcontent"><p>    For all integers \(x\) and odd \(m \geq 3\), if \((x^2 + 7)/4 = 2^m\), then </p>
+<div class="displaymath" id="a0000000023">
+  \[  -2\theta + 1 = \theta ^m - \theta '^{\, m}.  \]
+</div>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000027">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:main_m_condition">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/main_m_condition">Lean</a>
     
     
   
@@ -585,24 +613,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000028_modal">
+    <div class="dep-modal-container" id="lem:must_have_minus_sign_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000028" style="display: none">
+  <div class="thm" id="lem:must_have_minus_sign" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">19</span><span class="lemma_thmtitle">Must have minus sign</span></div>
+    <div class="thm_thmcontent"><p>    If either \(2\theta - 1 = \theta ^m - \theta '^{\, m}\) or \(-2\theta + 1 = \theta ^m - \theta '^{\, m}\) holds for odd \(m \geq 3\), then in fact the minus sign must hold: \(-2\theta + 1 = \theta ^m - \theta '^{\, m}\). This is proved by reducing modulo \(\theta '^2\) and checking which sign is consistent. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000028">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:must_have_minus_sign">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/must_have_minus_sign">Lean</a>
     
     
   
@@ -614,24 +643,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000029_modal">
+    <div class="dep-modal-container" id="lem:my_amazing_thing_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000029" style="display: none">
+  <div class="thm" id="lem:my_amazing_thing" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">14</span><span class="lemma_thmtitle">Factorization over \(\mathbb {Z}\)</span></div>
+    <div class="thm_thmcontent"><p>   If \((2^k + x)(2^k - x) = 7\), then either \(2^k - x = 1\) and \(2^k + x = 7\), or \(2^k - x = 7\) and \(2^k + x = 1\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000029">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:my_amazing_thing">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/ramanujan_nagell_even_pow_factors">Lean</a>
     
     
   
@@ -643,24 +673,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000030_modal">
+    <div class="dep-modal-container" id="lem:my_minpoly_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000030" style="display: none">
+  <div class="thm" id="lem:my_minpoly" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">3</span><span class="lemma_thmtitle">Minimal polynomial</span></div>
+    <div class="thm_thmcontent"><p>    The minimal polynomial of \(\theta \) over \(\mathbb {Z}\) is \(X^2 - X + 2\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000030">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:my_minpoly">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/my_minpoly">Lean</a>
     
     
   
@@ -672,24 +703,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000031_modal">
+    <div class="dep-modal-container" id="lem:ne_dvd_exponent_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000031" style="display: none">
+  <div class="thm" id="lem:ne_dvd_exponent" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">9</span><span class="lemma_thmtitle">No prime divides the exponent</span></div>
+    <div class="thm_thmcontent"><p>    For any prime \(p\), \(p\) does not divide the exponent of \(\theta \). This is immediate since the exponent equals \(1\) (Lemma&#160;<a href="sect0001.html#lem:exponent">8</a>). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000031">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:ne_dvd_exponent">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/ne_dvd_exponent">Lean</a>
     
     
   
@@ -701,24 +733,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000032_modal">
+    <div class="dep-modal-container" id="lem:not_odd_two_pow_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000032" style="display: none">
+  <div class="thm" id="lem:not_odd_two_pow" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">11</span><span class="lemma_thmtitle">Powers of two are not odd</span></div>
+    <div class="thm_thmcontent"><p>   For \(n \geq 1\), the number \(2^n\) is not odd. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000032">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:not_odd_two_pow">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/not_odd_two_pow">Lean</a>
     
     
   
@@ -730,24 +763,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000033_modal">
+    <div class="dep-modal-container" id="lem:odd_case_mod_seven_constraint_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000033" style="display: none">
+  <div class="thm" id="lem:odd_case_mod_seven_constraint" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">23</span><span class="lemma_thmtitle">Mod \(7\) constraint</span></div>
+    <div class="thm_thmcontent"><p>    If \(n\) is odd with \(n \geq 5\) and \(x^2 + 7 = 2^n\), then \((-2)^{n-3} \equiv n - 2 \pmod{7}\). </p>
+<p>This follows from the \(m\)-condition (Lemma&#160;<a href="sect0001.html#lem:main_m_condition">20</a>) by expanding \(\theta ^m - \theta '^{\, m}\) via the binomial theorem and reducing modulo \(7\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000033">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:odd_case_mod_seven_constraint">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/odd_case_mod_seven_constraint">Lean</a>
     
     
   
@@ -759,24 +794,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000034_modal">
+    <div class="dep-modal-container" id="lem:reduction_divide_by_4_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000034" style="display: none">
+  <div class="thm" id="lem:reduction_divide_by_4" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">21</span><span class="lemma_thmtitle">Reduction by dividing by \(4\)</span></div>
+    <div class="thm_thmcontent"><p>   If \(n\) is odd with \(n \geq 5\) and \(x^2 + 7 = 2^n\), then \((x^2 + 7)/4 = 2^{n-2}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000034">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:reduction_divide_by_4">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/reduction_divide_by_4">Lean</a>
     
     
   
@@ -788,24 +824,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000035_modal">
+    <div class="dep-modal-container" id="lem:span_eq_top_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000035" style="display: none">
+  <div class="thm" id="lem:span_eq_top" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">4</span><span class="lemma_thmtitle">Monogenicity</span></div>
+    <div class="thm_thmcontent"><p>    The ring of integers \(R\) is generated by \(\theta \) over \(\mathbb {Z}\): \(\mathbb {Z}[\theta ] = R\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000035">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:span_eq_top">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/span_eq_top">Lean</a>
     
     
   
@@ -817,24 +854,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000036_modal">
+    <div class="dep-modal-container" id="lem:sq_odd_then_odd_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000036" style="display: none">
+  <div class="thm" id="lem:sq_odd_then_odd" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">10</span><span class="lemma_thmtitle">Odd square implies odd root</span></div>
+    <div class="thm_thmcontent"><p>   If \(x^2\) is odd, then \(x\) is odd. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000036">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:sq_odd_then_odd">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/sq_odd_then_odd">Lean</a>
     
     
   
@@ -846,24 +884,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000037_modal">
+    <div class="dep-modal-container" id="lem:theta_eq_at_13_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000037" style="display: none">
+  <div class="thm" id="lem:theta_eq_at_13" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">31</span><span class="lemma_thmtitle">Verification: \(m = 13\) (i.e. \(n = 15\))</span></div>
+    <div class="thm_thmcontent"><p>    \(-2\theta + 1 = \theta ^{13} - \theta '^{\, 13}\). Verified via \(x = 181\): \((32761 + 7)/4 = 8192 = 2^{13}\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000037">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:theta_eq_at_13">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/theta_eq_at_13">Lean</a>
     
     
   
@@ -875,24 +914,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000038_modal">
+    <div class="dep-modal-container" id="lem:theta_eq_at_3_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000038" style="display: none">
+  <div class="thm" id="lem:theta_eq_at_3" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">29</span><span class="lemma_thmtitle">Verification: \(m = 3\) (i.e. \(n = 5\))</span></div>
+    <div class="thm_thmcontent"><p>    \(-2\theta + 1 = \theta ^3 - \theta '^{\, 3}\). Verified via \(x = 5\): \((25 + 7)/4 = 8 = 2^3\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000038">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:theta_eq_at_3">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/theta_eq_at_3">Lean</a>
     
     
   
@@ -904,24 +944,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000039_modal">
+    <div class="dep-modal-container" id="lem:theta_eq_at_5_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000039" style="display: none">
+  <div class="thm" id="lem:theta_eq_at_5" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">30</span><span class="lemma_thmtitle">Verification: \(m = 5\) (i.e. \(n = 7\))</span></div>
+    <div class="thm_thmcontent"><p>    \(-2\theta + 1 = \theta ^5 - \theta '^{\, 5}\). Verified via \(x = 11\): \((121 + 7)/4 = 32 = 2^5\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000039">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:theta_eq_at_5">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/theta_eq_at_5">Lean</a>
     
     
   
@@ -933,24 +974,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000040_modal">
+    <div class="dep-modal-container" id="lem:two_factorisation_R_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000040" style="display: none">
+  <div class="thm" id="lem:two_factorisation_R" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">7</span><span class="lemma_thmtitle">Factorization of \(2\)</span></div>
+    <div class="thm_thmcontent"><p>    In \(R\), we have \(\theta \cdot (1 - \theta ) = 2\), i.e. \(\frac{1+\sqrt{-7}}{2} \cdot \frac{1-\sqrt{-7}}{2} = 2\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000040">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:two_factorisation_R">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/two_factorisation_R">Lean</a>
     
     
   
@@ -962,24 +1004,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000041_modal">
+    <div class="dep-modal-container" id="lem:two_pow_min_seven_odd_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000041" style="display: none">
+  <div class="thm" id="lem:two_pow_min_seven_odd" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">12</span><span class="lemma_thmtitle">\(2^n - 7\) is odd</span></div>
+    <div class="thm_thmcontent"><p>   For all \(n \neq 0\), the integer \(2^n - 7\) is odd. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000041">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:two_pow_min_seven_odd">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/two_pow_min_seven_odd">Lean</a>
     
     
   
@@ -991,24 +1034,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000042_modal">
+    <div class="dep-modal-container" id="lem:ufd_association_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000042" style="display: none">
+  <div class="thm" id="lem:ufd_association" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">17</span><span class="lemma_thmtitle">UFD power association</span></div>
+    <div class="thm_thmcontent"><p>    If \(\alpha \cdot \beta = \theta ^m \cdot \theta '^{\, m}\) and \(\gcd (\alpha , \beta ) = 1\) in the UFD \(R\), then \(\alpha = \pm \theta ^m\) or \(\alpha = \pm \theta '^{\, m}\). This combines unique factorization (<span class="ttfamily">class_number_one</span>) with the fact that the only units are \(\pm 1\) (<span class="ttfamily">units_pm_one</span>). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000042">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:ufd_association">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/ufd_power_association">Lean</a>
     
     
   
@@ -1020,24 +1064,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000043_modal">
+    <div class="dep-modal-container" id="lem:units_pm_one_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000043" style="display: none">
+  <div class="thm" id="lem:units_pm_one" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">6</span><span class="lemma_thmtitle">Units are \(\pm 1\)</span></div>
+    <div class="thm_thmcontent"><p>   The only units in \(R\) are \(\pm 1\). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000043">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:units_pm_one">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/units_pm_one">Lean</a>
     
     
   
@@ -1049,24 +1094,25 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000044_modal">
+    <div class="dep-modal-container" id="lem:x_is_odd_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000044" style="display: none">
+  <div class="thm" id="lem:x_is_odd" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="lemma_thmcaption">
+      Lemma
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="lemma_thmlabel">13</span><span class="lemma_thmtitle">\(x\) is odd</span></div>
+    <div class="thm_thmcontent"><p>    If \(x^2 + 7 = 2^n\) with \(n \neq 0\), then \(x\) is odd. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000044">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#lem:x_is_odd">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/x_is_odd">Lean</a>
     
     
   
@@ -1078,24 +1124,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000045_modal">
+    <div class="dep-modal-container" id="thm:odd_case_mod_42_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000045" style="display: none">
+  <div class="thm" id="thm:odd_case_mod_42" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="theorem_thmcaption">
+      Theorem
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="theorem_thmlabel">24</span><span class="theorem_thmtitle">Mod \(42\) constraint</span></div>
+    <div class="thm_thmcontent"><p>    If \(n\) is odd with \(n \geq 5\) and \(x^2 + 7 = 2^n\), then \((n - 2) \bmod 42 \in \{ 3, 5, 13\} \). </p>
+<p>This follows from \((-2)^{n-3} \equiv n - 2 \pmod{7}\) together with Fermat’s little theorem \(2^6 \equiv 1 \pmod{7}\). Checking residues modulo \(42\) (combining mod \(6\) and mod \(7\)) yields the three residue classes. </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000045">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#thm:odd_case_mod_42">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/odd_case_only_three_values_mod_42">Lean</a>
     
     
   
@@ -1107,24 +1155,26 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000046_modal">
+    <div class="dep-modal-container" id="thm:odd_case_only_three_values_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000046" style="display: none">
+  <div class="thm" id="thm:odd_case_only_three_values" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="theorem_thmcaption">
+      Theorem
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="theorem_thmlabel">32</span><span class="theorem_thmtitle">Odd case: only three values</span></div>
+    <div class="thm_thmcontent"><p>    If \(n\) is odd with \(n \geq 5\) and \(x^2 + 7 = 2^n\), then \(n \in \{ 5, 7, 15\} \). </p>
+<p>From the mod \(42\) constraint, \(m = n - 2\) lies in one of three residue classes (\(3\), \(5\), or \(13\) mod \(42\)). The verification lemmas show these are actual solutions (at \(m = 3, 5, 13\)). The uniqueness lemma shows each residue class has at most one solution. Therefore \(n \in \{ 5, 7, 15\} \). </p>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000046">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#thm:odd_case_only_three_values">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/odd_case_only_three_values">Lean</a>
     
     
   
@@ -1136,604 +1186,28 @@
 
 
     
-    <div class="dep-modal-container" id="a0000000047_modal">
+    <div class="dep-modal-container" id="thm:RamanujanNagell_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         
-  <div class="thm" id="a0000000047" style="display: none">
+  <div class="thm" id="thm:RamanujanNagell" style="display: none">
     <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
+      <span class="theorem_thmcaption">
+      Theorem
       </span>
-      </div>
-    <div class="thm_thmcontent"></div>
+      <span class="theorem_thmlabel">38</span><span class="theorem_thmtitle">Ramanujan–Nagell</span></div>
+    <div class="thm_thmcontent"><p>    The only integer solutions to \(x^2 + 7 = 2^n\) are </p>
+<div class="displaymath" id="a0000000049">
+  \[  (x, n) \in \{ (\pm 1, 3),\;  (\pm 3, 4),\;  (\pm 5, 5),\;  (\pm 11, 7),\;  (\pm 181, 15)\} .  \]
+</div>
+</div>
 
-    <a class="latex_link" href="sect0001.html#a0000000047">LaTeX</a>
+    <a class="latex_link" href="sect0001.html#thm:RamanujanNagell">LaTeX</a>
     
     
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000048_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000048" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000048">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000049_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000049" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000049">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000050_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000050" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000050">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000051_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000051" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000051">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000052_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000052" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000052">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000053_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000053" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000053">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000054_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000054" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000054">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000055_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000055" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000055">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000056_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000056" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000056">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000057_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000057" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000057">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000058_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000058" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000058">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000059_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000059" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000059">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000060_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000060" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000060">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000061_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000061" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000061">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000062_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000062" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000062">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000063_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000063" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000063">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000064_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000064" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000064">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000065_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000065" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000065">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000066_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000066" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000066">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
-    <div class="dep-modal-container" id="a0000000067_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="a0000000067" style="display: none">
-    <div class="thm_thmheading">
-      <span class="_thmcaption">
-      
-      </span>
-      </div>
-    <div class="thm_thmcontent"></div>
-
-    <a class="latex_link" href="sect0001.html#a0000000067">LaTeX</a>
-    
-    
-  
+  <a class="lean_link lean_decl" href="https://BarinderBanwait.github.io/ramanujan_nagell/docs/find/#doc/RamanujanNagell">Lean</a>
     
     
   
@@ -1761,7 +1235,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	a0000000010	[color=blue,		label=a0000000010,		shape=ellipse];	a0000000011	[color=blue,		label=a0000000011,		shape=ellipse];	a0000000012	[color=blue,		label=a0000000012,		shape=ellipse];	a0000000013	[color=blue,		label=a0000000013,		shape=ellipse];	a0000000014	[color=blue,		label=a0000000014,		shape=ellipse];	a0000000015	[color=blue,		label=a0000000015,		shape=ellipse];	a0000000016	[color=blue,		label=a0000000016,		shape=ellipse];	a0000000017	[color=blue,		label=a0000000017,		shape=ellipse];	a0000000018	[color=blue,		label=a0000000018,		shape=ellipse];	a0000000019	[color=blue,		label=a0000000019,		shape=ellipse];	a0000000020	[color=blue,		label=a0000000020,		shape=ellipse];	a0000000021	[color=blue,		label=a0000000021,		shape=ellipse];	a0000000022	[color=blue,		label=a0000000022,		shape=ellipse];	a0000000023	[color=blue,		label=a0000000023,		shape=ellipse];	a0000000024	[color=blue,		label=a0000000024,		shape=ellipse];	a0000000025	[color=blue,		label=a0000000025,		shape=ellipse];	a0000000026	[color=blue,		label=a0000000026,		shape=ellipse];	a0000000027	[color=blue,		label=a0000000027,		shape=ellipse];	a0000000028	[color=blue,		label=a0000000028,		shape=ellipse];	a0000000029	[color=blue,		label=a0000000029,		shape=ellipse];	a0000000030	[color=blue,		label=a0000000030,		shape=ellipse];	a0000000031	[color=blue,		label=a0000000031,		shape=ellipse];	a0000000032	[color=blue,		label=a0000000032,		shape=ellipse];	a0000000033	[color=blue,		label=a0000000033,		shape=ellipse];	a0000000034	[color=blue,		label=a0000000034,		shape=ellipse];	a0000000035	[color=blue,		label=a0000000035,		shape=ellipse];	a0000000036	[color=blue,		label=a0000000036,		shape=ellipse];	a0000000037	[color=blue,		label=a0000000037,		shape=ellipse];	a0000000038	[color=blue,		label=a0000000038,		shape=ellipse];	a0000000039	[color=blue,		label=a0000000039,		shape=ellipse];	a0000000040	[color=blue,		label=a0000000040,		shape=ellipse];	a0000000041	[color=blue,		label=a0000000041,		shape=ellipse];	a0000000042	[color=blue,		label=a0000000042,		shape=ellipse];	a0000000043	[color=blue,		label=a0000000043,		shape=ellipse];	a0000000044	[color=blue,		label=a0000000044,		shape=ellipse];	a0000000045	[color=blue,		label=a0000000045,		shape=ellipse];	a0000000046	[color=blue,		label=a0000000046,		shape=ellipse];	a0000000047	[color=blue,		label=a0000000047,		shape=ellipse];	a0000000048	[color=blue,		label=a0000000048,		shape=ellipse];	a0000000049	[color=blue,		label=a0000000049,		shape=ellipse];	a0000000050	[color=blue,		label=a0000000050,		shape=ellipse];	a0000000051	[color=blue,		label=a0000000051,		shape=ellipse];	a0000000052	[color=blue,		label=a0000000052,		shape=ellipse];	a0000000053	[color=blue,		label=a0000000053,		shape=ellipse];	a0000000054	[color=blue,		label=a0000000054,		shape=ellipse];	a0000000055	[color=blue,		label=a0000000055,		shape=ellipse];	a0000000056	[color=blue,		label=a0000000056,		shape=ellipse];	a0000000057	[color=blue,		label=a0000000057,		shape=ellipse];	a0000000058	[color=blue,		label=a0000000058,		shape=ellipse];	a0000000059	[color=blue,		label=a0000000059,		shape=ellipse];	a0000000060	[color=blue,		label=a0000000060,		shape=ellipse];	a0000000061	[color=blue,		label=a0000000061,		shape=ellipse];	a0000000062	[color=blue,		label=a0000000062,		shape=ellipse];	a0000000063	[color=blue,		label=a0000000063,		shape=ellipse];	a0000000064	[color=blue,		label=a0000000064,		shape=ellipse];	a0000000065	[color=blue,		label=a0000000065,		shape=ellipse];	a0000000066	[color=blue,		label=a0000000066,		shape=ellipse];	a0000000067	[color=blue,		label=a0000000067,		shape=ellipse];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"def:binomial_B"	[color=green,		fillcolor="#B0ECA3",		label=binomial_B,		shape=box,		style=filled];	"lem:lemma_A_valuation"	[color=green,		fillcolor="#1CAC78",		label=lemma_A_valuation,		shape=ellipse,		style=filled];	"def:binomial_B" -> "lem:lemma_A_valuation"	[style=dashed];	"lem:at_most_one_m"	[color=green,		fillcolor="#9CEC8B",		label=at_most_one_m,		shape=ellipse,		style=filled];	"lem:lemma_A_valuation" -> "lem:at_most_one_m"	[style=dashed];	"thm:odd_case_only_three_values"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_only_three_values,		shape=ellipse,		style=filled];	"lem:at_most_one_m" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:is_integral_omega"	[color=green,		fillcolor="#1CAC78",		label=is_integral_omega,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega"	[color=blue,		label=is_integral_one_sub_omega,		shape=ellipse];	"lem:is_integral_omega" -> "lem:is_integral_one_sub_omega"	[style=dashed];	"lem:my_minpoly"	[color=blue,		label=my_minpoly,		shape=ellipse];	"lem:is_integral_omega" -> "lem:my_minpoly"	[style=dashed];	"lem:span_eq_top"	[color=blue,		label=span_eq_top,		shape=ellipse];	"lem:is_integral_omega" -> "lem:span_eq_top"	[style=dashed];	"lem:two_factorisation_R"	[color=blue,		label=two_factorisation_R,		shape=ellipse];	"lem:is_integral_omega" -> "lem:two_factorisation_R"	[style=dashed];	"lem:factors_in_R"	[color=green,		fillcolor="#9CEC8B",		label=factors_in_R,		shape=ellipse,		style=filled];	"lem:is_integral_one_sub_omega" -> "lem:factors_in_R"	[style=dashed];	"lem:exponent"	[color=green,		fillcolor="#9CEC8B",		label=exponent,		shape=ellipse,		style=filled];	"lem:span_eq_top" -> "lem:exponent"	[style=dashed];	"lem:two_factorisation_R" -> "lem:factors_in_R"	[style=dashed];	"lem:coprime"	[color=green,		fillcolor="#9CEC8B",		label=coprime,		shape=ellipse,		style=filled];	"lem:factors_in_R" -> "lem:coprime"	[style=dashed];	"lem:ne_dvd_exponent"	[color=green,		fillcolor="#9CEC8B",		label=ne_dvd_exponent,		shape=ellipse,		style=filled];	"lem:exponent" -> "lem:ne_dvd_exponent"	[style=dashed];	"lem:ufd_association"	[label=ufd_association,		shape=ellipse];	"lem:coprime" -> "lem:ufd_association"	[style=dashed];	"lem:class_number_one"	[color=blue,		label=class_number_one,		shape=ellipse];	"lem:class_number_one" -> "lem:ufd_association"	[style=dashed];	"lem:eliminate_x"	[color=green,		fillcolor="#9CEC8B",		label=eliminate_x,		shape=ellipse,		style=filled];	"lem:ufd_association" -> "lem:eliminate_x"	[style=dashed];	"lem:must_have_minus_sign"	[color=green,		fillcolor="#9CEC8B",		label=must_have_minus_sign,		shape=ellipse,		style=filled];	"lem:eliminate_x" -> "lem:must_have_minus_sign"	[style=dashed];	"lem:units_pm_one"	[color=blue,		label=units_pm_one,		shape=ellipse];	"lem:units_pm_one" -> "lem:ufd_association"	[style=dashed];	"lem:sq_odd_then_odd"	[color=green,		fillcolor="#1CAC78",		label=sq_odd_then_odd,		shape=ellipse,		style=filled];	"lem:x_is_odd"	[color=green,		fillcolor="#1CAC78",		label=x_is_odd,		shape=ellipse,		style=filled];	"lem:sq_odd_then_odd" -> "lem:x_is_odd"	[style=dashed];	"thm:RamanujanNagell"	[color=green,		fillcolor="#9CEC8B",		label=RamanujanNagell,		shape=ellipse,		style=filled];	"lem:x_is_odd" -> "thm:RamanujanNagell"	[style=dashed];	"lem:not_odd_two_pow"	[color=green,		fillcolor="#1CAC78",		label=not_odd_two_pow,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd"	[color=green,		fillcolor="#1CAC78",		label=two_pow_min_seven_odd,		shape=ellipse,		style=filled];	"lem:two_pow_min_seven_odd" -> "lem:x_is_odd"	[style=dashed];	"lem:my_amazing_thing"	[color=green,		fillcolor="#1CAC78",		label=my_amazing_thing,		shape=ellipse,		style=filled];	"lem:my_amazing_thing" -> "thm:RamanujanNagell"	[style=dashed];	"lem:main_m_condition"	[color=green,		fillcolor="#9CEC8B",		label=main_m_condition,		shape=ellipse,		style=filled];	"lem:expand_by_binomial"	[color=green,		fillcolor="#9CEC8B",		label=expand_by_binomial,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:expand_by_binomial"	[style=dashed];	"lem:corollary_C"	[color=green,		fillcolor="#9CEC8B",		label=corollary_C,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:corollary_C"	[style=dashed];	"lem:theta_eq_at_3"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_3,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_3"	[style=dashed];	"lem:theta_eq_at_5"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_5,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_5"	[style=dashed];	"lem:theta_eq_at_13"	[color=green,		fillcolor="#9CEC8B",		label=theta_eq_at_13,		shape=ellipse,		style=filled];	"lem:main_m_condition" -> "lem:theta_eq_at_13"	[style=dashed];	"lem:odd_case_mod_seven_constraint"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_seven_constraint,		shape=ellipse,		style=filled];	"lem:expand_by_binomial" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:corollary_C" -> "lem:at_most_one_m"	[style=dashed];	"lem:theta_eq_at_3" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_5" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:theta_eq_at_13" -> "thm:odd_case_only_three_values"	[style=dashed];	"lem:must_have_minus_sign" -> "lem:main_m_condition"	[style=dashed];	"thm:odd_case_mod_42"	[color=green,		fillcolor="#9CEC8B",		label=odd_case_mod_42,		shape=ellipse,		style=filled];	"lem:odd_case_mod_seven_constraint" -> "thm:odd_case_mod_42"	[style=dashed];	"thm:odd_case_mod_42" -> "thm:odd_case_only_three_values"	[style=dashed];	"thm:odd_case_only_three_values" -> "thm:RamanujanNagell"	[style=dashed];	"lem:reduction_divide_by_4"	[color=green,		fillcolor="#1CAC78",		label=reduction_divide_by_4,		shape=ellipse,		style=filled];	"lem:reduction_divide_by_4" -> "lem:odd_case_mod_seven_constraint"	[style=dashed];	"lem:helper_1"	[color=green,		fillcolor="#1CAC78",		label=helper_1,		shape=ellipse,		style=filled];	"lem:helper_1" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_2"	[color=green,		fillcolor="#1CAC78",		label=helper_2,		shape=ellipse,		style=filled];	"lem:helper_2" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_3"	[color=green,		fillcolor="#1CAC78",		label=helper_3,		shape=ellipse,		style=filled];	"lem:helper_3" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_4"	[color=green,		fillcolor="#1CAC78",		label=helper_4,		shape=ellipse,		style=filled];	"lem:helper_4" -> "thm:RamanujanNagell"	[style=dashed];	"lem:helper_5"	[color=green,		fillcolor="#1CAC78",		label=helper_5,		shape=ellipse,		style=filled];	"lem:helper_5" -> "thm:RamanujanNagell"	[style=dashed];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

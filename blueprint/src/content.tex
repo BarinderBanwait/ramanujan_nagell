@@ -33,6 +33,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \leanok
   The element $\omega \in K$ is integral over $\mathbb{Z}$: it satisfies $X^2 - X + 2 = 0$.
 \end{lemma}
+\begin{proof}\leanok
+  Exhibit the monic polynomial $X^2 - X + 2$ and verify $\omega^2 - \omega + 2 = 0$.
+\end{proof}
 
 \begin{lemma}[Integrality of $1 - \omega$]
   \label{lem:is_integral_one_sub_omega}
@@ -85,6 +88,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   This follows immediately from the fact that $\mathbb{Z}[\theta] = R$
   (Lemma~\ref{lem:span_eq_top}).
 \end{lemma}
+\begin{proof}\leanok
+  Rewrite using the characterization of exponent $1$ and apply monogenicity.
+\end{proof}
 
 \begin{lemma}[No prime divides the exponent]
   \label{lem:ne_dvd_exponent}
@@ -94,6 +100,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   For any prime $p$, $p$ does not divide the exponent of $\theta$.
   This is immediate since the exponent equals $1$ (Lemma~\ref{lem:exponent}).
 \end{lemma}
+\begin{proof}\leanok
+  The exponent is $1$, so $p \mid 1$ implies $p = 1$, contradicting primality.
+\end{proof}
 
 \section{Parity lemmas}
 
@@ -103,6 +112,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \leanok
   If $x^2$ is odd, then $x$ is odd.
 \end{lemma}
+\begin{proof}\leanok
+  Contrapositive: if $x$ is even then $x^2$ is even.
+\end{proof}
 
 \begin{lemma}[Powers of two are not odd]
   \label{lem:not_odd_two_pow}
@@ -110,6 +122,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \leanok
   For $n \geq 1$, the number $2^n$ is not odd.
 \end{lemma}
+\begin{proof}\leanok
+  $2^n$ is even for $n \geq 1$.
+\end{proof}
 
 \begin{lemma}[$2^n - 7$ is odd]
   \label{lem:two_pow_min_seven_odd}
@@ -117,6 +132,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \leanok
   For all $n \neq 0$, the integer $2^n - 7$ is odd.
 \end{lemma}
+\begin{proof}\leanok
+  $2^n$ is even and $7$ is odd, so their difference is odd.
+\end{proof}
 
 \begin{lemma}[$x$ is odd]
   \label{lem:x_is_odd}
@@ -125,6 +143,9 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
   \leanok
   If $x^2 + 7 = 2^n$ with $n \neq 0$, then $x$ is odd.
 \end{lemma}
+\begin{proof}\leanok
+  $x^2 = 2^n - 7$ is odd, so $x$ is odd.
+\end{proof}
 
 \section{The even case}
 
@@ -134,11 +155,15 @@ $n = 4$ and $x = \pm 3$.
 
 \begin{lemma}[Factorization over $\mathbb{Z}$]
   \label{lem:my_amazing_thing}
-  \lean{my_amazing_thing}
+  \lean{ramanujan_nagell_even_pow_factors}
   \leanok
   If $(2^k + x)(2^k - x) = 7$, then either $2^k - x = 1$ and $2^k + x = 7$,
   or $2^k - x = 7$ and $2^k + x = 1$.
 \end{lemma}
+\begin{proof}\leanok
+  Both factors are positive integers whose product is the prime $7$,
+  so one factor is $1$ and the other is $7$.
+\end{proof}
 
 \section{The odd case}
 
@@ -164,6 +189,10 @@ lemmas (exercises), followed by a sign-determination step.
   and their product equals $\theta^m \cdot \theta'^{\,m}$.
   Their difference is $2\theta - 1 = \sqrt{-7}$.
 \end{lemma}
+\begin{proof}\leanok
+  Express the factors using $\theta$ and $\theta'$, verify the product
+  using $\theta \cdot \theta' = 2$, and compute the difference.
+\end{proof}
 
 \begin{lemma}[Coprimality]
   \label{lem:coprime}
@@ -176,6 +205,10 @@ lemmas (exercises), followed by a sign-determination step.
   it would divide their difference $\sqrt{-7}$, but $N(\sqrt{-7}) = 7$ is
   not divisible by $N(\theta) = N(\theta') = 2$.
 \end{lemma}
+\begin{proof}\leanok
+  Norm argument: any common factor divides $\sqrt{-7}$, whose norm is $7$,
+  incompatible with the norm $2$ of $\theta$ and $\theta'$.
+\end{proof}
 
 \begin{lemma}[UFD power association]
   \label{lem:ufd_association}
@@ -197,6 +230,10 @@ lemmas (exercises), followed by a sign-determination step.
   eliminate $x$ and obtain: either $2\theta - 1 = \theta^m - \theta'^{\,m}$ or
   $-2\theta + 1 = \theta^m - \theta'^{\,m}$.
 \end{lemma}
+\begin{proof}\leanok
+  Case split on the four possibilities for $\alpha$, determine $\beta$ from
+  the product, and compute $\alpha - \beta$.
+\end{proof}
 
 \begin{lemma}[Must have minus sign]
   \label{lem:must_have_minus_sign}
@@ -208,6 +245,9 @@ lemmas (exercises), followed by a sign-determination step.
   $-2\theta + 1 = \theta^m - \theta'^{\,m}$.
   This is proved by reducing modulo $\theta'^2$ and checking which sign is consistent.
 \end{lemma}
+\begin{proof}\leanok
+  Reduce modulo $\theta'^2$ and verify only the minus sign is consistent.
+\end{proof}
 
 \subsection{Key intermediate result}
 
@@ -221,6 +261,10 @@ lemmas (exercises), followed by a sign-determination step.
     -2\theta + 1 = \theta^m - \theta'^{\,m}.
   \]
 \end{lemma}
+\begin{proof}\leanok
+  Chain the exercises: construct the conjugate factors, prove coprimality,
+  apply UFD association, eliminate $x$, then determine the sign.
+\end{proof}
 
 \subsection{From the $m$-condition to finitely many solutions}
 
@@ -230,6 +274,9 @@ lemmas (exercises), followed by a sign-determination step.
   \leanok
   If $n$ is odd with $n \geq 5$ and $x^2 + 7 = 2^n$, then $(x^2 + 7)/4 = 2^{n-2}$.
 \end{lemma}
+\begin{proof}\leanok
+  Since $n \geq 5$, we have $4 \mid 2^n$, so divide both sides by $4$.
+\end{proof}
 
 \begin{lemma}[Binomial expansion mod $7$]
   \label{lem:expand_by_binomial}
@@ -243,6 +290,9 @@ lemmas (exercises), followed by a sign-determination step.
   via the binomial theorem, observes that even-index terms cancel and odd-index terms
   involve powers of $(\sqrt{-7})^2 = -7$, then reads the result modulo $7$.
 \end{lemma}
+\begin{proof}\leanok
+  Binomial expansion and reduction modulo $7$.
+\end{proof}
 
 \begin{lemma}[Mod $7$ constraint]
   \label{lem:odd_case_mod_seven_constraint}
@@ -255,6 +305,9 @@ lemmas (exercises), followed by a sign-determination step.
   This follows from the $m$-condition (Lemma~\ref{lem:main_m_condition}) by expanding
   $\theta^m - \theta'^{\,m}$ via the binomial theorem and reducing modulo $7$.
 \end{lemma}
+\begin{proof}\leanok
+  Combine the reduction and binomial expansion lemmas.
+\end{proof}
 
 \begin{theorem}[Mod $42$ constraint]
   \label{thm:odd_case_mod_42}
@@ -268,6 +321,10 @@ lemmas (exercises), followed by a sign-determination step.
   Fermat's little theorem $2^6 \equiv 1 \pmod{7}$. Checking residues modulo $42$
   (combining mod $6$ and mod $7$) yields the three residue classes.
 \end{theorem}
+\begin{proof}\leanok
+  Exhaustive check of residues modulo $42$ using the mod $7$ constraint
+  and Fermat's little theorem.
+\end{proof}
 
 \subsection{Uniqueness per residue class}
 
@@ -283,6 +340,9 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   theta expression: if $(x_1^2 + 7)/4 = 2^{m_1}$ and $(x_2^2 + 7)/4 = 2^{m_2}$
   for odd $m_1, m_2 \geq 3$, then $\theta^{m_1} - \theta'^{\,m_1} = \theta^{m_2} - \theta'^{\,m_2}$.
 \end{lemma}
+\begin{proof}\leanok
+  Both sides equal $-2\theta + 1$ by the main $m$-condition.
+\end{proof}
 
 \begin{definition}[Binomial sum $B_d$]
   \label{def:binomial_B}
@@ -299,6 +359,7 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   \label{lem:lemma_A_valuation}
   \lean{lemma_A_binomial_valuation}
   \uses{def:binomial_B}
+  \leanok
   The $7$-adic valuation of $B_d$ equals $v_7(d)$: if $7^l \| d$
   (i.e.\ $7^l \mid d$ but $7^{l+1} \nmid d$), then $7^l \mid B_d$
   and $7^{l+1} \nmid B_d$.
@@ -306,11 +367,17 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   This is the core of the $7$-adic analysis: the $j=0$ term of $B_d$ equals $d$,
   and all higher terms have strictly larger $7$-adic valuation.
 \end{lemma}
+\begin{proof}\leanok
+  The $j=0$ term is $d$ with valuation $l$. Each $j \geq 1$ term has
+  $7$-adic valuation $\geq l+1$, so by the ultrametric property the
+  sum has valuation exactly $l$.
+\end{proof}
 
 \begin{lemma}[At most one solution per residue class]
   \label{lem:at_most_one_m}
   \lean{at_most_one_m_per_class}
   \uses{lem:corollary_C, lem:lemma_A_valuation}
+  \leanok
   If $m_1, m_2$ are both odd, $\geq 3$, satisfy $m_1 \equiv m_2 \pmod{42}$,
   and both give $-2\theta + 1 = \theta^{m_i} - \theta'^{\,m_i}$, then $m_1 = m_2$.
 
@@ -318,6 +385,10 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   (hence by $7$). The $7$-adic analysis of Lemma~\ref{lem:lemma_A_valuation} combined
   with Corollary~C yields a contradiction on the valuation of $\sqrt{-7} \cdot B_d$.
 \end{lemma}
+\begin{proof}\leanok
+  Contradiction via $7$-adic valuation: $d$ is divisible by $42$ (hence $7$),
+  and the valuation identity forces an impossible parity.
+\end{proof}
 
 \subsection{Verification of known solutions}
 
@@ -329,6 +400,9 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   $-2\theta + 1 = \theta^3 - \theta'^{\,3}$.
   Verified via $x = 5$: $(25 + 7)/4 = 8 = 2^3$.
 \end{lemma}
+\begin{proof}\leanok
+  Direct computation using $\theta^2 = \theta - 2$.
+\end{proof}
 
 \begin{lemma}[Verification: $m = 5$ (i.e.\ $n = 7$)]
   \label{lem:theta_eq_at_5}
@@ -338,6 +412,9 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   $-2\theta + 1 = \theta^5 - \theta'^{\,5}$.
   Verified via $x = 11$: $(121 + 7)/4 = 32 = 2^5$.
 \end{lemma}
+\begin{proof}\leanok
+  Direct computation using $\theta^2 = \theta - 2$.
+\end{proof}
 
 \begin{lemma}[Verification: $m = 13$ (i.e.\ $n = 15$)]
   \label{lem:theta_eq_at_13}
@@ -347,6 +424,9 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   $-2\theta + 1 = \theta^{13} - \theta'^{\,13}$.
   Verified via $x = 181$: $(32761 + 7)/4 = 8192 = 2^{13}$.
 \end{lemma}
+\begin{proof}\leanok
+  Direct computation using $\theta^2 = \theta - 2$.
+\end{proof}
 
 \subsection{Combining}
 
@@ -362,6 +442,10 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
   (at $m = 3, 5, 13$). The uniqueness lemma shows each residue class has at most one
   solution. Therefore $n \in \{5, 7, 15\}$.
 \end{theorem}
+\begin{proof}\leanok
+  Combine the mod $42$ constraint, uniqueness per class, and verification of
+  the three known solutions.
+\end{proof}
 
 \section{Main theorem}
 
@@ -378,6 +462,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \leanok
   If $x^2 = 9$ and $n = 4$, then $(x, n) = (\pm 3, 4)$.
 \end{lemma}
+\begin{proof}\leanok Solve $x^2 = 9$. \end{proof}
 
 \begin{lemma}[Odd case: $n = 3$, $x^2 = 1$]
   \label{lem:helper_2}
@@ -385,6 +470,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \leanok
   If $x^2 = 1$ and $n = 3$, then $(x, n) = (\pm 1, 3)$.
 \end{lemma}
+\begin{proof}\leanok Solve $x^2 = 1$. \end{proof}
 
 \begin{lemma}[Odd case: $n = 5$, $x^2 = 25$]
   \label{lem:helper_3}
@@ -392,6 +478,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \leanok
   If $x^2 = 25$ and $n = 5$, then $(x, n) = (\pm 5, 5)$.
 \end{lemma}
+\begin{proof}\leanok Solve $x^2 = 25$. \end{proof}
 
 \begin{lemma}[Odd case: $n = 7$, $x^2 = 121$]
   \label{lem:helper_4}
@@ -399,6 +486,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \leanok
   If $x^2 = 121$ and $n = 7$, then $(x, n) = (\pm 11, 7)$.
 \end{lemma}
+\begin{proof}\leanok Solve $x^2 = 121$. \end{proof}
 
 \begin{lemma}[Odd case: $n = 15$, $x^2 = 32761$]
   \label{lem:helper_5}
@@ -406,6 +494,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \leanok
   If $x^2 = 32761$ and $n = 15$, then $(x, n) = (\pm 181, 15)$.
 \end{lemma}
+\begin{proof}\leanok Solve $x^2 = 32761$. \end{proof}
 
 \subsection{The theorem}
 
@@ -418,8 +507,9 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \[
     (x, n) \in \{(\pm 1, 3),\; (\pm 3, 4),\; (\pm 5, 5),\; (\pm 11, 7),\; (\pm 181, 15)\}.
   \]
-
-  \begin{proof}
+\end{theorem}
+\begin{proof}
+  \leanok
   First, one shows $n \geq 3$ by bounding $2^n \geq x^2 + 7 \geq 7$.
   Then $x$ must be odd (Lemma~\ref{lem:x_is_odd}).
 
@@ -433,5 +523,4 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \textbf{Case 3: $n$ odd, $n \geq 5$.} By Theorem~\ref{thm:odd_case_only_three_values},
   $n \in \{5, 7, 15\}$, and direct computation gives the remaining solutions
   (Lemmas~\ref{lem:helper_3}, \ref{lem:helper_4}, \ref{lem:helper_5}).
-  \end{proof}
-\end{theorem}
+\end{proof}

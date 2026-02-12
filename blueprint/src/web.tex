@@ -11,8 +11,15 @@
 \usepackage[showmore, dep_graph]{blueprint}
 
 
-\input{macros/common}
-\input{macros/web}
+% Inlined from macros/common.tex (plasTeX 3.1 can't resolve macros/common path)
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+% End inlined macros
 
 \home{https://BarinderBanwait.github.io/ramanujan_nagell}
 \github{https://github.com/BarinderBanwait/ramanujan_nagell}

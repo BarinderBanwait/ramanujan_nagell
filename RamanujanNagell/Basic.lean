@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2024 Barinder S. Banwait. All rights reserved.
+Copyright (c) 2026 Barinder S. Banwait. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Barinder S. Banwait
 -/
@@ -15,6 +15,7 @@ import Mathlib.NumberTheory.NumberField.Norm
 import Mathlib.NumberTheory.NumberField.Units.Basic
 import Mathlib.RingTheory.Ideal.Int
 import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.Padics.PadicVal.Basic
 
 set_option linter.style.longLine false
 set_option diagnostics true
@@ -104,6 +105,16 @@ lemma ne_dvd_exponent (p : ℕ) [hp : Fact p.Prime] : ¬ (p ∣ RingOfIntegers.e
 lemma two_factorisation_R : θ * (1 - θ) = 2 := by
   admit
 
+/-- Exercise 3: In the UFD R, if α · β = θ^m · θ'^m and gcd(α, β) = 1, then
+    α = ±θ^m or α = ±θ'^m. This combines two steps: (1) unique factorization
+    (`class_number_one`) implies α is associate to θ^m or θ'^m, and (2) the only
+    units are ±1 (`units_pm_one`), pinning down the sign. -/
+lemma ufd_power_association (α β : R) (m : ℕ)
+    (h_prod : α * β = θ ^ m * θ' ^ m)
+    (h_coprime : IsCoprime α β) :
+    (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) := by
+  haveI := class_number_one
+  admit
 
 /-!
 # The Ramanujan-Nagell equation
@@ -111,7 +122,6 @@ lemma two_factorisation_R : θ * (1 - θ) = 2 := by
 Stuff
 
 -/
-
 
 /--
 Summary
@@ -351,17 +361,6 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       rw [← Int.cast_abs, Int.abs_eq_natAbs, h_norm_p_eq_one]
       exact rfl
     exact hp.not_unit h_unit
-
-/-- Exercise 3: In the UFD R, if α · β = θ^m · θ'^m and gcd(α, β) = 1, then
-    α = ±θ^m or α = ±θ'^m. This combines two steps: (1) unique factorization
-    (`class_number_one`) implies α is associate to θ^m or θ'^m, and (2) the only
-    units are ±1 (`units_pm_one`), pinning down the sign. -/
-lemma ufd_power_association (α β : R) (m : ℕ)
-    (h_prod : α * β = θ ^ m * θ' ^ m)
-    (h_coprime : IsCoprime α β) :
-    (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) := by
-  haveI := class_number_one
-  admit
 
 /-- Exercise 4: From α = ±θ^m or α = ±θ'^m, use the product relation to determine β,
     then take the difference α - β = 2θ-1 to eliminate x and obtain the conclusion. -/
@@ -859,17 +858,118 @@ lemma corollary_C (x₁ x₂ : ℤ) (m₁ m₂ : ℕ)
   rw [← h1, ← h2]
 
 /-- The odd-indexed binomial sum: B_d = Σ_{j=0}^{(d-1)/2} C(d, 2j+1) · (-7)^j.
-    This arises from expanding (1+√-7)^d = A_d + √-7 · B_d. -/
+    This arises from expanding (1+√-7)^d = A_d + √-7 · B_d.
+    -/
 noncomputable def binomial_B (d : ℕ) : ℤ :=
   ∑ j ∈ Finset.range ((d + 1) / 2), (d.choose (2 * j + 1)) * (-7) ^ j
 
+/-- For j ≥ 1, 7^j > 2*j + 1, proved by induction. -/
+private lemma seven_pow_gt_two_mul_add_one (j : ℕ) (hj : j ≥ 1) :
+    7 ^ j > 2 * j + 1 := by
+  induction j with
+  | zero => omega
+  | succ n ih =>
+    cases n with
+    | zero => norm_num
+    | succ m =>
+      have : 7 ^ (m + 2) = 7 * 7 ^ (m + 1) := by ring
+      omega
+
+/-- For j ≥ 1, j > v_7(2j+1). This follows because 7^m grows much faster than 2m+1. -/
+private lemma j_gt_padicValNat_two_mul_add_one (j : ℕ) (hj : j ≥ 1) :
+    j > padicValNat 7 (2 * j + 1) := by
+  set m := padicValNat 7 (2 * j + 1)
+  by_contra h_le
+  push_neg at h_le
+  have h_dvd : 7 ^ m ∣ (2 * j + 1) := pow_padicValNat_dvd
+  have h_le2 : 7 ^ m ≤ 2 * j + 1 := Nat.le_of_dvd (by omega) h_dvd
+  have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
+  exact absurd (Nat.lt_of_lt_of_le (seven_pow_gt_two_mul_add_one j hj) (le_refl _))
+    (not_lt.mpr (le_trans h_le3 h_le2))
+
+/-- If 7^l ∣ d and j ≥ 1, then 7^(l+1) ∣ C(d,2j+1) * 7^j.
+    Uses the absorption identity and p-adic valuation arithmetic. -/
+private lemma higher_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
+    (h_div : 7 ^ l ∣ d) (hk : 2 * j + 1 ≤ d) :
+    7 ^ (l + 1) ∣ d.choose (2 * j + 1) * 7 ^ j := by
+  haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
+  set C := d.choose (2 * j + 1) with hC_def
+  set k := 2 * j + 1 with hk_def
+  have hC_pos : C > 0 := Nat.choose_pos hk
+  have hC_ne : C ≠ 0 := by omega
+  have hk_ne : k ≠ 0 := by omega
+  -- Absorption identity: d * C(d-1, 2j) = C(d, 2j+1) * (2j+1)
+  have h_absorb : d * (d - 1).choose (2 * j) = C * k := by
+    have hds : (d - 1).succ = d := Nat.succ_pred_eq_of_pos hd
+    have h := Nat.succ_mul_choose_eq (d - 1) (2 * j)
+    rw [hds] at h; convert h using 2 <;> omega
+  -- 7^l ∣ C * k (from 7^l ∣ d and absorption identity)
+  have h_dvd_prod : 7 ^ l ∣ C * k := by
+    rw [← h_absorb]; exact dvd_trans h_div (dvd_mul_right d _)
+  -- padicValNat 7 (C * k) = padicValNat 7 C + padicValNat 7 k ≥ l
+  have h_val_prod : l ≤ padicValNat 7 (C * k) :=
+    (padicValNat_dvd_iff_le (mul_ne_zero hC_ne hk_ne)).mp h_dvd_prod
+  have h_val_mul : padicValNat 7 (C * k) = padicValNat 7 C + padicValNat 7 k :=
+    padicValNat.mul hC_ne hk_ne
+  -- j > padicValNat 7 (2j+1)
+  have h_j_gt : j > padicValNat 7 k := by
+    rw [hk_def]; exact j_gt_padicValNat_two_mul_add_one j hj
+  -- Conclude: padicValNat 7 (C * 7^j) = padicValNat 7 C + j ≥ l + 1
+  have h_val_pow : padicValNat 7 (C * 7 ^ j) = padicValNat 7 C + j := by
+    rw [padicValNat.mul hC_ne (by positivity), padicValNat.prime_pow]
+  exact (padicValNat_dvd_iff_le (mul_ne_zero hC_ne (by positivity))).mpr (by omega)
+
 /-- Lemma A: The 7-adic valuation of B_d is exactly l when 7^l ∥ d.
-    This is the core of the 7-adic analysis: the j=0 term of B_d equals d,
-    and all higher terms have strictly larger 7-adic valuation. -/
+    The j=0 term of B_d equals d (valuation l), and all higher terms
+    have strictly larger 7-adic valuation (≥ l+1), so by the ultrametric
+    property the sum has valuation exactly l. -/
 lemma lemma_A_binomial_valuation (d l : ℕ) (hd : d > 0)
     (h_div : (7 : ℤ) ^ l ∣ ↑d) (h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d) :
     (7 : ℤ) ^ l ∣ binomial_B d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_B d := by
-  sorry
+  set n := (d + 1) / 2 with hn_def
+  set f : ℕ → ℤ := fun j => ↑(d.choose (2 * j + 1)) * (-7) ^ j with hf_def
+  have hn_pos : n ≥ 1 := by omega
+  -- The j=0 term is d
+  have h_f0 : f 0 = ↑d := by simp [hf_def, Nat.choose_one_right]
+  -- Split: binomial_B d = f(0) + Σ_{j ∈ range(n-1)} f(j+1)
+  have h_split : binomial_B d = f 0 + ∑ j ∈ Finset.range (n - 1), f (j + 1) := by
+    unfold binomial_B
+    conv_lhs => rw [show (d + 1) / 2 = (n - 1) + 1 from by omega]
+    rw [Finset.sum_range_succ']
+    ring
+  -- Convert hypothesis to ℕ
+  have h_div_nat : 7 ^ l ∣ d := by exact_mod_cast h_div
+  -- Every j≥1 term is divisible by 7^(l+1)
+  have h_higher : ∀ j ∈ Finset.range (n - 1), (7 : ℤ) ^ (l + 1) ∣ f (j + 1) := by
+    intro j hj
+    simp only [hf_def]
+    have hj_mem := Finset.mem_range.mp hj
+    have hk_le : 2 * (j + 1) + 1 ≤ d := by omega
+    -- Get ℕ divisibility from helper
+    have h_nat := higher_term_nat_dvd d l (j + 1) hd (by omega) h_div_nat hk_le
+    -- Lift to ℤ
+    have h_int : (7 : ℤ) ^ (l + 1) ∣ ↑(d.choose (2 * (j + 1) + 1)) * (7 : ℤ) ^ (j + 1) := by
+      exact_mod_cast h_nat
+    -- Factor out (-1)^(j+1) from (-7)^(j+1)
+    have h_neg7 : (-7 : ℤ) ^ (j + 1) = (-1) ^ (j + 1) * (7 : ℤ) ^ (j + 1) := by
+      rw [show (-7 : ℤ) = (-1) * 7 from by ring, mul_pow]
+    rw [h_neg7, show (↑(d.choose (2 * (j + 1) + 1)) : ℤ) *
+      ((-1 : ℤ) ^ (j + 1) * (7 : ℤ) ^ (j + 1)) =
+      (-1) ^ (j + 1) * (↑(d.choose (2 * (j + 1) + 1)) * (7 : ℤ) ^ (j + 1)) from by ring]
+    exact dvd_mul_of_dvd_right h_int _
+  -- Tail sum divisible by 7^(l+1)
+  have h_tail : (7 : ℤ) ^ (l + 1) ∣ ∑ j ∈ Finset.range (n - 1), f (j + 1) :=
+    Finset.dvd_sum h_higher
+  constructor
+  · -- Part 1: 7^l ∣ binomial_B d
+    rw [h_split, h_f0]
+    exact dvd_add h_div (dvd_trans (pow_dvd_pow 7 (by omega : l ≤ l + 1)) h_tail)
+  · -- Part 2: ¬ 7^(l+1) ∣ binomial_B d
+    intro h_contra
+    apply h_ndiv
+    rw [h_split, h_f0] at h_contra
+    have := dvd_sub h_contra h_tail
+    simpa using this
 
 /-- Lemma B: Same valuation result as Lemma A, used for the conjugate θ'.
     The sign difference (- instead of +) in (1-√-7)^d = A_d - √-7·B_d is what
@@ -879,11 +979,221 @@ lemma lemma_B_binomial_valuation (d l : ℕ) (hd : d > 0)
     (7 : ℤ) ^ l ∣ binomial_B d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_B d := by
   exact lemma_A_binomial_valuation d l hd h_div h_ndiv
 
+/-- The even-indexed binomial sum A'_d = Σ_{j=0}^{d/2-1} C(d, 2(j+1)) · (-7)^j.
+    This arises from the even-index part of the expansion of (1+√-7)^d. -/
+noncomputable def binomial_A' (d : ℕ) : ℤ :=
+  ∑ j ∈ Finset.range (d / 2), (d.choose (2 * (j + 1)) : ℤ) * (-7) ^ j
+
+/-- If 7^l ∣ d, j ≥ 1, and 2(j+1) ≤ d, then 7^(l+1) ∣ C(d, 2(j+1)) · 7^j.
+    Analogous to higher_term_nat_dvd for even-indexed terms. -/
+private lemma higher_even_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
+    (h_div : 7 ^ l ∣ d) (hk : 2 * (j + 1) ≤ d) :
+    7 ^ (l + 1) ∣ d.choose (2 * (j + 1)) * 7 ^ j := by
+  haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
+  set C := d.choose (2 * (j + 1)) with hC_def
+  set k := 2 * (j + 1) with hk_def
+  have hC_pos : C > 0 := Nat.choose_pos hk
+  have hC_ne : C ≠ 0 := by omega
+  have hk_ne : k ≠ 0 := by omega
+  -- Absorption identity: d * C(d-1, 2j+1) = C(d, 2(j+1)) * (2(j+1))
+  have h_absorb : d * (d - 1).choose (2 * j + 1) = C * k := by
+    have hds : (d - 1).succ = d := Nat.succ_pred_eq_of_pos hd
+    have h := Nat.succ_mul_choose_eq (d - 1) (2 * j + 1)
+    rw [hds] at h; convert h using 2 <;> omega
+  -- 7^l ∣ C * k (from 7^l ∣ d and absorption identity)
+  have h_dvd_prod : 7 ^ l ∣ C * k := by
+    rw [← h_absorb]; exact dvd_trans h_div (dvd_mul_right d _)
+  have h_val_prod : l ≤ padicValNat 7 (C * k) :=
+    (padicValNat_dvd_iff_le (mul_ne_zero hC_ne hk_ne)).mp h_dvd_prod
+  have h_val_mul : padicValNat 7 (C * k) = padicValNat 7 C + padicValNat 7 k :=
+    padicValNat.mul hC_ne hk_ne
+  -- j ≥ 1 implies j > padicValNat 7 (2(j+1))
+  -- Since 2(j+1) ≤ 7^(padicValNat 7 (2(j+1))) and 7^m grows fast
+  have h_j_gt : j > padicValNat 7 k := by
+    rw [hk_def]
+    set m := padicValNat 7 (2 * (j + 1))
+    by_contra h_le
+    push_neg at h_le
+    have h_dvd : 7 ^ m ∣ (2 * (j + 1)) := pow_padicValNat_dvd
+    have h_le2 : 7 ^ m ≤ 2 * (j + 1) := Nat.le_of_dvd (by omega) h_dvd
+    have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
+    have h_gt : 7 ^ j > 2 * j + 1 := seven_pow_gt_two_mul_add_one j hj
+    have h_eq : 7 ^ j = 2 * (j + 1) := by omega
+    have h_even : Even (7 ^ j) := by
+      rw [h_eq]
+      simp
+    have h_not_even : ¬ Even (7 ^ j) := by grind
+    exact h_not_even h_even
+  -- Conclude: padicValNat 7 (C * 7^j) ≥ l + 1
+  have h_val_pow : padicValNat 7 (C * 7 ^ j) = padicValNat 7 C + j := by
+    rw [padicValNat.mul hC_ne (by positivity), padicValNat.prime_pow]
+  exact (padicValNat_dvd_iff_le (mul_ne_zero hC_ne (by positivity))).mpr (by omega)
+
+/-- The 7-adic valuation of A'_d is exactly l when 7^l ∥ d.
+    The j=0 term C(d,2) = d(d-1)/2 has valuation l, and all higher terms
+    have strictly larger 7-adic valuation (≥ l+1). -/
+lemma even_binomial_valuation (d l : ℕ) (hd : d > 0)
+    (h_div : (7 : ℤ) ^ l ∣ ↑d) (h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d)
+    (h_7_dvd : 7 ∣ d) :
+    (7 : ℤ) ^ l ∣ binomial_A' d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_A' d := by
+  set n := d / 2 with hn_def
+  set f : ℕ → ℤ := fun j => ↑(d.choose (2 * (j + 1))) * (-7) ^ j with hf_def
+  have hn_pos : n ≥ 1 := by omega
+  -- The j=0 term is C(d,2) = d*(d-1)/2
+  have h_even : 2 ∣ d * (d - 1) := by
+    by_cases h : 2 ∣ d
+    · exact h.mul_right (d - 1)
+    · have h2 : 2 ∣ d - 1 := by omega
+      exact h2.mul_left d
+  have h_f0 : f 0 = ↑(d.choose 2) := by simp [hf_def]
+  -- C(d,2) = d*(d-1)/2
+  have h_choose2 : d.choose 2 = d * (d - 1) / 2 := Nat.choose_two_right d
+  -- v₇(C(d,2)) = l: since 7^l ∥ d, 7∤(d-1) (as d ≡ 0 mod 7), 7∤2
+  have h_f0_div : (7 : ℤ) ^ l ∣ f 0 := by
+    rw [h_f0, h_choose2]
+    have h_div_nat : 7 ^ l ∣ d := by exact_mod_cast h_div
+    have h_div_prod_nat : 7 ^ l ∣ d * (d - 1) := dvd_mul_of_dvd_left h_div_nat (d - 1)
+    have : 7 ^ l ∣ d * (d - 1) / 2 := by
+      rw [Nat.dvd_div_iff_mul_dvd h_even]
+      exact (Nat.Coprime.pow_right _ (by decide : Nat.Coprime 2 7)).mul_dvd_of_dvd_of_dvd
+        h_even h_div_prod_nat
+    exact_mod_cast this
+  have h_f0_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ f 0 := by
+    rw [h_f0]
+    intro h_contra
+    apply h_ndiv
+    -- 7^(l+1) | C(d,2) in ℤ → 7^(l+1) | d in ℤ
+    have h_choose_nat : 7 ^ (l + 1) ∣ d.choose 2 := by exact_mod_cast h_contra
+    rw [h_choose2] at h_choose_nat
+    have h_dvd_prod : 7 ^ (l + 1) ∣ d * (d - 1) := by
+      rw [← Nat.div_mul_cancel h_even]
+      exact h_choose_nat.mul_right 2
+    -- 7 ∤ (d-1) since 7|d, so gcd(7^(l+1), d-1) = 1
+    have h_cop_d1 : Nat.Coprime (7 ^ (l + 1)) (d - 1) := by
+      apply Nat.Coprime.pow_left
+      exact (Nat.Prime.coprime_iff_not_dvd (by decide)).mpr (by omega)
+    exact_mod_cast h_cop_d1.dvd_of_dvd_mul_right h_dvd_prod
+  -- Split: A'_d = f(0) + Σ_{j ∈ range(n-1)} f(j+1)
+  have h_split : binomial_A' d = f 0 + ∑ j ∈ Finset.range (n - 1), f (j + 1) := by
+    unfold binomial_A'
+    conv_lhs => rw [show d / 2 = (n - 1) + 1 from by omega]
+    rw [Finset.sum_range_succ']
+    ring
+  -- Convert to ℕ
+  have h_div_nat : 7 ^ l ∣ d := by exact_mod_cast h_div
+  -- Every j≥1 term is divisible by 7^(l+1)
+  have h_higher : ∀ j ∈ Finset.range (n - 1), (7 : ℤ) ^ (l + 1) ∣ f (j + 1) := by
+    intro j hj
+    simp only [hf_def]
+    have hj_mem := Finset.mem_range.mp hj
+    have hk_le : 2 * ((j + 1) + 1) ≤ d := by omega
+    have h_nat := higher_even_term_nat_dvd d l (j + 1) hd (by omega) h_div_nat hk_le
+    have h_int : (7 : ℤ) ^ (l + 1) ∣ ↑(d.choose (2 * ((j + 1) + 1))) * (7 : ℤ) ^ (j + 1) := by
+      exact_mod_cast h_nat
+    have h_neg7 : (-7 : ℤ) ^ (j + 1) = (-1) ^ (j + 1) * (7 : ℤ) ^ (j + 1) := by
+      rw [show (-7 : ℤ) = (-1) * 7 from by ring, mul_pow]
+    rw [h_neg7, show (↑(d.choose (2 * ((j + 1) + 1))) : ℤ) *
+      ((-1 : ℤ) ^ (j + 1) * (7 : ℤ) ^ (j + 1)) =
+      (-1) ^ (j + 1) * (↑(d.choose (2 * ((j + 1) + 1))) * (7 : ℤ) ^ (j + 1)) from by ring]
+    exact dvd_mul_of_dvd_right h_int _
+  -- Tail sum divisible by 7^(l+1)
+  have h_tail : (7 : ℤ) ^ (l + 1) ∣ ∑ j ∈ Finset.range (n - 1), f (j + 1) :=
+    Finset.dvd_sum h_higher
+  constructor
+  · rw [h_split]; exact dvd_add h_f0_div (dvd_trans (pow_dvd_pow 7 (by omega : l ≤ l + 1)) h_tail)
+  · intro h_contra
+    apply h_f0_ndiv
+    rw [h_split] at h_contra
+    have := dvd_sub h_contra h_tail
+    simpa using this
+
+/-- The trace sequence a(n) = θ^n + θ'^n, defined as an integer recurrence.
+    Satisfies a(0) = 2, a(1) = 1, a(n+2) = a(n+1) - 2*a(n). -/
+def trace_seq : ℕ → ℤ
+  | 0 => 2
+  | 1 => 1
+  | (n + 2) => trace_seq (n + 1) - 2 * trace_seq n
+
+/-- The trace sequence cast into R equals θ^n + θ'^n. -/
+lemma trace_seq_eq (n : ℕ) : (trace_seq n : R) = θ ^ n + θ' ^ n := by
+  induction n using trace_seq.induct with
+  | case1 =>
+    simp only [trace_seq, Int.cast_ofNat, pow_zero]
+    ring
+  | case2 =>
+    simp only [trace_seq, Int.cast_one, pow_one]
+    have h_theta' : θ' = 1 - θ := Subtype.ext (by simp)
+    rw [h_theta']; ring
+  | case3 n ih1 ih2 =>
+    simp only [trace_seq, Int.cast_sub, Int.cast_mul, Int.cast_ofNat]
+    rw [ih1, ih2]
+    have h_theta' : θ' = 1 - θ := Subtype.ext (by simp)
+    have h_prod : θ * θ' = 2 := by rw [h_theta']; exact two_factorisation_R
+    have key : θ ^ (n + 2) + θ' ^ (n + 2) =
+        (θ + θ') * (θ ^ (n + 1) + θ' ^ (n + 1)) - θ * θ' * (θ ^ n + θ' ^ n) := by ring
+    rw [key, show θ + θ' = 1 from by rw [h_theta']; ring, h_prod]
+    ring
+
+set_option maxHeartbeats 400000 in
+/-- trace_seq m % 7 depends only on m % 3 (the recurrence has period 3 mod 7). -/
+private lemma trace_seq_mod7_period (m : ℕ) :
+    trace_seq m % 7 = trace_seq (m % 3) % 7 := by
+  induction m using Nat.strongRecOn with
+  | ind m ih =>
+    match m with
+    | 0 => simp
+    | 1 => simp
+    | 2 => simp
+    | m + 3 =>
+      have h1 := ih (m + 2) (by omega)
+      have h2 := ih (m + 1) (by omega)
+      conv_lhs => rw [show trace_seq (m + 3) =
+        trace_seq (m + 2) - 2 * trace_seq (m + 1) from rfl]
+      -- Reduce to small values via h1, h2 and case split on m % 3
+      have key : (trace_seq (m + 2) - 2 * trace_seq (m + 1)) % 7 =
+          (trace_seq ((m + 2) % 3) - 2 * trace_seq ((m + 1) % 3)) % 7 := by omega
+      rw [show (m + 3) % 3 = m % 3 from by omega, key]
+      have : m % 3 = 0 ∨ m % 3 = 1 ∨ m % 3 = 2 := by omega
+      rcases this with h0 | h1' | h2'
+      · rw [h0, show (m + 2) % 3 = 2 from by omega,
+             show (m + 1) % 3 = 1 from by omega]; simp [trace_seq]
+      · rw [h1', show (m + 2) % 3 = 0 from by omega,
+             show (m + 1) % 3 = 2 from by omega]; simp [trace_seq]
+      · rw [h2', show (m + 2) % 3 = 1 from by omega,
+             show (m + 1) % 3 = 0 from by omega]; simp [trace_seq]
+
+/-- The trace sequence is never divisible by 7. -/
+lemma trace_seq_not_dvd_seven (n : ℕ) : ¬((7 : ℤ) ∣ trace_seq n) := by
+  intro ⟨k, hk⟩
+  have h := trace_seq_mod7_period n
+  rw [hk] at h; simp [Int.mul_emod] at h
+  have : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
+  rcases this with h0 | h1 | h2
+  · rw [h0] at h; simp [trace_seq] at h
+  · rw [h1] at h; simp [trace_seq] at h
+  · rw [h2] at h; simp [trace_seq] at h
+
+lemma nat_even_iff_not_odd (n : ℕ) : Even n ↔ ¬ Odd n := by
+  exact Iff.symm not_odd_iff_even
+
 /-- If two solutions m₁, m₂ satisfy m₁ ≡ m₂ (mod 42) and both give
     θ^m - θ'^m = -2θ+1, then m₁ = m₂. This is proved by contradiction:
     if m₁ ≠ m₂, the difference d = |m₂ - m₁| is divisible by 42 (hence by 7),
     and the 7-adic analysis of Lemmas A and B combined with Corollary C yields
-    a contradiction on the valuation of √-7 · B_d. -/
+    a contradiction on the valuation of √-7 · B_d.
+
+    PROVIDED SOLUTION
+
+    1. WLOG m₂ > m₁ (else swap or they're equal).                                                                           │
+    2. Let d = m₂ - m₁, which is divisible by 42, hence by 7.                                                               │
+    3. Let l = v₇(d).                                                                                                       │
+    4. From corollary_C (via h₁_theta, h₂_theta): θ^m₁ - θ'^m₁ = θ^m₂ - θ'^m₂.                                              │
+    5. Expand using binomial sums: this forces B_{m₂} = 2^d · B_{m₁}, equivalently B_d has certain 7-adic properties.       │
+    6. From lemma_A_binomial_valuation: v₇(B_d) = l exactly.                                                                │
+    7. The identity (2θ-1)² = -7 means v_p(√-7) = 1 where p = (2θ-1).                                                       │
+    8. For d ∈ ℤ: v_p(d) = 2·v₇(d) = 2l (always even).                                                                      │
+    9. Need v_p(d · √-7) ≥ 2(l+1) but v_p(d · √-7) = 2l+1 < 2l+2. Contradiction.
+-/
 lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
     (h₁_odd : Odd m₁) (h₂_odd : Odd m₂)
     (h₁_ge : m₁ ≥ 3) (h₂_ge : m₂ ≥ 3)
@@ -891,16 +1201,332 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
     (h₁_theta : -2 * θ + 1 = θ ^ m₁ - θ' ^ m₁)
     (h₂_theta : -2 * θ + 1 = θ ^ m₂ - θ' ^ m₂) :
     m₁ = m₂ := by
-    -- │ 1. WLOG m₂ > m₁ (else swap or they're equal).                                                                           │
-    -- │ 2. Let d = m₂ - m₁, which is divisible by 42, hence by 7.                                                               │
-    -- │ 3. Let l = v₇(d).                                                                                                       │
-    -- │ 4. From corollary_C (via h₁_theta, h₂_theta): θ^m₁ - θ'^m₁ = θ^m₂ - θ'^m₂.                                              │
-    -- │ 5. Expand using binomial sums: this forces B_{m₂} = 2^d · B_{m₁}, equivalently B_d has certain 7-adic properties.       │
-    -- │ 6. From lemma_A_binomial_valuation: v₇(B_d) = l exactly.                                                                │
-    -- │ 7. The identity (2θ-1)² = -7 means v_p(√-7) = 1 where p = (2θ-1).                                                       │
-    -- │ 8. For d ∈ ℤ: v_p(d) = 2·v₇(d) = 2l (always even).                                                                      │
-    -- │ 9. Need v_p(d · √-7) ≥ 2(l+1) but v_p(d · √-7) = 2l+1 < 2l+2. Contradiction.
-    sorry
+  -- Proof by contradiction
+  by_contra h_ne
+  -- WLOG m₁ < m₂ (the hypotheses are symmetric)
+  wlog h_lt : m₁ < m₂ with H
+  · exact H m₂ m₁ h₂_odd h₁_odd h₂_ge h₁_ge h_cong.symm h₂_theta h₁_theta
+      (Ne.symm h_ne) (by omega)
+  -- Let d = m₂ - m₁ > 0
+  set d := m₂ - m₁ with hd_def
+  have hd_pos : d > 0 := by omega
+  -- Step 2: d is divisible by 42 (from congruence), hence by 7
+  have h_42_dvd : 42 ∣ d := by
+    rw [hd_def]
+    exact (Nat.modEq_iff_dvd' h_lt.le).mp h_cong
+  have h_7_dvd : (7 : ℕ) ∣ d := Nat.dvd_trans (by norm_num : 7 ∣ 42) h_42_dvd
+  -- Step 3: Let l = v₇(d), which is ≥ 1
+  set l := padicValNat 7 d with hl_def
+  haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
+  have hl_pos : l ≥ 1 :=
+    one_le_padicValNat_of_dvd (by omega) h_7_dvd
+  -- 7^l ∣ d and ¬ 7^(l+1) ∣ d (definition of p-adic valuation)
+  have h_div : (7 : ℤ) ^ l ∣ ↑d := by
+    exact_mod_cast pow_padicValNat_dvd
+  have h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d := by
+    intro h_contra
+    have h_nat : 7 ^ (l + 1) ∣ d := by exact_mod_cast h_contra
+    have := (padicValNat_dvd_iff_le (by omega : d ≠ 0)).mp h_nat
+    omega
+  -- Step 4: From h₁_theta, h₂_theta: θ^m₁ - θ'^m₁ = θ^m₂ - θ'^m₂
+  have h_eq : θ ^ m₁ - θ' ^ m₁ = θ ^ m₂ - θ' ^ m₂ :=
+    h₁_theta.symm.trans h₂_theta
+  -- Step 6: Apply lemma_A to get v₇(B_d) = l exactly
+  have h_val := lemma_A_binomial_valuation d l hd_pos h_div h_ndiv
+  -- Steps 7-9: The 7-adic contradiction via the identity P · B_d = -7 · A'_d
+  -- where P = θ^m₁ + θ'^m₁ (trace, an integer) and A'_d is the even-indexed sum.
+  --
+  -- Define A'_d = Σ_{j=0}^{d/2-1} C(d, 2(j+1)) · (-7)^j (even-indexed binomial sum)
+  set A'_d := ∑ j ∈ Finset.range (d / 2),
+    (d.choose (2 * (j + 1)) : ℤ) * (-7) ^ j with hA'_def
+  -- Step 7a: The trace P = θ^m₁ + θ'^m₁ is an integer not divisible by 7.
+  -- (The recurrence a_m = a_{m-1} - 2·a_{m-2} has period 3 mod 7: {2,1,4,...}, none zero.)
+  have h_trace : ∃ P : ℤ, (P : R) = ↑(θ ^ m₁ + θ' ^ m₁) ∧ ¬((7 : ℤ) ∣ P) := by
+    exact ⟨trace_seq m₁, trace_seq_eq m₁, trace_seq_not_dvd_seven m₁⟩
+  -- Step 7b: Algebraic identity from the theta equation and binomial expansion:
+  -- P · B_d = -7 · A'_d, derived from expanding θ^d - 1 and θ'^d - 1 via binomials.
+  obtain ⟨P, hP_eq, hP_coprime⟩ := h_trace
+  have h_identity : P * binomial_B d = 1 - 7 * A'_d - (2 : ℤ) ^ d := by
+    -- Strategy: prove in K, then lift to ℤ via Int.cast_injective.
+    have h_theta' : θ' = 1 - θ := Subtype.ext (by simp)
+    set α_K := 2 * (↑θ : K) - 1 with hα_def
+    have hsq : α_K ^ 2 = (-7 : K) := by
+      have h_zero : (θ : K) ^ 2 - (θ : K) + 2 = 0 := by
+        rw [sq, omega_mul_omega_eq_mk]; ext <;> simp
+      have h_theta_sq : (θ : K) ^ 2 = (θ : K) - 2 := by linear_combination h_zero
+      calc α_K ^ 2 = 4 * (θ : K) ^ 2 - 4 * (θ : K) + 1 := by rw [hα_def]; ring
+        _ = 4 * ((θ : K) - 2) - 4 * (θ : K) + 1 := by rw [h_theta_sq]
+        _ = -7 := by ring
+    have hα_ne : α_K ≠ 0 := by
+      intro h0; rw [h0, zero_pow two_ne_zero] at hsq; norm_num at hsq
+    -- Key relation from h_eq: P·D = α·(S - 2) in K
+    -- where S = θ^d + θ'^d, D = θ^d - θ'^d, P = θ^m₁ + θ'^m₁
+    -- Proof: from h_eq, θ^m₁·θ^d - θ'^m₁·θ'^d = θ^m₁ - θ'^m₁
+    -- This can be rearranged algebraically to P·D = (θ^m₁ - θ'^m₁)·(S - 2)
+    have h_m2_eq : m₂ = m₁ + d := by omega
+    -- Cross-multiply identity: (a+b)(c-e) = -(a-b)(c+e-2)
+    have h_eq_K : (θ : K) ^ m₁ - (θ' : K) ^ m₁ =
+        (θ : K) ^ m₁ * (θ : K) ^ d - (θ' : K) ^ m₁ * (θ' : K) ^ d := by
+      have h0 := congr_arg Subtype.val h_eq
+      simp at h0
+      rw [h_m2_eq] at h0
+      simp only [pow_add] at h0
+      exact h0
+    have h_cross : ((θ : K) ^ m₁ + (θ' : K) ^ m₁) * ((θ : K) ^ d - (θ' : K) ^ d) =
+        -((θ : K) ^ m₁ - (θ' : K) ^ m₁) * ((θ : K) ^ d + (θ' : K) ^ d - 2) := by
+      -- (a+b)(c-e) + (a-b)(c+e-2) = 2(ac-be) - 2(a-b) = 0 by h_eq_K
+      linear_combination -2 * h_eq_K
+    -- From h₁_theta: θ^m₁ - θ'^m₁ = -(2θ - 1) = -α_K
+    -- have h_diff_eq : (θ : K) ^ m₁ - (θ' : K) ^ m₁ = -α_K := by
+    --   have h0 := congr_arg Subtype.val h₁_theta
+    --   simp at h0
+    --   -- h0 : -2 * ω + 1 = ω ^ m₁ - (1 - ω) ^ m₁
+    --   -- Goal: ω ^ m₁ - (1 - ω) ^ m₁ = -(2 * ω - 1)
+    --   linarith
+    have h_diff_eq : (θ : K) ^ m₁ - (θ' : K) ^ m₁ = -α_K := by
+      have h0 := congr_arg Subtype.val h₁_theta
+      simp at h0
+      -- 1. Substitute the power difference using h0 (replace RHS with LHS)
+      -- 2. Substitute the definition of α_K
+      rw [← h0, hα_def]
+      -- 3. Verify that -2ω + 1 = -(2ω - 1)
+      ring_nf
+      rw [mul_comm]
+      exact rfl
+    -- Cast hP_eq to K
+    have hP_K : (P : K) = (θ : K) ^ m₁ + (θ' : K) ^ m₁ := by
+      have h0 := congr_arg Subtype.val hP_eq
+      simp at h0
+      push_cast at h0 ⊢; exact h0
+    -- Binomial expansions of (2θ)^d and (2θ')^d
+    have hbinom_plus : (2 * (↑θ : K)) ^ d =
+        ∑ k ∈ Finset.range (d + 1), (↑(d.choose k) : K) * α_K ^ k := by
+      have h := add_pow α_K 1 d
+      simp only [one_pow, mul_one] at h
+      rw [show α_K + 1 = 2 * (↑θ : K) from by rw [hα_def]; ring] at h
+      rw [h]; exact Finset.sum_congr rfl (fun k _ => mul_comm _ _)
+    have hbinom_minus : (2 * (1 - (↑θ : K))) ^ d =
+        ∑ k ∈ Finset.range (d + 1), (↑(d.choose k) : K) * (-α_K) ^ k := by
+      have h := add_pow (-α_K) 1 d
+      simp only [one_pow, mul_one] at h
+      rw [show -α_K + 1 = 2 * (1 - (↑θ : K)) from by rw [hα_def]; ring] at h
+      rw [h]; exact Finset.sum_congr rfl (fun k _ => mul_comm _ _)
+    -- Difference identity: (2θ)^d - (2θ')^d = 2*α*B_d
+    have h_diff_binom : (2 * (↑θ : K)) ^ d - (2 * (1 - (↑θ : K))) ^ d =
+        2 * α_K * (↑(binomial_B d) : K) := by
+      rw [hbinom_plus, hbinom_minus, ← Finset.sum_sub_distrib]
+      rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.range (d+1)) (p := Odd)]
+      have h_even_zero : ∑ k ∈ Finset.filter (fun x => ¬Odd x) (Finset.range (d + 1)),
+          ((d.choose k : K) * α_K ^ k - (d.choose k : K) * (-α_K) ^ k) = 0 := by
+        refine Finset.sum_eq_zero (fun k hk => ?_)
+        simp only [Finset.mem_filter] at hk
+        have h_ev : Even k := (Nat.even_or_odd k).resolve_right hk.2
+        simp [Even.neg_pow h_ev, sub_self]
+      rw [h_even_zero, add_zero]
+      unfold binomial_B
+      rw [Int.cast_sum, Finset.mul_sum]
+      simp only [Int.cast_mul, Int.cast_pow, Int.cast_natCast, Int.cast_neg, Int.cast_ofNat]
+      symm
+      refine Finset.sum_bij (fun j _ => 2 * j + 1) ?_ ?_ ?_ ?_
+      · intro j hj; simp only [Finset.mem_range] at hj ⊢
+        simp only [Finset.mem_filter, Finset.mem_range]
+        exact ⟨by omega, ⟨j, by ring⟩⟩
+      · intro a b _ _ h_ab; linarith
+      · intro k hk; simp only [Finset.mem_filter, Finset.mem_range] at hk
+        obtain ⟨j, hj⟩ := hk.2
+        exact ⟨j, Finset.mem_range.mpr (by omega), hj.symm⟩
+      · intro j hj
+        simp only [Odd.neg_pow ⟨j, rfl⟩]
+        have hpow : α_K ^ (2 * j + 1) = α_K * (α_K ^ 2) ^ j := by ring_nf
+        rw [hpow, hsq]; push_cast; ring
+    -- Sum identity: (2θ)^d + (2θ')^d = 2*(1 - 7*A'_d)
+    have h_sum_binom : (2 * (↑θ : K)) ^ d + (2 * (1 - (↑θ : K))) ^ d =
+        2 * (1 - 7 * (↑A'_d : K)) := by
+      rw [hbinom_plus, hbinom_minus, ← Finset.sum_add_distrib]
+      rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.range (d+1)) (p := Odd)]
+      have h_odd_zero : ∑ k ∈ Finset.filter Odd (Finset.range (d + 1)),
+          ((d.choose k : K) * α_K ^ k + (d.choose k : K) * (-α_K) ^ k) = 0 := by
+        refine Finset.sum_eq_zero (fun k hk => ?_)
+        simp only [Finset.mem_filter] at hk
+        rw [Odd.neg_pow hk.2]; ring
+      rw [h_odd_zero, zero_add]
+      rw [hA'_def, Int.cast_sum]
+      simp only [Int.cast_mul, Int.cast_pow, Int.cast_natCast, Int.cast_neg, Int.cast_ofNat]
+      -- Reindex: even filter = image of (fun j => 2*j) over range(d/2+1)
+      symm
+      -- rw [show (2 : K) * (1 - 7 * ∑ j ∈ Finset.range (d / 2),
+      --     (↑(d.choose (2 * (j + 1))) : K) * ((-7 : K)) ^ j) =
+      --   2 + ∑ j ∈ Finset.range (d / 2),
+      --     2 * (↑(d.choose (2 * (j + 1))) : K) * (-7 : K) ^ (j + 1) from by
+      --     rw [Finset.mul_sum]; congr 1; ext; push_cast; ring_nf; sorry; sorry]
+
+      -- Replace your existing 'rw [show ... ]' block with this:
+      rw [show (2 : K) * (1 - 7 * ∑ j ∈ Finset.range (d / 2),
+             (↑(d.choose (2 * (j + 1))) : K) * ((-7 : K)) ^ j) =
+           2 + ∑ j ∈ Finset.range (d / 2),
+             2 * (↑(d.choose (2 * (j + 1))) : K) * (-7 : K) ^ (j + 1) from by
+        -- 1. Distribute 2 * (1 - ...) -> 2 - 2 * ...
+        rw [mul_sub, mul_one]
+        -- 2. Move constants inside the sum on the LHS
+        --    2 * (7 * Sum) -> Sum (2 * 7 * ...)
+        rw [← mul_assoc, Finset.mul_sum]
+        -- 3. Align the LHS (subtraction) with the RHS (addition)
+        --    Turn "2 - Sum" into "2 + (-Sum)" and push negation inside
+        rw [sub_eq_add_neg, ← Finset.sum_neg_distrib]
+        -- 4. Strip the "2 +" from both sides and match the sums
+        congr 1
+        apply Finset.sum_congr rfl
+        intro j hj
+        -- 5. Prove that -(2 * 7 * term) = 2 * term * (-7)^(j+1)
+        --    ring can handle this easily (since (-7)^(j+1) includes a -7 factor)
+        ring]
+
+      -- rw [show (Finset.filter Even (Finset.range (d + 1))) =
+      --   Finset.image (fun j => 2 * j) (Finset.range (d / 2 + 1)) from by
+      --   ext k; simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
+      --   constructor
+      --   · rintro ⟨hk, j, hj⟩; exact ⟨j, by omega, hj⟩
+      --   · rintro ⟨j, hj, rfl⟩; exact ⟨by omega, ⟨j, rfl⟩⟩]
+
+      -- 1. Align the syntax: Turn "¬Odd" into "Even" in the goal
+      simp_rw [← nat_even_iff_not_odd]
+
+      -- 2. Now perform the set rewrite
+      rw [show Finset.filter Even (Finset.range (d + 1)) =
+             Finset.image (fun j => 2 * j) (Finset.range (d / 2 + 1)) from by
+        ext k
+        simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image, Even]
+        constructor
+        -- Left to Right: If k is even (k = m + m) and k < d+1, then k is in the image
+        · rintro ⟨hk, m, rfl⟩
+          refine ⟨m, ?_, (two_mul m)⟩ -- Use two_mul to switch j+j to 2*j
+          omega -- Omega handles the inequality logic (2m < d+1 -> m < d/2 + 1)
+        -- Right to Left: If k = 2*m and m < d/2+1, then k is even and k < d+1
+        · rintro ⟨m, hm, rfl⟩
+          refine ⟨by omega, ⟨m, two_mul m⟩⟩] -- Use two_mul to switch 2*m back to m+m
+
+      rw [Finset.sum_image (fun a _ b _ hab => by omega)]
+      rw [show d / 2 + 1 = (d / 2) + 1 from rfl]
+      rw [Finset.sum_range_succ']
+      simp only [Nat.choose_zero_right, pow_zero, mul_one, Nat.cast_one, mul_zero]
+      norm_num
+      rw [add_comm _ (2:K)]
+      rw [add_left_cancel_iff]
+      -- rw [show d / 2 + 1 = (d / 2) + 1 from rfl, Finset.sum_range_succ']
+      -- simp -- only [Nat.choose_zero_right, pow_zero, mul_one, Nat.cast_one]
+      -- rw [add_left_cancel_iff]
+      apply Finset.sum_congr rfl
+      intro j _
+      have : α_K ^ (2 * (j + 1)) = (α_K ^ 2) ^ (j + 1) := by ring_nf
+      rw [this, hsq]; ring
+    -- Combine: P*(c-e) = α_K*(c+e-2), multiply by 2^d, substitute, cancel α_K
+    have h_in_K : 2 * (P : K) * (↑(binomial_B d) : K) =
+        2 * ((1 : K) - 7 * ↑A'_d - (2 : K) ^ d) := by
+      -- From h_cross + h_diff_eq: P*(c-e) = α_K*(c+e-2)
+      have h_sub1 : (P : K) * ((θ : K) ^ d - (θ' : K) ^ d) =
+          α_K * ((θ : K) ^ d + (θ' : K) ^ d - 2) := by
+        rw [hP_K]; rw [h_cross, h_diff_eq]; ring
+      -- Multiply by 2^d and substitute binomial identities
+      have h_scaled : (P : K) * ((2:K)^d * ((θ : K) ^ d - (θ' : K) ^ d)) =
+          α_K * ((2:K)^d * ((θ : K) ^ d + (θ' : K) ^ d) - (2:K)^d * 2) := by
+        calc (P : K) * ((2:K)^d * ((θ : K) ^ d - (θ' : K) ^ d))
+            = (2:K)^d * ((P : K) * ((θ : K) ^ d - (θ' : K) ^ d)) := by ring
+          _ = (2:K)^d * (α_K * ((θ : K) ^ d + (θ' : K) ^ d - 2)) := by rw [h_sub1]
+          _ = α_K * ((2:K)^d * ((θ : K) ^ d + (θ' : K) ^ d) - (2:K)^d * 2) := by ring
+      -- Replace using binomial identities
+      have h_lhs_eq : (2:K)^d * ((θ : K) ^ d - (θ' : K) ^ d) =
+          (2 * (↑θ : K))^d - (2 * (1 - (↑θ : K)))^d := by
+        rw [mul_pow, mul_pow, h_theta']; push_cast; ring
+      rw [h_lhs_eq, h_diff_binom] at h_scaled
+      have h_rhs_eq : (2:K)^d * ((θ : K) ^ d + (θ' : K) ^ d) =
+          (2 * (↑θ : K))^d + (2 * (1 - (↑θ : K)))^d := by
+        rw [mul_pow, mul_pow, h_theta']; push_cast; ring
+      rw [h_rhs_eq, h_sum_binom] at h_scaled
+      -- h_scaled: P*(2*α*B_d) = α*(2*(1-7*A'_d) - 2^d*2). Cancel α.
+      have h_cancel : α_K * (2 * (P : K) * ↑(binomial_B d)) =
+          α_K * (2 * (1 - 7 * ↑A'_d - (2:K)^d)) := by linear_combination h_scaled
+      exact mul_left_cancel₀ hα_ne h_cancel
+    -- Lift from K to ℤ via Int.cast_injective
+    apply Int.cast_injective (α := K)
+    have h_lhs : ((P * binomial_B d : ℤ) : K) = (P : K) * (↑(binomial_B d) : K) := by
+      push_cast; ring
+    have h_rhs : ((1 - 7 * A'_d - (2 : ℤ) ^ d : ℤ) : K) =
+        (1 : K) - 7 * ↑A'_d - (2 : K) ^ d := by push_cast; ring
+    rw [h_lhs, h_rhs]
+    have h_two_K_ne : (2 : K) ≠ 0 := by
+      intro h0; exact absurd (show (2 : ℚ) = 0 from by exact_mod_cast h0) (by norm_num)
+    rw [mul_assoc] at h_in_K
+    have h_reduced := mul_left_cancel₀ h_two_K_ne h_in_K
+    exact h_reduced
+  -- Step 8: v₇(A'_d) = l (same ultrametric argument as lemma_A, for even-indexed terms).
+  -- The j=0 term C(d,2) = d(d-1)/2 has v₇ = l (since 7^l ∥ d and 7∤(d-1), 7∤2).
+  -- All j≥1 terms have v₇ ≥ l+1 (by absorption identity, same as higher_term_nat_dvd).
+  have h_even_val : (7 : ℤ) ^ l ∣ A'_d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ A'_d := by
+    rw [hA'_def]; exact even_binomial_valuation d l hd_pos h_div h_ndiv h_7_dvd
+  -- Step 8b: 7^(l+1) ∣ (2^d - 1).
+  -- Since 42 ∣ d, we have 3 ∣ d, so 2^d - 1 = (2^3)^(d/3) - 1 = 8^(d/3) - 1.
+  -- By LTE (p=7, a=8, b=1): v₇(8^(d/3) - 1) = v₇(8-1) + v₇(d/3) = 1 + v₇(d) = l + 1.
+  have h_3_dvd : 3 ∣ d := Nat.dvd_trans (by norm_num : 3 ∣ 42) h_42_dvd
+  have h_pow_dvd : (7 : ℤ) ^ (l + 1) ∣ ((2 : ℤ) ^ d - 1) := by
+    -- 2^d = (2^3)^(d/3) = 8^(d/3), and 8 ≡ 1 (mod 7).
+    -- By LTE (Lifting the Exponent Lemma) for p=7, a=8, b=1:
+    --   v₇(8^n - 1) = v₇(8-1) + v₇(n) = 1 + v₇(n)
+    -- With n = d/3: v₇(2^d - 1) = 1 + v₇(d/3) = 1 + v₇(d) = 1 + l.
+    -- (v₇(d/3) = v₇(d) since gcd(3,7) = 1 and 3 | d.)
+    set n := d / 3 with hn_def
+    have hd3 : d = 3 * n := by omega
+    have h_rewrite : (2 : ℤ) ^ d - 1 = (8 : ℤ) ^ n - 1 ^ n := by
+      rw [one_pow, show (8 : ℤ) = 2 ^ 3 from by norm_num, ← pow_mul, ← hd3]
+    rw [h_rewrite]
+    -- 7^l ∣ n (since 7^l ∣ d = 3n and gcd(3,7)=1)
+    have h_l_dvd_n : 7 ^ l ∣ n := by
+      have h_dvd_d : 7 ^ l ∣ d := pow_padicValNat_dvd
+      rw [hd3] at h_dvd_d
+      exact ((Nat.Coprime.pow_right l (by decide : Nat.Coprime 3 7)).symm.dvd_mul_left).mp h_dvd_d
+    -- Apply LTE via emultiplicity
+    apply pow_dvd_of_le_emultiplicity
+    have h_lte := Int.emultiplicity_pow_sub_pow (p := 7)
+      (by decide : Nat.Prime 7) (by decide : Odd 7)
+      (show (7 : ℤ) ∣ 8 - 1 from ⟨1, by norm_num⟩)
+      (show ¬ (7 : ℤ) ∣ 8 from by decide)
+      n
+    rw [show (8 : ℤ) - 1 = (7 : ℤ) from by norm_num] at h_lte
+    -- h_lte : emultiplicity ↑7 (8^n - 1^n) = emultiplicity ↑7 7 + emultiplicity 7 n
+    -- Goal: ↑(l+1) ≤ emultiplicity (7:ℤ) (8^n - 1^n)
+    -- The coercion ↑7 and (7:ℤ) should be definitionally equal
+    have h_em_n : (l : ℕ∞) ≤ emultiplicity (7 : ℕ) n :=
+      le_emultiplicity_of_pow_dvd h_l_dvd_n
+    have h_em_7 : (1 : ℕ∞) ≤ emultiplicity (↑(7 : ℕ)) ((7 : ℤ)) :=
+      le_emultiplicity_of_pow_dvd (dvd_refl (7 : ℤ))
+    calc (↑(l + 1) : ℕ∞) = 1 + ↑l := by push_cast; ring
+      _ ≤ emultiplicity (↑(7 : ℕ)) (7 : ℤ) + emultiplicity (7 : ℕ) n :=
+          add_le_add h_em_7 h_em_n
+      _ = emultiplicity (↑(7 : ℕ)) ((8 : ℤ) ^ n - (1 : ℤ) ^ n) := h_lte.symm
+  -- Step 9: Derive the contradiction on 7-adic valuations.
+  -- From h_identity: P * B_d = 1 - 7*A'_d - 2^d = -(7*A'_d + (2^d - 1))
+  -- From h_even_val: 7^l ∣ A'_d, so 7^(l+1) ∣ 7*A'_d
+  -- From h_pow_dvd: 7^(l+1) ∣ (2^d - 1)
+  -- Therefore: 7^(l+1) ∣ (7*A'_d + (2^d - 1)) = -(P * B_d)
+  -- Since 7 ∤ P, 7^(l+1) ∣ B_d. But h_val says ¬ 7^(l+1) ∣ B_d. Contradiction!
+  obtain ⟨h_Bd_div, h_Bd_ndiv⟩ := h_val
+  obtain ⟨h_Ad_div, _⟩ := h_even_val
+  -- 7^(l+1) ∣ P * B_d
+  have h_dvd_prod : (7 : ℤ) ^ (l + 1) ∣ P * binomial_B d := by
+    rw [h_identity]
+    -- 1 - 7*A'_d - 2^d = -(7*A'_d + (2^d - 1))
+    have h1 : (7 : ℤ) ^ (l + 1) ∣ 7 * A'_d := by
+      rw [show (7 : ℤ) ^ (l + 1) = 7 * 7 ^ l from by rw [pow_succ, mul_comm]]
+      exact mul_dvd_mul_left 7 h_Ad_div
+    have h2 : (1 : ℤ) - 7 * A'_d - (2 : ℤ) ^ d = -(7 * A'_d + ((2 : ℤ) ^ d - 1)) := by ring
+    rw [h2]
+    exact dvd_neg.mpr (dvd_add h1 h_pow_dvd)
+  -- 7 is prime and 7 ∤ P, so IsCoprime (7^(l+1)) P
+  have h_coprime : IsCoprime ((7 : ℤ) ^ (l + 1)) P := by
+    apply IsCoprime.pow_left
+    have hp : Prime (7 : ℤ) := by rw [Int.prime_iff_natAbs_prime]; decide
+    exact (Prime.coprime_iff_not_dvd hp).mpr hP_coprime
+  -- Therefore 7^(l+1) ∣ B_d
+  exact h_Bd_ndiv (h_coprime.dvd_of_dvd_mul_left h_dvd_prod)
 
 /-- Verification: m = 3 (i.e. n = 5) is a solution, via x = 5: (25+7)/4 = 8 = 2³. -/
 lemma theta_eq_at_3 : -2 * θ + 1 = θ ^ 3 - θ' ^ 3 := by
@@ -976,7 +1602,6 @@ lemma two_pow_min_seven_odd :
   use k - 4
   omega
 
-
 lemma x_is_odd :
   ∀ x : ℤ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 7 = 2 ^ n →
     x % 2 = 1 := by
@@ -995,7 +1620,7 @@ lemma x_is_odd :
 -- The original lemma statement was incorrect: it only covered x ≥ 0 case
 -- We modify it to return either ordering of (1, 7) factorization
 -- Both cases give 2^k = 4 and x = ±3
-lemma my_amazing_thing :
+lemma ramanujan_nagell_even_pow_factors :
   ∀ x : ℤ , ∀ k : ℕ, (2^k + x) * (2^k - x) = 7 →
     (2^k - x = 1 ∧ 2^k + x = 7) ∨ (2^k - x = 7 ∧ 2^k + x = 1) := by
   intro x k h
@@ -1194,7 +1819,7 @@ theorem RamanujanNagell :
       calc
         (2^k + x) * (2^k - x) = 2^(2*k) - x^2 := by ring
                             _ = 7 := by rw [← h]; ring
-    have h₄' := my_amazing_thing x k h₄
+    have h₄' := ramanujan_nagell_even_pow_factors x k h₄
     -- Both cases give us 2^k - x + 2^k + x = 8, so 2^k = 4
     have h₅ : (8 : ℤ) = (2 : ℤ) * (2 : ℤ) ^ k := by
       rcases h₄' with ⟨h₄a, h₄b⟩ | ⟨h₄a, h₄b⟩
