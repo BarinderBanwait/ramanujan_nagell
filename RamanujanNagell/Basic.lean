@@ -258,6 +258,77 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       exact rfl
     exact hp.not_unit h_unit
 
+-- The conjugate factors are not units: h_diff forces both to have nonzero ω-component,
+-- but ±1 (the only units) have ω-component 0.
+lemma factor_not_unit_left (α β : R) (m : ℕ)
+    (h_prod : α * β = θ ^ m * θ' ^ m)
+    (h_diff : (↑α : K) - ↑β = 2 * (↑θ : K) - 1) :
+    ¬IsUnit α := by
+  -- If α = ±1, then ↑α - ↑β has im-component 0, but 2ω-1 has im = 2. Contradiction.
+  by_contra h_unit
+  -- α = 1 or α = -1
+  have h_cases : α = 1 ∨ α = -1 := by
+    have := units_pm_one h_unit.unit; simpa [Units.ext_iff] using this
+  -- θ' = 1 - θ, so θ^m * θ'^m = 2^m
+  have hθ' : θ' = 1 - θ := Subtype.ext (by simp)
+  have h2m : θ ^ m * θ' ^ m = (2 : R) ^ m := by
+    rw [hθ', ← mul_pow, two_factorisation_R]
+  rw [h2m] at h_prod
+  -- Key fact: ((algebraMap R K) 2 ^ m).im = 0
+  have h2m_im : ((algebraMap (𝓞 K) K) 2 ^ m).im = 0 := by
+    have : (algebraMap (𝓞 K) K) 2 = (2 : K) := rfl
+    rw [this]
+    conv_lhs => rw [show (2 : K) ^ m = ((2 ^ m : ℕ) : K) from by push_cast; ring]
+    exact im_natCast (n := 2 ^ m)
+  rcases h_cases with rfl | rfl
+  · -- Case α = 1: β = 2^m
+    have hβ : β = (2 : R) ^ m := by simpa using h_prod
+    rw [hβ] at h_diff
+    -- Compare im-components: 0 = 2
+    have h_im := congrArg QuadraticAlgebra.im h_diff
+    simp at h_im; rw [h2m_im] at h_im; simp at h_im
+  · -- Case α = -1: β = -(2^m)
+    have hβ : β = -((2 : R) ^ m) := by
+      have : (-1 : R) * β = (2 : R) ^ m := h_prod
+      linear_combination -this
+    rw [hβ] at h_diff
+    -- Compare im-components: 0 = 2
+    have h_im := congrArg QuadraticAlgebra.im h_diff
+    simp at h_im; rw [h2m_im] at h_im; simp at h_im
+
+lemma factor_not_unit_right (α β : R) (m : ℕ)
+    (h_prod : α * β = θ ^ m * θ' ^ m)
+    (h_diff : (↑α : K) - ↑β = 2 * (↑θ : K) - 1) :
+    ¬IsUnit β := by
+  -- If β is a unit, so is α (since α * β = 2^m and β = ±1 gives α = ±2^m,
+  -- but then h_diff gives the same im-component contradiction).
+  by_contra h_unit
+  have h_cases : β = 1 ∨ β = -1 := by
+    have := units_pm_one h_unit.unit; simpa [Units.ext_iff] using this
+  have hθ' : θ' = 1 - θ := Subtype.ext (by simp)
+  have h2m : θ ^ m * θ' ^ m = (2 : R) ^ m := by
+    rw [hθ', ← mul_pow, two_factorisation_R]
+  rw [h2m] at h_prod
+  have h2m_im : ((algebraMap (𝓞 K) K) 2 ^ m).im = 0 := by
+    have : (algebraMap (𝓞 K) K) 2 = (2 : K) := rfl
+    rw [this]
+    conv_lhs => rw [show (2 : K) ^ m = ((2 ^ m : ℕ) : K) from by push_cast; ring]
+    exact im_natCast (n := 2 ^ m)
+  rcases h_cases with rfl | rfl
+  · -- Case β = 1: α = 2^m
+    have hα : α = (2 : R) ^ m := by simpa using h_prod
+    rw [hα] at h_diff
+    have h_im := congrArg QuadraticAlgebra.im h_diff
+    simp at h_im; rw [h2m_im] at h_im; simp at h_im
+  · -- Case β = -1: α = -(2^m)
+    have hα : α = -((2 : R) ^ m) := by
+      have : α * (-1 : R) = (2 : R) ^ m := h_prod
+      have : -α = (2 : R) ^ m := by linear_combination this
+      linear_combination -this
+    rw [hα] at h_diff
+    have h_im := congrArg QuadraticAlgebra.im h_diff
+    simp at h_im; rw [h2m_im] at h_im; simp at h_im
+
 /-- Exercise 4: From α = ±θ^m or α = ±θ'^m, use the product relation to determine β,
     then take the difference α - β = 2θ-1 to eliminate x and obtain the conclusion. -/
 lemma eliminate_x_conclude (α β : R) (m : ℕ)
@@ -421,8 +492,13 @@ theorem main_m_condition :
   obtain ⟨α, β, h_prod, h_diff⟩ := factors_in_R_with_product x m hm_ge h_eq
   -- Step 2: α and β are coprime (θ and θ' don't divide √-7, by norms)
   have h_coprime := conjugate_factors_coprime α β m h_prod h_diff
+  -- Step 2.5: α and β are not units
+  -- (their product is 2^m with m ≥ 3; if one were ±1, the other would be ±2^m,
+  --  but the difference equation forces both to have nonzero ω-component)
+  have hα_not_unit : ¬IsUnit α := factor_not_unit_left α β m h_prod h_diff
+  have hβ_not_unit : ¬IsUnit β := factor_not_unit_right α β m h_prod h_diff
   -- Step 3: By UFD property (class number 1), α is associate to θ^m or θ'^m
-  have h_assoc := ufd_power_association α β m h_prod h_coprime
+  have h_assoc := ufd_power_association α β m h_prod h_coprime hα_not_unit hβ_not_unit
   -- Step 4: Units are ±1, take difference to eliminate x and get the disjunction
   have h_disj := eliminate_x_conclude α β m h_diff h_assoc h_prod
   -- Step 5: The minus sign must hold
