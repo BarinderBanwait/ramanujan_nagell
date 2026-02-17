@@ -28,7 +28,7 @@ $\omega = (1 + \sqrt{-7})/2$. We write $R = \mathcal{O}_K$ for the ring of integ
 $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
 
 \begin{lemma}[Integrality of $\omega$]
-  \label{lem:is_integral_ω}
+  \label{lem:is_integral_omega}
   \lean{is_integral_ω}
   \leanok
   The element $\omega \in K$ is integral over $\mathbb{Z}$: it satisfies $X^2 - X + 2 = 0$.
@@ -38,7 +38,7 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
 \end{proof}
 
 \begin{lemma}[Integrality of $1 - \omega$]
-  \label{lem:is_integral_one_sub_ω}
+  \label{lem:is_integral_one_sub_omega}
   \lean{is_integral_one_sub_ω}
   \leanok
   The element $1 - \omega \in K$ is integral over $\mathbb{Z}$.
@@ -50,7 +50,7 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
 \begin{lemma}[Minimal polynomial]
   \label{lem:my_minpoly}
   \lean{my_minpoly}
-  \uses{lem:is_integral_ω}
+  \uses{lem:is_integral_omega}
   \leanok
   The minimal polynomial of $\theta$ over $\mathbb{Z}$ is $X^2 - X + 2$.
 \end{lemma}
@@ -209,7 +209,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Conjugate factors in $R$]
   \label{lem:factors_in_R_with_product}
   \lean{factors_in_R_with_product}
-  \uses{lem:is_integral_one_sub_ω, lem:is_integral_ω, lem:two_factorisation_R}
+  \uses{lem:is_integral_one_sub_omega, lem:is_integral_omega, lem:two_factorisation_R}
   \leanok
   The conjugate factors $(x \pm \sqrt{-7})/2$ lie in $R$ (since $x$ is odd),
   and their product equals $\theta^m \cdot \theta'^{\,m}$.
@@ -223,7 +223,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Coprimality]
   \label{lem:conjugate_factors_coprime}
   \lean{conjugate_factors_coprime}
-  \uses{lem:algebra_norm_eq_quadratic_norm, lem:class_number_one_PID, lem:is_integral_ω, lem:two_factorisation_R}
+  \uses{lem:algebra_norm_eq_quadratic_norm, lem:class_number_one_PID, lem:is_integral_omega, lem:two_factorisation_R}
   \leanok
   The conjugate factors are coprime in $R$.
   The only prime factors of $2$ in $R$ are $\theta$ and $\theta'$
@@ -253,7 +253,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Eliminate $x$]
   \label{lem:eliminate_x_conclude}
   \lean{eliminate_x_conclude}
-  \uses{lem:is_integral_one_sub_ω, lem:is_integral_ω}
+  \uses{lem:is_integral_one_sub_omega, lem:is_integral_omega}
   \leanok
   From $\alpha = \pm\theta^m$ or $\alpha = \pm\theta'^{\,m}$, use the product relation to
   determine $\beta$, then take the difference $\alpha - \beta = 2\theta - 1$ to
@@ -655,7 +655,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
 
 \section{Additional declarations}
 
-\begin{lemma}[associated_eq_or_neg]
+\begin{lemma}[associated\_eq\_or\_neg]
   \label{lem:associated_eq_or_neg}
   \lean{associated_eq_or_neg}
   \uses{lem:units_pm_one}
@@ -666,7 +666,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[associated_of_theta_pow_dvd]
+\begin{lemma}[associated\_of\_theta\_pow\_dvd]
   \label{lem:associated_of_theta_pow_dvd}
   \lean{associated_of_theta_pow_dvd}
   \uses{lem:class_number_one, lem:theta'_irreducible, lem:theta_irreducible}
@@ -677,7 +677,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[associated_of_theta_pow_dvd_right]
+\begin{lemma}[associated\_of\_theta\_pow\_dvd\_right]
   \label{lem:associated_of_theta_pow_dvd_right}
   \lean{associated_of_theta_pow_dvd_right}
   \uses{lem:class_number_one, lem:theta'_irreducible, lem:theta_irreducible}
@@ -688,7 +688,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[factor_not_unit_left]
+\begin{lemma}[factor\_not\_unit\_left]
   \label{lem:factor_not_unit_left}
   \lean{factor_not_unit_left}
   \uses{lem:two_factorisation_R, lem:units_pm_one}
@@ -699,7 +699,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[factor_not_unit_right]
+\begin{lemma}[factor\_not\_unit\_right]
   \label{lem:factor_not_unit_right}
   \lean{factor_not_unit_right}
   \uses{lem:two_factorisation_R, lem:units_pm_one}
@@ -710,10 +710,10 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[my_minpoly_theta_prime]
+\begin{lemma}[my\_minpoly\_theta\_prime]
   \label{lem:my_minpoly_theta_prime}
   \lean{my_minpoly_theta_prime}
-  \uses{lem:is_integral_one_sub_ω}
+  \uses{lem:is_integral_one_sub_omega}
   \leanok
   TODO: add description
 \end{lemma}
@@ -721,7 +721,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[norm_eq_coeff_zero_minpoly]
+\begin{lemma}[norm\_eq\_coeff\_zero\_minpoly]
   \label{lem:norm_eq_coeff_zero_minpoly}
   \lean{norm_eq_coeff_zero_minpoly}
   \leanok
@@ -731,7 +731,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[norm_isUnit_iff]
+\begin{lemma}[norm\_isUnit\_iff]
   \label{lem:norm_isUnit_iff}
   \lean{norm_isUnit_iff}
   \leanok
@@ -741,7 +741,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[norm_theta_eq_two]
+\begin{lemma}[norm\_theta\_eq\_two]
   \label{lem:norm_theta_eq_two}
   \lean{norm_theta_eq_two}
   \uses{lem:my_minpoly, lem:norm_eq_coeff_zero_minpoly}
@@ -752,7 +752,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[norm_theta_prime_eq_two]
+\begin{lemma}[norm\_theta\_prime\_eq\_two]
   \label{lem:norm_theta_prime_eq_two}
   \lean{norm_theta_prime_eq_two}
   \uses{lem:my_minpoly_theta_prime, lem:norm_eq_coeff_zero_minpoly}
@@ -763,7 +763,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta'_irreducible]
+\begin{lemma}[theta'\_irreducible]
   \label{lem:theta'_irreducible}
   \lean{theta'_irreducible}
   \uses{lem:norm_isUnit_iff, lem:norm_theta_prime_eq_two, lem:theta_prime_not_unit}
@@ -774,7 +774,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta'_not_dvd_theta]
+\begin{lemma}[theta'\_not\_dvd\_theta]
   \label{lem:theta'_not_dvd_theta}
   \lean{theta'_not_dvd_theta}
   \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
@@ -785,7 +785,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_irreducible]
+\begin{lemma}[theta\_irreducible]
   \label{lem:theta_irreducible}
   \lean{theta_irreducible}
   \uses{lem:norm_isUnit_iff, lem:norm_theta_eq_two, lem:theta_not_unit}
@@ -796,7 +796,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_not_dvd_theta']
+\begin{lemma}[theta\_not\_dvd\_theta']
   \label{lem:theta_not_dvd_theta'}
   \lean{theta_not_dvd_theta'}
   \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
@@ -807,7 +807,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_not_unit]
+\begin{lemma}[theta\_not\_unit]
   \label{lem:theta_not_unit}
   \lean{theta_not_unit}
   \uses{lem:norm_theta_eq_two}
@@ -818,7 +818,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_pow_dvd_of_coprime_prod]
+\begin{lemma}[theta\_pow\_dvd\_of\_coprime\_prod]
   \label{lem:theta_pow_dvd_of_coprime_prod}
   \lean{theta_pow_dvd_of_coprime_prod}
   \uses{lem:class_number_one, lem:theta_irreducible}
@@ -829,7 +829,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_prime_not_unit]
+\begin{lemma}[theta\_prime\_not\_unit]
   \label{lem:theta_prime_not_unit}
   \lean{theta_prime_not_unit}
   \uses{lem:norm_theta_prime_eq_two}
@@ -840,7 +840,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta_theta'_not_associated]
+\begin{lemma}[theta\_theta'\_not\_associated]
   \label{lem:theta_theta'_not_associated}
   \lean{theta_theta'_not_associated}
   \uses{lem:units_pm_one}
@@ -851,7 +851,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[ufd_associated_dichotomy]
+\begin{lemma}[ufd\_associated\_dichotomy]
   \label{lem:ufd_associated_dichotomy}
   \lean{ufd_associated_dichotomy}
   \uses{lem:associated_of_theta_pow_dvd, lem:associated_of_theta_pow_dvd_right, lem:class_number_one, lem:theta_pow_dvd_of_coprime_prod}

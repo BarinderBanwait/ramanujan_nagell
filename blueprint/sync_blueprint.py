@@ -380,9 +380,10 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
 
         i += 1
 
-    # --- Pass 4: Normalize labels to match Lean names ---
-    # Ensure all \label{prefix:X} match the \lean{Y} on the next line.
-    # Build rename map and apply globally.
+    # --- Pass 4: Normalize labels to match Lean names (ASCII-safe) ---
+    # Ensure all \label{prefix:X} use the Lean name (transliterated to ASCII).
+    # This makes the dependency graph display Lean names, while keeping
+    # pdflatex compatibility (no Unicode in labels).
     current_text = "\n".join(new_lines)
     label_renames: dict[str, str] = {}  # old_label -> new_label
     for m_iter in re.finditer(
@@ -392,7 +393,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         old_label = m_iter.group(1)
         label_prefix = old_label.split(":")[0]
         lean_name = m_iter.group(3)
-        new_label = f"{label_prefix}:{lean_name}"
+        new_label = f"{label_prefix}:{_ascii_label(lean_name)}"
         if old_label != new_label:
             label_renames[old_label] = new_label
 
@@ -443,7 +444,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
                         ref_decl = decls.get(ref)
                         if ref_decl:
                             ref_prefix = _kind_to_label_prefix(ref_decl.kind)
-                            expected_labels.append(f"{ref_prefix}:{ref}")
+                            expected_labels.append(f"{ref_prefix}:{_ascii_label(ref)}")
 
                 # Check if next line is an existing \uses{}
                 next_idx = i + 1
@@ -513,7 +514,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
             if name not in lean_name_to_label:
                 decl = missing[name]
                 label_prefix = _kind_to_label_prefix(decl.kind)
-                lean_name_to_label[name] = f"{label_prefix}:{name}"
+                lean_name_to_label[name] = f"{label_prefix}:{_ascii_label(name)}"
 
         # Sort by source file then name for stable ordering
         for name in sorted(missing.keys()):
@@ -522,12 +523,13 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
 
             env = _kind_to_env(decl.kind)
             label_prefix = _kind_to_label_prefix(decl.kind)
+            ascii_name = _ascii_label(name)
 
             desc = decl.docstring if decl.docstring else "TODO: add description"
             fully_proved = not decl.has_sorry
 
-            new_lines.append(f"\\begin{{{env}}}[{name}]")
-            new_lines.append(f"  \\label{{{label_prefix}:{name}}}")
+            new_lines.append(f"\\begin{{{env}}}[{_latex_escape_title(name)}]")
+            new_lines.append(f"  \\label{{{label_prefix}:{ascii_name}}}")
             new_lines.append(f"  \\lean{{{name}}}")
 
             # Auto-detect \uses (prefer existing labels over auto-generated ones)
@@ -540,7 +542,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
                         ref_decl = decls.get(ref)
                         if ref_decl:
                             ref_prefix = _kind_to_label_prefix(ref_decl.kind)
-                            uses_labels.append(f"{ref_prefix}:{ref}")
+                            uses_labels.append(f"{ref_prefix}:{_ascii_label(ref)}")
             if uses_labels:
                 new_lines.append(f"  \\uses{{{', '.join(uses_labels)}}}")
 
@@ -589,6 +591,39 @@ def _has_leanok_nearby(lines: list[str], lean_line_idx: int) -> bool:
         if re.match(r"\\end\{", lines[j]) or re.match(r"\\begin\{proof\}", lines[j]):
             return False
     return False
+
+
+# Unicode to ASCII mapping for LaTeX labels (pdflatex can't handle Unicode)
+_UNICODE_TO_ASCII = {
+    "ω": "omega",
+    "θ": "theta",
+    "α": "alpha",
+    "β": "beta",
+    "γ": "gamma",
+    "δ": "delta",
+    "ε": "epsilon",
+    "π": "pi",
+    "σ": "sigma",
+    "τ": "tau",
+    "φ": "phi",
+    "ψ": "psi",
+    "₀": "0",
+    "₁": "1",
+    "₂": "2",
+}
+
+
+def _ascii_label(name: str) -> str:
+    """Convert a Lean name to an ASCII-safe LaTeX label component."""
+    result = name
+    for uni, asc in _UNICODE_TO_ASCII.items():
+        result = result.replace(uni, asc)
+    return result
+
+
+def _latex_escape_title(name: str) -> str:
+    r"""Escape underscores and other LaTeX-special chars for use in \begin{env}[title]."""
+    return name.replace("_", r"\_")
 
 
 def _kind_to_env(kind: str) -> str:
