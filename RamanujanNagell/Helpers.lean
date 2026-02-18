@@ -11,11 +11,16 @@ import Mathlib.Algebra.QuadraticAlgebra.NormDeterminant
 import Mathlib.Algebra.Polynomial.Degree.IsMonicOfDegree
 import Mathlib.NumberTheory.KummerDedekind
 import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.NumberTheory.NumberField.InfinitePlace.Basic
+import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+import Mathlib.NumberTheory.NumberField.ClassNumber
 import Mathlib.NumberTheory.RamificationInertia.Basic
 import Mathlib.NumberTheory.NumberField.Ideal.KummerDedekind
 import Mathlib.NumberTheory.NumberField.Norm
 import Mathlib.NumberTheory.NumberField.Units.Basic
+import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.DedekindDomain.PID
 import Mathlib.NumberTheory.Multiplicity
 import Mathlib.NumberTheory.Padics.PadicVal.Basic
 import Mathlib.Tactic.ComputeDegree
@@ -27,7 +32,7 @@ import Mathlib.FieldTheory.Minpoly.Field
 set_option linter.style.longLine false
 set_option diagnostics true
 
-open Polynomial NumberField QuadraticAlgebra RingOfIntegers Algebra Nat Ideal
+open Polynomial NumberField QuadraticAlgebra RingOfIntegers Algebra Nat Ideal InfinitePlace
   UniqueFactorizationMonoid
 
 /-! ## Algebraic Number Theory Facts
@@ -182,17 +187,189 @@ lemma my_minpoly_theta_prime : minpoly ℤ θ' = X ^ 2 - X + 2 := by
   exact eq_of_monic_of_associated (minpoly.monic is_integral_one_sub_ω) h_monic
     ((minpoly.irreducible is_integral_one_sub_ω).associated_of_dvd h_irred h_dvd)
 
+lemma K_degree_2 : Module.finrank ℚ K = 2 := by
+  rw [QuadraticAlgebra.finrank_eq_two]
+
+lemma K_nrRealPlaces_zero : nrRealPlaces K = 0 := by
+  rw [nrRealPlaces_eq_zero_iff]
+  constructor
+  intro v
+  rw [← InfinitePlace.not_isReal_iff_isComplex]
+  intro hv
+  rw [InfinitePlace.isReal_iff] at hv
+  -- Get a ring hom ψ : K →+* ℝ from the real embedding
+  let ψ := NumberField.ComplexEmbedding.IsReal.embedding hv
+  -- ω satisfies ω * ω = ⟨-2, 1⟩ = -2 + ω in K
+  have h_eq : (ω : K) * ω = (⟨-2, 1⟩ : K) := by
+    exact QuadraticAlgebra.omega_mul_omega_eq_mk
+  -- ω² - ω + 2 = 0 in K, so ψ(ω)² - ψ(ω) + 2 = 0 in ℝ
+  -- But x² - x + 2 = (x-1/2)² + 7/4 > 0 for all real x
+  -- ⟨-2, 1⟩ = -2 + ω in K
+  have h_mk : (⟨-2, 1⟩ : K) = -2 + ω := by
+    have := @QuadraticAlgebra.mk_eq_add_smul_omega ℚ (-2) 1 _ (-2 : ℚ) (1 : ℚ)
+    simp at this
+    exact this
+  rw [h_mk] at h_eq
+  have h1 := congr_arg ψ h_eq
+  simp only [map_mul, map_add, map_neg, map_ofNat] at h1
+  have h2 : (ψ ω - 1/2) ^ 2 + 7/4 = ψ ω * ψ ω - ψ ω + 2 := by ring
+  have h4 : (ψ ω - 1/2) ^ 2 ≥ 0 := sq_nonneg _
+  linarith
+
+lemma K_nrComplexPlaces_2 : nrComplexPlaces K = 1 := by
+  have h := card_add_two_mul_card_eq_rank K
+  have h_alg : (QuadraticAlgebra.instAlgebra : Algebra ℚ K) = DivisionRing.toRatAlgebra :=
+    Subsingleton.elim _ _
+  have h2 : @Module.finrank ℚ K _ _ DivisionRing.toRatAlgebra.toModule = 2 := by
+    rw [← h_alg]; exact K_degree_2
+  rw [h2, K_nrRealPlaces_zero] at h
+  omega
+
 lemma span_eq_top : adjoin ℤ {θ} = ⊤ := by
   admit
 
-lemma class_number_one : UniqueFactorizationMonoid R := by
-  admit
+-- θ² = θ - 2 in 𝓞 K (from ω² = -2 + ω in K)
+private lemma theta_sq : (θ : 𝓞 K) * θ = θ - 2 := by
+  apply Subtype.ext
+  show (ω : K) * ω = ω - 2
+  have h1 := @QuadraticAlgebra.omega_mul_omega_eq_mk ℚ (-2) 1 _
+  have h2 := @QuadraticAlgebra.mk_eq_add_smul_omega ℚ (-2) 1 _ (-2 : ℚ) (1 : ℚ)
+  simp at h2
+  rw [h1, h2]; ring
 
-lemma class_number_one_PID : IsPrincipalIdealRing R := by
-  admit
+lemma K_discriminant : discr K = 7 := by
+  -- Construct ℤ-power basis for 𝓞 K using span_eq_top
+  have h_int : IsIntegral ℤ (θ : 𝓞 K) := RingOfIntegers.isIntegral θ
+  let pb := PowerBasis.ofAdjoinEqTop' h_int span_eq_top
+  rw [← discr_eq_discr K pb.basis]
+  rw [Algebra.discr_def]
+  -- Goal: (traceMatrix ℤ ⇑pb.basis).det = -7
+  -- We need pb.dim = 2
+  have h_dim : pb.dim = 2 := by
+    have h1 := pb.natDegree_minpoly
+    have h2 : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
+    rw [h2, my_minpoly] at h1
+    -- h1 : (X ^ 2 - X + 2).natDegree = pb.dim
+    change (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = pb.dim at h1
+    have h3 : (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = 2 := by compute_degree!
+    linarith
+  -- Goal: (traceMatrix ℤ ⇑pb.basis).det = -7
+  -- Reindex to Fin 2
+  have h_gen : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
+  -- Show trace matrix entries
+  -- traceMatrix[i][j] = trace(pb.basis i * pb.basis j) = trace(θ^i * θ^j)
+  -- For dim=2: trace(1) = 2, trace(θ) = 1, trace(θ²) = trace(θ-2) = 1-4 = -3
+  -- So trace matrix = !![2,1;1,-3], det = -7
+  -- Use pb.basis_eq_pow to rewrite basis elements
+  -- Then compute trace using the minimal polynomial
+  simp only [Algebra.traceMatrix]
+  sorry
+
 
 lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
-  admit
+  intro u
+  -- Step 1: reduce to "u is a root of unity in K"
+  suffices h_torsion : u ∈ NumberField.Units.torsion K by
+    -- u has finite order (torsion = elements of finite order)
+    have h_fin : IsOfFinOrder u := (CommGroup.mem_torsion Rˣ u).mp h_torsion
+    -- KEY SORRY: orderOf u divides 2.
+    -- Proof sketch: any primitive nth root of unity ζ in K satisfies φ(n) ≤ [K:ℚ] = 2,
+    -- so n ∈ {1,2,3,4,6}. But n ∈ {3,4,6} would force K = ℚ(ζ₃) or ℚ(i),
+    -- which have discriminants -3 or -4, contradicting disc(K) = -7.
+    have h_div2 : orderOf u ∣ 2 := by
+      have h_pos : 0 < orderOf u := orderOf_pos_iff.mpr h_fin
+      -- φ(orderOf u) ≤ [K:ℚ] = 2 (IsPrimitiveRoot.totient_le_degree_minpoly + my_minpoly)
+      have h_totient_le : Nat.totient (orderOf u) ≤ 2 := by sorry
+      -- For n ≥ 7, φ(n) ≥ 4 > 2, so orderOf u ≤ 6
+      have h_le6 : orderOf u ≤ 6 := by sorry
+      -- K has no cube roots of unity (K ≇ ℚ(ζ₃) = ℚ(√-3), since -7 ≠ -3):
+      have hno_cube : ∀ z : R, z ^ 2 + z + 1 ≠ 0 := by sorry
+      -- K has no square root of -1 (K ≇ ℚ(i), since -7 ≠ -4):
+      have hno_i : ∀ z : R, z ^ 2 + 1 ≠ 0 := by sorry
+      -- Helper: lift u^k = 1 in Rˣ to (↑u : R)^k = 1
+      have lift_pow : ∀ k : ℕ, u ^ k = 1 → (u : R) ^ k = 1 := fun k hk => by
+        have := congr_arg Units.val hk; simpa using this
+      -- Helper: orderOf u = k → (↑u : R) ≠ 1 (for k ≥ 2)
+      have ne_one_R : orderOf u ≥ 2 → (u : R) ≠ 1 := fun hk heq => by
+        have hU1 : u = 1 := Units.val_inj.mp heq
+        simp [hU1, orderOf_one] at hk
+      -- Helper: orderOf u = k → (↑u : R)^2 ≠ 1 (for k ∤ 2)
+      have sq_ne_one_R : ¬ orderOf u ∣ 2 → (u : R) ^ 2 ≠ 1 := fun hnd heq => by
+        have hU2 : u ^ 2 = 1 := Units.val_inj.mp (by simpa using heq)
+        exact hnd (orderOf_dvd_iff_pow_eq_one.mpr hU2)
+      -- Case analysis: orderOf u ∈ {1, 2, 3, 4, 5, 6}
+      have h1 : 1 ≤ orderOf u := h_pos
+      interval_cases h : orderOf u
+      · norm_num  -- 1 ∣ 2
+      · norm_num  -- 2 ∣ 2
+      · -- n = 3: (↑u)^2 + (↑u) + 1 = 0 in R, contradicts hno_cube
+        exfalso; apply hno_cube (u : R)
+        have hR3 : (u : R) ^ 3 = 1 := lift_pow 3 (h ▸ pow_orderOf_eq_one u)
+        have hne : (u : R) ≠ 1 := ne_one_R (by omega)
+        have fac : ((u : R) - 1) * ((u : R) ^ 2 + (u : R) + 1) = 0 := by
+          have eq : ((u : R) - 1) * ((u : R) ^ 2 + (u : R) + 1) = (u : R) ^ 3 - 1 := by ring
+          rw [eq, hR3]; ring
+        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne)
+      · -- n = 4: (↑u)^2 + 1 = 0, contradicts hno_i
+        exfalso; apply hno_i (u : R)
+        have hR4 : (u : R) ^ 4 = 1 := lift_pow 4 (h ▸ pow_orderOf_eq_one u)
+        have hne2 : (u : R) ^ 2 ≠ 1 := sq_ne_one_R (by norm_num)
+        have fac : ((u : R) ^ 2 - 1) * ((u : R) ^ 2 + 1) = 0 := by
+          have eq : ((u : R) ^ 2 - 1) * ((u : R) ^ 2 + 1) = (u : R) ^ 4 - 1 := by ring
+          rw [eq, hR4]; ring
+        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne2)
+      · -- n = 5: φ(5) = 4 > 2, contradicts h_totient_le
+        exfalso
+        have : (5 : ℕ).totient = 4 := by decide
+        omega
+      · -- n = 6: (↑u)^2 satisfies X^2 + X + 1 = 0, contradicts hno_cube
+        exfalso; apply hno_cube ((u : R) ^ 2)
+        have hR6 : (u : R) ^ 6 = 1 := lift_pow 6 (h ▸ pow_orderOf_eq_one u)
+        have hne2 : (u : R) ^ 2 ≠ 1 := sq_ne_one_R (by norm_num)
+        have fac : ((u : R) ^ 2 - 1) * (((u : R) ^ 2) ^ 2 + (u : R) ^ 2 + 1) = 0 := by
+          have eq : ((u : R) ^ 2 - 1) * (((u : R) ^ 2) ^ 2 + (u : R) ^ 2 + 1)
+                  = (u : R) ^ 6 - 1 := by ring
+          rw [eq, hR6]; ring
+        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne2)
+    -- Deduce u^2 = 1 in Rˣ
+    have h_sq : u ^ 2 = 1 := orderOf_dvd_iff_pow_eq_one.mp h_div2
+    -- Lift to R: (↑u : R)^2 = 1
+    have h_sq_R : (u : R) ^ 2 = 1 := by
+      have : ((u ^ 2 : Rˣ) : R) = ((1 : Rˣ) : R) := congr_arg Units.val h_sq
+      simpa using this
+    -- In R (integral domain), a^2 = 1 ↔ a = 1 ∨ a = -1
+    rcases sq_eq_one_iff.mp h_sq_R with h | h
+    · left;  exact Units.val_inj.mp h
+    · right; exact Units.val_inj.mp (by simp [h])
+  -- Step 2: card(InfinitePlace K) = 1 (since nrRealPlaces = 0, nrComplexPlaces = 1)
+  have h_card : Fintype.card (InfinitePlace K) = 1 := by
+    rw [card_eq_nrRealPlaces_add_nrComplexPlaces, K_nrRealPlaces_zero, K_nrComplexPlaces_2]
+  -- Step 3: unit rank of K is 0
+  have h_rank : NumberField.Units.rank K = 0 := by
+    simp [NumberField.Units.rank, h_card]
+  -- Step 4: apply Dirichlet — every unit = torsion × ∏ fundSystem^eᵢ
+  obtain ⟨⟨ζ, e⟩, h_eq, _⟩ := NumberField.Units.exist_unique_eq_mul_prod K u
+  -- With rank 0, the index type Fin (rank K) = Fin 0 is empty, so the product collapses to 1
+  haveI h_empty : IsEmpty (Fin (NumberField.Units.rank K)) := by
+    rw [h_rank]; exact inferInstance
+  simp only [Finset.univ_eq_empty, Finset.prod_empty, mul_one] at h_eq
+  -- h_eq : u = ↑ζ, and ζ ∈ torsion K by construction
+  exact h_eq ▸ ζ.prop
+
+lemma class_number_one_PID : IsPrincipalIdealRing R := by
+  apply isPrincipalIdealRing_of_abs_discr_lt
+  simp only [K_nrComplexPlaces_2, K_discriminant]
+  have h_alg : (QuadraticAlgebra.instAlgebra : Algebra ℚ K) = DivisionRing.toRatAlgebra :=
+    Subsingleton.elim _ _
+  have h2 : @Module.finrank ℚ K _ _ DivisionRing.toRatAlgebra.toModule = 2 := by
+    rw [← h_alg]; exact K_degree_2
+  rw [h2]; norm_num [Nat.factorial]
+  -- 7 < π²; since π > 3, π² > 9 > 7
+  nlinarith [Real.pi_gt_three]
+
+lemma class_number_one : UniqueFactorizationMonoid R :=
+  haveI := class_number_one_PID
+  inferInstance
 
 -- The Algebra.norm on a QuadraticAlgebra coincides with the QuadraticAlgebra.norm
 lemma algebra_norm_eq_quadratic_norm (z : K) : Algebra.norm ℚ z = QuadraticAlgebra.norm z := by

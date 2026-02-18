@@ -67,15 +67,24 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
 \begin{lemma}[Class number one]
   \label{lem:class_number_one}
   \lean{class_number_one}
+  \uses{lem:class_number_one_PID}
+  \leanok
   The ring of integers $R$ is a unique factorization domain
   (equivalently, the class number of $\mathbb{Q}(\sqrt{-7})$ is $1$).
 \end{lemma}
+\begin{proof}\leanok
+  Proof in Lean source.
+\end{proof}
 
 \begin{lemma}[Class number one implies PID]
   \label{lem:class_number_one_PID}
   \lean{class_number_one_PID}
+  \leanok
   The ring of integers $R$ is a principal ideal ring.
 \end{lemma}
+\begin{proof}\leanok
+  Proof in Lean source.
+\end{proof}
 
 \begin{lemma}[Algebra norm equals quadratic norm]
   \label{lem:algebra_norm_eq_quadratic_norm}
@@ -239,7 +248,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[UFD power association]
   \label{lem:ufd_power_association}
   \lean{ufd_power_association}
-  \uses{lem:class_number_one}
+  \uses{lem:associated_eq_or_neg, lem:class_number_one, lem:ufd_associated_dichotomy}
   \leanok
   If $\alpha \cdot \beta = \theta^m \cdot \theta'^{\,m}$ and $\gcd(\alpha, \beta) = 1$ in the
   UFD $R$, then $\alpha = \pm\theta^m$ or $\alpha = \pm\theta'^{\,m}$.
@@ -284,7 +293,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Main $m$-condition]
   \label{lem:main_m_condition}
   \lean{main_m_condition}
-  \uses{lem:conjugate_factors_coprime, lem:eliminate_x_conclude, lem:factors_in_R_with_product, lem:must_have_minus_sign, lem:ufd_power_association}
+  \uses{lem:conjugate_factors_coprime, lem:eliminate_x_conclude, lem:factor_not_unit_left, lem:factor_not_unit_right, lem:factors_in_R_with_product, lem:must_have_minus_sign, lem:ufd_power_association}
   \leanok
   For all integers $x$ and odd $m \geq 3$, if $(x^2 + 7)/4 = 2^m$, then
   \[
@@ -652,13 +661,11 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   (Lemmas~\ref{lem:helper_3}, \ref{lem:helper_4}, \ref{lem:helper_5}).
 \end{proof}
 
-
 \section{Additional declarations}
 
-\begin{lemma}[associated\_eq\_or\_neg]
-  \label{lem:associated_eq_or_neg}
-  \lean{associated_eq_or_neg}
-  \uses{lem:units_pm_one}
+\begin{lemma}[K\_degree\_2]
+  \label{lem:K_degree_2}
+  \lean{K_degree_2}
   \leanok
   TODO: add description
 \end{lemma}
@@ -666,10 +673,20 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[associated\_of\_theta\_pow\_dvd]
-  \label{lem:associated_of_theta_pow_dvd}
-  \lean{associated_of_theta_pow_dvd}
-  \uses{lem:class_number_one, lem:theta'_irreducible, lem:theta_irreducible}
+\begin{lemma}[K\_discriminant]
+  \label{lem:K_discriminant}
+  \lean{K_discriminant}
+  \uses{lem:my_minpoly, lem:span_eq_top}
+  TODO: add description
+\end{lemma}
+\begin{proof}
+  Proof in Lean source.
+\end{proof}
+
+\begin{lemma}[K\_nrComplexPlaces\_2]
+  \label{lem:K_nrComplexPlaces_2}
+  \lean{K_nrComplexPlaces_2}
+  \uses{lem:K_degree_2, lem:K_nrRealPlaces_zero}
   \leanok
   TODO: add description
 \end{lemma}
@@ -677,184 +694,9 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[associated\_of\_theta\_pow\_dvd\_right]
-  \label{lem:associated_of_theta_pow_dvd_right}
-  \lean{associated_of_theta_pow_dvd_right}
-  \uses{lem:class_number_one, lem:theta'_irreducible, lem:theta_irreducible}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[factor\_not\_unit\_left]
-  \label{lem:factor_not_unit_left}
-  \lean{factor_not_unit_left}
-  \uses{lem:two_factorisation_R, lem:units_pm_one}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[factor\_not\_unit\_right]
-  \label{lem:factor_not_unit_right}
-  \lean{factor_not_unit_right}
-  \uses{lem:two_factorisation_R, lem:units_pm_one}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[my\_minpoly\_theta\_prime]
-  \label{lem:my_minpoly_theta_prime}
-  \lean{my_minpoly_theta_prime}
-  \uses{lem:is_integral_one_sub_omega}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[norm\_eq\_coeff\_zero\_minpoly]
-  \label{lem:norm_eq_coeff_zero_minpoly}
-  \lean{norm_eq_coeff_zero_minpoly}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[norm\_isUnit\_iff]
-  \label{lem:norm_isUnit_iff}
-  \lean{norm_isUnit_iff}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[norm\_theta\_eq\_two]
-  \label{lem:norm_theta_eq_two}
-  \lean{norm_theta_eq_two}
-  \uses{lem:my_minpoly, lem:norm_eq_coeff_zero_minpoly}
-  \leanok
-  The minimal polynomial of θ: X² - X + 2.
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[norm\_theta\_prime\_eq\_two]
-  \label{lem:norm_theta_prime_eq_two}
-  \lean{norm_theta_prime_eq_two}
-  \uses{lem:my_minpoly_theta_prime, lem:norm_eq_coeff_zero_minpoly}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta'\_irreducible]
-  \label{lem:theta'_irreducible}
-  \lean{theta'_irreducible}
-  \uses{lem:norm_isUnit_iff, lem:norm_theta_prime_eq_two, lem:theta_prime_not_unit}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta'\_not\_dvd\_theta]
-  \label{lem:theta'_not_dvd_theta}
-  \lean{theta'_not_dvd_theta}
-  \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_irreducible]
-  \label{lem:theta_irreducible}
-  \lean{theta_irreducible}
-  \uses{lem:norm_isUnit_iff, lem:norm_theta_eq_two, lem:theta_not_unit}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_not\_dvd\_theta']
-  \label{lem:theta_not_dvd_theta'}
-  \lean{theta_not_dvd_theta'}
-  \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_not\_unit]
-  \label{lem:theta_not_unit}
-  \lean{theta_not_unit}
-  \uses{lem:norm_theta_eq_two}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_pow\_dvd\_of\_coprime\_prod]
-  \label{lem:theta_pow_dvd_of_coprime_prod}
-  \lean{theta_pow_dvd_of_coprime_prod}
-  \uses{lem:class_number_one, lem:theta_irreducible}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_prime\_not\_unit]
-  \label{lem:theta_prime_not_unit}
-  \lean{theta_prime_not_unit}
-  \uses{lem:norm_theta_prime_eq_two}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_theta'\_not\_associated]
-  \label{lem:theta_theta'_not_associated}
-  \lean{theta_theta'_not_associated}
-  \uses{lem:units_pm_one}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[ufd\_associated\_dichotomy]
-  \label{lem:ufd_associated_dichotomy}
-  \lean{ufd_associated_dichotomy}
-  \uses{lem:associated_of_theta_pow_dvd, lem:associated_of_theta_pow_dvd_right, lem:class_number_one, lem:theta_pow_dvd_of_coprime_prod}
+\begin{lemma}[K\_nrRealPlaces\_zero]
+  \label{lem:K_nrRealPlaces_zero}
+  \lean{K_nrRealPlaces_zero}
   \leanok
   TODO: add description
 \end{lemma}
