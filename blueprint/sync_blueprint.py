@@ -411,8 +411,18 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w']+)\}", current_text):
         lean_name_to_label[m_iter.group(2)] = m_iter.group(1)
 
-    # Also collect all lean names that are in the blueprint
-    all_blueprint_lean_names = set(re.findall(r"\\lean\{([\w']+)\}", current_text))
+    # Pre-populate lean_name_to_label with fallback labels for ALL known Lean declarations.
+    # This ensures dependencies on declarations that are newly discovered (not yet in the
+    # blueprint) are still captured, since Pass 6 will add them with the same label formula.
+    for _name, _decl_obj in decls.items():
+        if _name not in lean_name_to_label:
+            _prefix = _kind_to_label_prefix(_decl_obj.kind)
+            lean_name_to_label[_name] = f"{_prefix}:{_ascii_label(_name)}"
+
+    # Use ALL Lean declarations as the eligible dependency set — not just those already in
+    # the blueprint. This fixes a first-run ordering bug where new declarations are added by
+    # Pass 6 (after Pass 5 runs), so they would be absent from all_blueprint_lean_names.
+    all_eligible_lean_names = set(decls.keys())
 
     updated_text = "\n".join(new_lines)
     new_lines = []
@@ -431,10 +441,13 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
             # Compute expected \uses from Lean source
             decl = decls.get(current_lean_name)
             if decl:
-                # Filter references to only those in the blueprint
+                # Filter references to those known in the Lean source (eligible for \uses{}).
+                # We use all_eligible_lean_names (all parsed Lean declarations) rather than
+                # only blueprint names, so that newly-added declarations are captured even
+                # on the first run before Pass 6 adds them to the blueprint.
                 expected_refs = [
                     ref for ref in decl.references
-                    if ref in all_blueprint_lean_names and ref != current_lean_name
+                    if ref in all_eligible_lean_names and ref != current_lean_name
                 ]
                 expected_labels = []
                 for ref in sorted(expected_refs):
@@ -477,49 +490,63 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         new_lines.append(line)
         i += 1
 
-    # --- Step 6: Auto-generate new entries ---
-    # Refresh the label map and blueprint names after uses pass
+    # --- Step 6: Regenerate "Additional declarations" section ---
+    # Strategy: always rebuild the entire Additional declarations section from scratch.
+    # This avoids a bug where the old section is removed but previously-existing entries
+    # are not re-added (because they weren't "missing" from the full file scan), leaving
+    # dangling \uses{} references to labels that no longer exist.
+    #
+    # "Additional declarations" = all Lean declarations NOT in the main body.
+    # The main body is everything before the Additional declarations section marker.
     current_text = "\n".join(new_lines)
     lean_name_to_label = {}
     for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w']+)\}", current_text):
         lean_name_to_label[m_iter.group(2)] = m_iter.group(1)
-    existing_lean_names = set(re.findall(r"\\lean\{([\w']+)\}", current_text))
-    missing = {
+
+    # Split into main body (user-curated) and Additional declarations (auto-generated).
+    _section_marker = "\\section{Additional declarations}"
+    _section_pos = current_text.find(_section_marker)
+    if _section_pos >= 0:
+        _main_body_text = current_text[:_section_pos]
+        _old_additional_lean_names = set(
+            re.findall(r"\\lean\{([\w']+)\}", current_text[_section_pos:])
+        )
+    else:
+        _main_body_text = current_text
+        _old_additional_lean_names = set()
+
+    # Declarations that are in the main body (user-placed, don't touch).
+    _main_body_lean_names = set(re.findall(r"\\lean\{([\w']+)\}", _main_body_text))
+
+    # All declarations that should live in Additional declarations.
+    _additional_decls = {
         name: decl
         for name, decl in decls.items()
-        if name not in existing_lean_names
+        if name not in _main_body_lean_names
     }
 
-    if missing:
-        # Check if "Additional declarations" section already exists
-        additional_section_re = re.compile(
-            r"\\section\{Additional declarations\}"
-        )
-        has_section = additional_section_re.search("\n".join(new_lines))
+    # Truly new = not in old Additional declarations section (for reporting).
+    for name in sorted(_additional_decls.keys()):
+        if name not in _old_additional_lean_names:
+            new_entries.append(name)
 
-        if has_section:
-            # Remove old additional section to regenerate
-            joined = "\n".join(new_lines)
-            section_start = joined.find("\\section{Additional declarations}")
-            if section_start >= 0:
-                # Trim from section start to end
-                new_lines = joined[:section_start].rstrip().split("\n")
+    # Remove old Additional declarations section (if any) and rebuild.
+    if _section_pos >= 0:
+        new_lines = current_text[:_section_pos].rstrip().split("\n")
+
+    if _additional_decls:
+        # Pre-populate label map for all additional entries so cross-refs work.
+        for name, decl in _additional_decls.items():
+            if name not in lean_name_to_label:
+                label_prefix = _kind_to_label_prefix(decl.kind)
+                lean_name_to_label[name] = f"{label_prefix}:{_ascii_label(name)}"
 
         new_lines.append("")
         new_lines.append("\\section{Additional declarations}")
         new_lines.append("")
 
-        # Pre-populate label map for new entries so cross-references work
-        for name in missing:
-            if name not in lean_name_to_label:
-                decl = missing[name]
-                label_prefix = _kind_to_label_prefix(decl.kind)
-                lean_name_to_label[name] = f"{label_prefix}:{_ascii_label(name)}"
-
-        # Sort by source file then name for stable ordering
-        for name in sorted(missing.keys()):
-            decl = missing[name]
-            new_entries.append(name)
+        for name in sorted(_additional_decls.keys()):
+            decl = _additional_decls[name]
 
             env = _kind_to_env(decl.kind)
             label_prefix = _kind_to_label_prefix(decl.kind)
@@ -532,17 +559,16 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
             new_lines.append(f"  \\label{{{label_prefix}:{ascii_name}}}")
             new_lines.append(f"  \\lean{{{name}}}")
 
-            # Auto-detect \uses (prefer existing labels over auto-generated ones)
+            # Compute \uses from Lean source references.
             uses_labels = []
-            for ref in decl.references:
-                if ref in existing_lean_names or ref in missing:
-                    if ref in lean_name_to_label:
-                        uses_labels.append(lean_name_to_label[ref])
-                    else:
-                        ref_decl = decls.get(ref)
-                        if ref_decl:
-                            ref_prefix = _kind_to_label_prefix(ref_decl.kind)
-                            uses_labels.append(f"{ref_prefix}:{_ascii_label(ref)}")
+            for ref in sorted(decl.references):
+                if ref in lean_name_to_label:
+                    uses_labels.append(lean_name_to_label[ref])
+                else:
+                    ref_decl = decls.get(ref)
+                    if ref_decl:
+                        ref_prefix = _kind_to_label_prefix(ref_decl.kind)
+                        uses_labels.append(f"{ref_prefix}:{_ascii_label(ref)}")
             if uses_labels:
                 new_lines.append(f"  \\uses{{{', '.join(uses_labels)}}}")
 
