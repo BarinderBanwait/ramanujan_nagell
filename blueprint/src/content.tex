@@ -101,7 +101,7 @@ $\theta = \omega \in R$, and $\theta' = 1 - \omega = (1 - \sqrt{-7})/2 \in R$.
 \begin{lemma}[Units are $\pm 1$]
   \label{lem:units_pm_one}
   \lean{units_pm_one}
-  \uses{lem:K_nrComplexPlaces_2, lem:K_nrRealPlaces_zero}
+  \uses{lem:K_degree_2, lem:K_nrComplexPlaces_2, lem:K_nrRealPlaces_zero}
   The only units in $R$ are $\pm 1$.
 \end{lemma}
 
@@ -679,9 +679,10 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
   \label{lem:K_discriminant}
   \lean{K_discriminant}
   \uses{lem:my_minpoly, lem:span_eq_top}
+  \leanok
   TODO: add description
 \end{lemma}
-\begin{proof}
+\begin{proof}\leanok
   Proof in Lean source.
 \end{proof}
 

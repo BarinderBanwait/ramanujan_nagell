@@ -28,6 +28,10 @@ import Mathlib.RingTheory.Norm.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.LinearMap
 import Mathlib.LinearAlgebra.Charpoly.BaseChange
 import Mathlib.FieldTheory.Minpoly.Field
+import Mathlib.RingTheory.RootsOfUnity.Minpoly
+import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+import RamanujanNagell.QuadraticIntegers.RingOfIntegers
+import RamanujanNagell.QuadraticIntegers.FieldIsomorphism
 
 set_option linter.style.longLine false
 set_option diagnostics true
@@ -226,7 +230,30 @@ lemma K_nrComplexPlaces_2 : nrComplexPlaces K = 1 := by
   omega
 
 lemma span_eq_top : adjoin ℤ {θ} = ⊤ := by
-  admit
+  -- Strategy:
+  -- 1. `ring_of_integers_neg7` gives IsIntegralClosure (QuadraticAlgebra ℤ (-2) 1) ℤ K'
+  -- 2. `fieldIso : K' ≃ₐ[ℚ] K` transports this to IsIntegralClosure (QuadraticAlgebra ℤ (-2) 1) ℤ K
+  -- 3. `IsIntegralClosure.equiv` gives AlgEquiv ℤ (QuadraticAlgebra ℤ (-2) 1) (𝓞 K) sending ω ↦ θ
+  -- 4. Pull back `adjoin ℤ {ω} = ⊤` (in QuadraticAlgebra ℤ (-2) 1) via the iso
+  -- The key content: there is an algebra iso QuadraticAlgebra ℤ (-2) 1 ≃ₐ[ℤ] 𝓞 K
+  -- sending ω ↦ θ. This follows from ring_of_integers_neg7 + algebraIntZ_K' + fieldIso.
+  obtain ⟨iso, h_iso_omega⟩ :
+      ∃ (iso : QuadraticAlgebra ℤ (-2 : ℤ) 1 ≃ₐ[ℤ] 𝓞 K), iso ω = θ := by
+    sorry
+  -- Every element of QuadraticAlgebra ℤ (-2) 1 is in adjoin ℤ {ω}
+  have h_top : Algebra.adjoin ℤ ({ω} : Set (QuadraticAlgebra ℤ (-2 : ℤ) 1)) = ⊤ :=
+    quadraticAlgebra_adjoin_omega_eq_top (-2 : ℤ) 1
+  -- The pullback: adjoin ℤ {iso ω} = ⊤ in 𝓞 K
+  have h_pull : Algebra.adjoin ℤ ({iso (ω : QuadraticAlgebra ℤ (-2 : ℤ) 1)} : Set (𝓞 K)) = ⊤ := by
+    have key : Subalgebra.map iso.toAlgHom
+        (Algebra.adjoin ℤ ({ω} : Set (QuadraticAlgebra ℤ (-2 : ℤ) 1))) = ⊤ := by
+      rw [h_top, Algebra.map_top, AlgHom.range_eq_top]
+      intro b
+      exact ⟨iso.symm b, by simp⟩
+    rw [AlgHom.map_adjoin_singleton] at key
+    exact key
+  -- Conclude: adjoin ℤ {θ} = ⊤
+  rwa [h_iso_omega] at h_pull
 
 -- θ² = θ - 2 in 𝓞 K (from ω² = -2 + ω in K)
 private lemma theta_sq : (θ : 𝓞 K) * θ = θ - 2 := by
@@ -237,34 +264,75 @@ private lemma theta_sq : (θ : 𝓞 K) * θ = θ - 2 := by
   simp at h2
   rw [h1, h2]; ring
 
-lemma K_discriminant : discr K = 7 := by
-  -- Construct ℤ-power basis for 𝓞 K using span_eq_top
+lemma K_discriminant : discr K = -7 := by
   have h_int : IsIntegral ℤ (θ : 𝓞 K) := RingOfIntegers.isIntegral θ
   let pb := PowerBasis.ofAdjoinEqTop' h_int span_eq_top
+  -- Step 1: any ℤ-basis of 𝓞 K computes the same discriminant
   rw [← discr_eq_discr K pb.basis]
+  -- Step 2: the discriminant equals the determinant of the trace matrix
   rw [Algebra.discr_def]
-  -- Goal: (traceMatrix ℤ ⇑pb.basis).det = -7
-  -- We need pb.dim = 2
+  -- Step 3: pb has dimension 2 (minpoly of θ is X² - X + 2, degree 2)
   have h_dim : pb.dim = 2 := by
     have h1 := pb.natDegree_minpoly
     have h2 : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
     rw [h2, my_minpoly] at h1
-    -- h1 : (X ^ 2 - X + 2).natDegree = pb.dim
     change (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = pb.dim at h1
     have h3 : (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = 2 := by compute_degree!
     linarith
-  -- Goal: (traceMatrix ℤ ⇑pb.basis).det = -7
-  -- Reindex to Fin 2
-  have h_gen : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
-  -- Show trace matrix entries
-  -- traceMatrix[i][j] = trace(pb.basis i * pb.basis j) = trace(θ^i * θ^j)
-  -- For dim=2: trace(1) = 2, trace(θ) = 1, trace(θ²) = trace(θ-2) = 1-4 = -3
-  -- So trace matrix = !![2,1;1,-3], det = -7
-  -- Use pb.basis_eq_pow to rewrite basis elements
-  -- Then compute trace using the minimal polynomial
-  simp only [Algebra.traceMatrix]
-  sorry
-
+  -- Step 4: reindex the trace matrix from Fin pb.dim to Fin 2
+  --         (det is invariant under reindexing by an equivalence)
+  rw [← Matrix.det_reindex_self (finCongr h_dim)]
+  -- Step 5: the reindexed trace matrix for the power basis {1, θ} is !![2, 1; 1, -3]
+  -- Justification:
+  --   pb.basis 0 = θ^0 = 1,  pb.basis 1 = θ^1 = θ  (by pb.basis_eq_pow + h_gen)
+  --   trace(1 · 1)   = trace(1) = 2
+  --   trace(1 · θ)   = trace(θ) = 1       (sum of conjugates θ + θ' = 1)
+  --   trace(θ · θ)   = trace(θ²) = trace(θ - 2) = 1 - 4 = -3  (by theta_sq)
+  -- The trace matrix for the power basis {1, θ}, reindexed to Fin 2, is !![2, 1; 1, -3]
+  have h_mat : (Matrix.reindex (finCongr h_dim) (finCongr h_dim)) (traceMatrix ℤ ⇑pb.basis) =
+      !![2, 1; 1, -3] := by
+    have h_gen : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
+    -- trace(1) = finrank = 2
+    have h_tr_one : Algebra.trace ℤ (integralClosure ℤ K) (1 : integralClosure ℤ K) = 2 := by
+      rw [show (1 : integralClosure ℤ K) = algebraMap ℤ _ 1 from (map_one _).symm,
+          Algebra.trace_algebraMap_of_basis pb.basis,
+          show Fintype.card (Fin pb.dim) = 2 from by rw [Fintype.card_fin, h_dim]]
+      simp
+    -- trace(θ) = -(minpoly).nextCoeff = -(-1) = 1
+    have h_tr_gen : Algebra.trace ℤ (integralClosure ℤ K) θ = 1 := by
+      rw [← h_gen,
+          Algebra.trace_eq_matrix_trace pb.basis, Matrix.trace_eq_neg_charpoly_nextCoeff,
+          charpoly_leftMulMatrix, h_gen, my_minpoly]
+      have hnd : (X ^ 2 - X + (2 : ℤ[X])).natDegree = 2 := by compute_degree!
+      rw [nextCoeff_of_natDegree_pos (by omega : 0 < _), hnd]
+      norm_num [coeff_add, coeff_sub, coeff_X_pow, coeff_X]
+    -- trace(θ²) = trace(θ - 2) = 1 - 4 = -3
+    have h_tr_sq : Algebra.trace ℤ (integralClosure ℤ K) (θ * θ) = -3 := by
+      rw [theta_sq, map_sub,
+          show (2 : integralClosure ℤ K) = algebraMap ℤ _ 2 from by simp,
+          Algebra.trace_algebraMap_of_basis pb.basis,
+          show Fintype.card (Fin pb.dim) = 2 from by rw [Fintype.card_fin, h_dim],
+          h_tr_gen]; ring
+    -- Prove matrix equality entrywise
+    ext i j
+    simp only [Matrix.reindex_apply, Matrix.submatrix_apply, traceMatrix, Matrix.of_apply,
+      traceForm_apply]
+    rw [pb.basis_eq_pow, pb.basis_eq_pow]
+    have hvi : ((finCongr h_dim).symm i).val = i.val := by simp [finCongr]
+    have hvj : ((finCongr h_dim).symm j).val = j.val := by simp [finCongr]
+    rw [hvi, hvj, h_gen]
+    fin_cases i <;> fin_cases j <;>
+      simp only [Fin.val_one, pow_zero, pow_one,
+        one_mul, mul_one, Matrix.cons_val', Matrix.cons_val_zero,
+        Matrix.empty_val', Matrix.vecCons, Matrix.of, Matrix.vecHead, Matrix.vecTail,
+        Fin.isValue]
+    · exact h_tr_one
+    · exact h_tr_gen
+    · exact h_tr_gen
+    · exact h_tr_sq
+  calc ((Matrix.reindex (finCongr h_dim) (finCongr h_dim)) (traceMatrix ℤ ⇑pb.basis)).det
+      = (!![2, 1; 1, -3] : Matrix (Fin 2) (Fin 2) ℤ).det := congr_arg Matrix.det h_mat
+    _ = -7 := by rw [Matrix.det_fin_two_of]; norm_num
 
 lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
   intro u
@@ -279,7 +347,44 @@ lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
     have h_div2 : orderOf u ∣ 2 := by
       have h_pos : 0 < orderOf u := orderOf_pos_iff.mpr h_fin
       -- φ(orderOf u) ≤ [K:ℚ] = 2 (IsPrimitiveRoot.totient_le_degree_minpoly + my_minpoly)
-      have h_totient_le : Nat.totient (orderOf u) ≤ 2 := by sorry
+      have h_totient_le : Nat.totient (orderOf u) ≤ 2 := by
+        -- Rewrite orderOf u as orderOf (u : R) via orderOf_units
+        rw [← orderOf_units (y := u)]
+        -- (u : R) is a primitive (orderOf (u : R))-th root of unity
+        have h_prim : IsPrimitiveRoot (u : R) (orderOf (u : R)) := IsPrimitiveRoot.orderOf _
+        -- φ(orderOf (u:R)) ≤ natDegree (minpoly ℤ (u:R))
+        have h1 : Nat.totient (orderOf (u : R)) ≤ (minpoly ℤ (u : R)).natDegree :=
+          IsPrimitiveRoot.totient_le_degree_minpoly h_prim
+        -- natDegree (minpoly ℤ (u:R)) ≤ 2 via Cayley-Hamilton for the left-multiplication map
+        have h2' : (minpoly ℤ (u : R)).natDegree ≤ 2 := by
+          set lm := Algebra.lmul ℤ R (u : R)
+          -- Cayley-Hamilton: aeval lm lm.charpoly = 0
+          have h_cayham : aeval lm lm.charpoly = 0 := LinearMap.aeval_self_charpoly lm
+          -- aeval commutes with algebra hom lmul
+          have h_aeval_lmul : aeval lm lm.charpoly =
+              Algebra.lmul ℤ R (aeval (u : R) lm.charpoly) :=
+            Polynomial.aeval_algHom_apply (Algebra.lmul ℤ R) (u : R) lm.charpoly
+          -- Therefore aeval (u:R) lm.charpoly = 0
+          have h_aeval_zero : aeval (u : R) lm.charpoly = 0 := by
+            -- lmul ℤ R applied to (aeval (u:R) charpoly) equals 0 as a linear map
+            have h_key : Algebra.lmul ℤ R (aeval (u : R) lm.charpoly) = 0 :=
+              h_aeval_lmul.symm.trans h_cayham
+            -- Evaluate both sides at 1 to extract the element equation
+            have h1 := LinearMap.congr_fun h_key 1
+            simp [Algebra.lmul] at h1
+            exact h1
+          -- minpoly ℤ (u:R) divides charpoly of lm
+          have h_int : IsIntegral ℤ (u : R) := Algebra.IsIntegral.isIntegral _
+          have h_dvd : minpoly ℤ (u : R) ∣ lm.charpoly :=
+            minpoly.isIntegrallyClosed_dvd h_int h_aeval_zero
+          have h_ne : lm.charpoly ≠ 0 := (LinearMap.charpoly_monic lm).ne_zero
+          -- charpoly has degree = finrank ℤ R = 2
+          have h_deg : lm.charpoly.natDegree = 2 := by
+            rw [LinearMap.charpoly_natDegree, NumberField.RingOfIntegers.rank K]
+            convert K_degree_2 using 2
+            exact Subsingleton.elim _ _
+          linarith [Polynomial.natDegree_le_of_dvd h_dvd h_ne]
+        omega
       -- For n ≥ 7, φ(n) ≥ 4 > 2, so orderOf u ≤ 6
       have h_le6 : orderOf u ≤ 6 := by sorry
       -- K has no cube roots of unity (K ≇ ℚ(ζ₃) = ℚ(√-3), since -7 ≠ -3):
