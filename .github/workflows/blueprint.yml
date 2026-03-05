@@ -5,6 +5,11 @@ on:
     branches:
       - master # Trigger on pushes to the default branch
   workflow_dispatch:        # Allow manual triggering of the workflow from the GitHub Actions interface
+    inputs:
+      skip_lean:
+        description: 'Skip Lean build and API docs (fast frontend-only deploy)'
+        type: boolean
+        default: false
 
 # Cancel previous runs if a new commit is pushed to the same PR or branch
 concurrency:
@@ -28,15 +33,19 @@ jobs:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Install elan
+        if: ${{ !inputs.skip_lean }}
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
       - name: Get Mathlib cache
+        if: ${{ !inputs.skip_lean }}
         run: ~/.elan/bin/lake exe cache get || true
 
       - name: Build project
+        if: ${{ !inputs.skip_lean }}
         run: ~/.elan/bin/lake build RamanujanNagell
 
       - name: Cache API docs
+        if: ${{ !inputs.skip_lean }}
         uses: actions/cache@v4
         with:
           path: |
@@ -51,6 +60,7 @@ jobs:
           key: Docs-${{ hashFiles('lake-manifest.json') }}
 
       - name: Build project API documentation
+        if: ${{ !inputs.skip_lean }}
         run: ~/.elan/bin/lake -R -Kenv=dev build RamanujanNagell:docs
       
       - name: Check for `home_page` folder # this is meant to detect a Jekyll-based website
@@ -86,13 +96,16 @@ jobs:
             cp -r blueprint/web home_page/blueprint
 
       - name: Check declarations mentioned in the blueprint exist in Lean code
+        if: ${{ !inputs.skip_lean }}
         run: |
             ~/.elan/bin/lake exe checkdecls blueprint/lean_decls
 
       - name: Copy API documentation to `home_page/docs`
+        if: ${{ !inputs.skip_lean }}
         run: cp -r .lake/build/doc home_page/docs
 
       - name: Remove unnecessary lake files from documentation in `home_page/docs`
+        if: ${{ !inputs.skip_lean }}
         run: |
           find home_page/docs -name "*.trace" -delete
           find home_page/docs -name "*.hash" -delete
@@ -121,5 +134,6 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Make sure the API documentation cache works
+        if: ${{ !inputs.skip_lean }}
         run: mv home_page/docs .lake/build/doc
      
