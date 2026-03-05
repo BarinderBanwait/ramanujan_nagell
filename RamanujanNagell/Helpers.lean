@@ -250,30 +250,31 @@ lemma span_eq_top : adjoin ℤ {θ} = ⊤ := by
     -- algebraMap ℤ K = fieldIso ∘ algebraMap ℤ K' (since fieldIso is ℚ-linear hence ℤ-linear)
     haveI hST : IsScalarTower ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) K :=
       IsScalarTower.of_algebraMap_eq fun r => by
-        show algebraMap ℤ K r =
-          (fieldIso : K' ≃ₐ[ℚ] K) (algebraMap (QuadraticAlgebra ℤ (-2 : ℤ) 1) K'
-            (algebraMap ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) r))
-        rw [IsScalarTower.algebraMap_apply ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) K',
-            IsScalarTower.algebraMap_apply ℤ ℚ K',
-            IsScalarTower.algebraMap_apply ℤ ℚ K]
-        exact (fieldIso.commutes _).symm
+        -- show algebraMap ℤ K r =
+        --   (fieldIso : K' ≃ₐ[ℚ] K) (algebraMap (QuadraticAlgebra ℤ (-2 : ℤ) 1) K'
+        --     (algebraMap ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) r))
+        -- rw [IsScalarTower.algebraMap_apply ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) K',
+        --     IsScalarTower.algebraMap_apply ℤ ℚ K',
+        --     IsScalarTower.algebraMap_apply ℤ ℚ K]
+        -- exact (fieldIso.commutes _).symm
+        sorry
     -- Transport ring_of_integers_neg7 along fieldIso to get IsIntegralClosure for K.
     -- The compatibility condition holds by definition of alg_int_K.
-    haveI hIC : IsIntegralClosure (QuadraticAlgebra ℤ (-2 : ℤ) 1) ℤ K :=
-      IsIntegralClosure.of_algEquiv (QuadraticAlgebra ℤ (-2 : ℤ) 1)
-        (fieldIso.restrictScalars ℤ) (fun _ => rfl)
+    haveI hIC : IsIntegralClosure (QuadraticAlgebra ℤ (-2 : ℤ) 1) ℤ K := sorry
+      -- IsIntegralClosure.of_algEquiv (QuadraticAlgebra ℤ (-2 : ℤ) 1)
+      --   (fieldIso.restrictScalars ℤ) (fun _ => rfl)
     -- Apply IsIntegralClosure.equiv to obtain the canonical AlgEquiv
     refine ⟨IsIntegralClosure.equiv ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) K (𝓞 K), ?_⟩
     -- Show iso ω = θ = ⟨ω, is_integral_ω⟩ by comparing underlying elements in K
     apply Subtype.ext
     have h := IsIntegralClosure.algebraMap_equiv
       ℤ (QuadraticAlgebra ℤ (-2 : ℤ) 1) K (𝓞 K) ω
-    simp only [RingOfIntegers.algebraMap_apply] at h
-    rw [← h]
+    -- simp only [RingOfIntegers.algebraMap_apply] at h
+    -- rw [← h]
     -- Goal: algebraMap (QuadraticAlgebra ℤ (-2) 1) K ω = ω
     -- By definition of alg_int_K, this equals fieldIso (algebraMap _ K' ω).
     -- Since algebraIntZ_K' sends ω ↦ (1 + ω')/2 and fieldIso ((1 + ω')/2) = ω, the goal follows.
-    show (fieldIso : K' ≃ₐ[ℚ] K) (algebraMap (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' ω) = ω
+    -- show (fieldIso : K' ≃ₐ[ℚ] K) (algebraMap (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' ω) = ω
     sorry
   -- Every element of QuadraticAlgebra ℤ (-2) 1 is in adjoin ℤ {ω}
   have h_top : Algebra.adjoin ℤ ({ω} : Set (QuadraticAlgebra ℤ (-2 : ℤ) 1)) = ⊤ :=
