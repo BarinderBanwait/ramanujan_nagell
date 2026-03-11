@@ -73,27 +73,26 @@ which is the ring of integers of ℚ(√-7) since disc(θ² - θ + 2) = 1 - 8 = 
 theorem ring_of_integers_neg7 : IsIntegralClosure (QuadraticAlgebra ℤ (-2 : ℤ) 1) ℤ K' := by
   haveI hsq : Fact (Squarefree (-7 : ℤ)) :=
     ⟨by have h7 : Squarefree (7 : ℤ) := (show Prime (7 : ℤ) from by norm_num).squarefree
-        intro x hx; exact h7 x (dvd_neg.mpr hx)⟩
+        exact fun x hx ↦ h7 x (dvd_neg.mpr hx)⟩
   haveI halt : (-7 : ℤ).natAbs.AtLeastTwo := ⟨by norm_num⟩
   haveI hmod : Fact ((-7 : ℤ) ≡ 1 [ZMOD 4]) := ⟨by decide⟩
-  -- With Field K' now available (via hsq, halt), shadow algebraIntZ_K' with an instance
-  -- using field division (same lift element as d_1's private instance).
-  -- Proof-irrelevance then makes the two instances definitionally equal.
-  -- Note: ((-7 - 1) / 4 : ℤ) = -2 by rfl, so the type equality is also definitional.
   haveI : Algebra (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' :=
     (QuadraticAlgebra.lift (R := ℤ)
       ⟨(1 + (ω : K')) / 2, QuadraticInteger.algebra_S_K (d := -7)⟩).toRingHom.toAlgebra
-
-  -- 1. Bind the exact theorem application to a local hypothesis
-  have h_d1 := @QuadraticInteger.d_1 (-7 : ℤ) hsq halt hmod
-
-  -- change IsIntegralClosure (QuadraticAlgebra ℤ ((-7 - 1) / 4) 1) ℤ _
-  convert h_d1 using 1
-  -- refine Algebra.algebra_ext_iff.mpr ?_
+  -- Inline the lemma application directly into convert
+  convert @QuadraticInteger.d_1 (-7 : ℤ) hsq halt hmod using 1
   refine Algebra.algebra_ext_iff.mpr (RingHom.ext_iff.mp ?_)
-  ext
   unfold algebraIntZ_K'
-  sorry
-  sorry
-
+    -- The `change` here is optional documentation, but good for readability
+  change (QuadraticAlgebra.lift (R := ℤ) ⟨(1 / 2 : ℚ) • ((ω : K') + 1), algK'Proof⟩).toRingHom =
+    (QuadraticAlgebra.lift (R := ℤ) ⟨(1 + (ω : K')) / 2, QuadraticInteger.algebra_S_K (d := -7)⟩).toRingHom
+  congr 1; congr 1; apply Subtype.ext
+  change (1 / 2 : ℚ) • ((ω : K') + 1) = (1 + (ω : K')) / 2
+  -- Inline the two_ne_zero proof directly into the rewrite
+  rw [eq_div_iff two_ne_zero, show (2 : K') = 1 + 1 by norm_num]
+  -- Use <;> to apply the exact same simp and ring sequence to both .re and .im subgoals
+  ext <;>
+    simp only [re_mul, im_mul, re_smul, im_smul, omega_re, omega_im, re_add, im_add,
+               re_one, im_one, add_zero, zero_add, smul_eq_mul] <;>
+    ring
 end
