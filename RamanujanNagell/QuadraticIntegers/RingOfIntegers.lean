@@ -5,12 +5,15 @@ Authors: Barinder S. Banwait
 
 Attribution: This file is adapted from
   ~/Documents/QuadraticIntegers/QuadraticIntegers/RingOfIntegers.lean
-The theorem `ring_of_integers_neg7` is the specialisation of `QuadraticInteger.d_1` at
-d = -7, e = (d-1)/4 = -2, giving `IsIntegralClosure (QuadraticAlgebra ℤ (-2) 1) ℤ K'`.
+by Brasca et al. The theorem `ring_of_integers_neg7` is the specialisation of
+`QuadraticInteger.d_1` at d = -7, e = (d-1)/4 = -2, giving
+`IsIntegralClosure (QuadraticAlgebra ℤ (-2) 1) ℤ K'`.
 -/
 
 import Mathlib.Algebra.QuadraticAlgebra.Basic
 import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Tactic
+import RamanujanNagell.QuadraticIntegers.QuadraticIntegerROI
 
 open QuadraticAlgebra
 
@@ -32,8 +35,30 @@ The ring map sends the ℤ-generator ω_int (satisfying ω_int² = -2 + ω_int) 
   -2 + 1·((1 + ω')/2) = -2 + 1/2 + ω'/2 = -3/2 + ω'/2  ✓
 This is `QuadraticInteger.d_1`'s algebra instance at d = -7, e = -2.
 -/
-noncomputable instance algebraIntZ_K' : Algebra (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' := by
-  sorry
+
+/-- The proof that (1/2)·(ω'+1) satisfies the relation for QuadraticAlgebra ℤ (-2) 1. -/
+private def algK'Proof : (1 / 2 : ℚ) • ((ω : K') + 1) * ((1 / 2 : ℚ) • ((ω : K') + 1)) =
+    (-2 : ℤ) • (1 : K') + (1 : ℤ) • ((1 / 2 : ℚ) • ((ω : K') + 1)) := by
+  ext
+  · simp only [re_mul, re_smul, im_smul, omega_re, omega_im, re_add, im_add, re_one, im_one,
+               add_zero, zero_add]
+    simp only [smul_eq_mul]; ring
+  · simp only [im_mul, re_smul, im_smul, omega_re, omega_im, re_add, im_add, re_one, im_one,
+               add_zero, zero_add]
+    simp only [smul_eq_mul]; ring
+
+noncomputable instance algebraIntZ_K' : Algebra (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' :=
+  (QuadraticAlgebra.lift (R := ℤ) ⟨(1 / 2 : ℚ) • ((ω : K') + 1), algK'Proof⟩).toRingHom.toAlgebra
+
+/-- The algebra map sends ω to (1+ω')/2. -/
+@[simp]
+lemma algebraMap_omega_K' :
+    algebraMap (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' (ω : QuadraticAlgebra ℤ (-2 : ℤ) 1) =
+    (1 / 2 : ℚ) • ((ω : K') + 1) := by
+  have h := QuadraticAlgebra.lift_symm_apply_coe
+    (QuadraticAlgebra.lift (R := ℤ) ⟨(1 / 2 : ℚ) • ((ω : K') + 1), algK'Proof⟩)
+  rw [Equiv.symm_apply_apply] at h
+  exact h.symm
 
 /-! ## The ring of integers of K'
 
@@ -46,8 +71,29 @@ This is exactly the ring ℤ[θ] in our main file (where θ satisfies θ² = θ 
 which is the ring of integers of ℚ(√-7) since disc(θ² - θ + 2) = 1 - 8 = -7.
 -/
 theorem ring_of_integers_neg7 : IsIntegralClosure (QuadraticAlgebra ℤ (-2 : ℤ) 1) ℤ K' := by
-  -- This is QuadraticInteger.d_1 specialised at d = -7.
-  -- The hypothesis d ≡ 1 [ZMOD 4] holds since -7 ≡ 1 [ZMOD 4] (i.e. -7 - 1 = -8 = 4 · (-2)).
+  haveI hsq : Fact (Squarefree (-7 : ℤ)) :=
+    ⟨by have h7 : Squarefree (7 : ℤ) := (show Prime (7 : ℤ) from by norm_num).squarefree
+        intro x hx; exact h7 x (dvd_neg.mpr hx)⟩
+  haveI halt : (-7 : ℤ).natAbs.AtLeastTwo := ⟨by norm_num⟩
+  haveI hmod : Fact ((-7 : ℤ) ≡ 1 [ZMOD 4]) := ⟨by decide⟩
+  -- With Field K' now available (via hsq, halt), shadow algebraIntZ_K' with an instance
+  -- using field division (same lift element as d_1's private instance).
+  -- Proof-irrelevance then makes the two instances definitionally equal.
+  -- Note: ((-7 - 1) / 4 : ℤ) = -2 by rfl, so the type equality is also definitional.
+  haveI : Algebra (QuadraticAlgebra ℤ (-2 : ℤ) 1) K' :=
+    (QuadraticAlgebra.lift (R := ℤ)
+      ⟨(1 + (ω : K')) / 2, QuadraticInteger.algebra_S_K (d := -7)⟩).toRingHom.toAlgebra
+
+  -- 1. Bind the exact theorem application to a local hypothesis
+  have h_d1 := @QuadraticInteger.d_1 (-7 : ℤ) hsq halt hmod
+
+  -- change IsIntegralClosure (QuadraticAlgebra ℤ ((-7 - 1) / 4) 1) ℤ _
+  convert h_d1 using 1
+  -- refine Algebra.algebra_ext_iff.mpr ?_
+  refine Algebra.algebra_ext_iff.mpr (RingHom.ext_iff.mp ?_)
+  ext
+  unfold algebraIntZ_K'
+  sorry
   sorry
 
 end
