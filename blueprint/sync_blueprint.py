@@ -35,7 +35,7 @@ SCAN_FILES = [
     "Helpers.lean",
     "QuadraticIntegers/FieldIsomorphism.lean",
     "QuadraticIntegers/RingOfIntegers.lean",
-    ("QuadraticIntegers/QuadraticIntegerROI.lean", {"d_1"}),
+    ("QuadraticIntegers/QuadraticIntegerROI.lean", {"QuadraticInteger.d_1"}),
 ]
 
 # Declaration regex: matches lemma, theorem, def, abbrev at start of line
@@ -46,6 +46,10 @@ DECL_RE = re.compile(
     r"(lemma|theorem|def|abbrev)\s+([\w']+)",
     re.MULTILINE,
 )
+
+# Namespace open/close regexes (for fully qualifying declaration names)
+NAMESPACE_OPEN_RE = re.compile(r"^namespace\s+([\w']+)", re.MULTILINE)
+NAMESPACE_END_RE = re.compile(r"^end\s+([\w']+)", re.MULTILINE)
 
 # Docstring regex: /-- ... -/ immediately before a declaration
 DOCSTRING_RE = re.compile(
@@ -96,12 +100,36 @@ def parse_lean_files() -> dict[str, LeanDecl]:
         text = filepath.read_text()
         lines = text.split("\n")
 
+        # Build a namespace stack keyed by position so we can qualify names.
+        # We collect all namespace open/end events sorted by position, then
+        # replay them to find the active namespace at each declaration site.
+        ns_events = []  # (pos, kind, name) where kind is 'open' or 'end'
+        for m_ns in NAMESPACE_OPEN_RE.finditer(text):
+            ns_events.append((m_ns.start(), "open", m_ns.group(1)))
+        for m_ns in NAMESPACE_END_RE.finditer(text):
+            ns_events.append((m_ns.start(), "end", m_ns.group(1)))
+        ns_events.sort()
+
+        def namespace_at(pos: int) -> str:
+            """Return the fully qualified namespace prefix active at pos."""
+            stack: list[str] = []
+            for ev_pos, ev_kind, ev_name in ns_events:
+                if ev_pos >= pos:
+                    break
+                if ev_kind == "open":
+                    stack.append(ev_name)
+                elif ev_kind == "end" and stack and stack[-1] == ev_name:
+                    stack.pop()
+            return ".".join(stack)
+
         # Find all declarations with their positions
         matches = list(DECL_RE.finditer(text))
 
         for i, m in enumerate(matches):
             kind = m.group(1)
-            name = m.group(2)
+            bare_name = m.group(2)
+            ns = namespace_at(m.start())
+            name = f"{ns}.{bare_name}" if ns else bare_name
 
             if name in SKIP_NAMES:
                 continue
@@ -215,12 +243,12 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     uses_changes = []  # (name, old_uses, new_uses)
 
     # Find all \lean{name} entries
-    lean_entries = set(re.findall(r"\\lean\{([\w']+)\}", text))
+    lean_entries = set(re.findall(r"\\lean\{([\w'.]+)\}", text))
 
     # Build map from Lean name -> existing LaTeX label
     # by finding \lean{name} and looking backwards for the nearest \label{...}
     lean_name_to_label: dict[str, str] = {}
-    for m in re.finditer(r"\\lean\{([\w']+)\}", text):
+    for m in re.finditer(r"\\lean\{([\w'.]+)\}", text):
         lean_name = m.group(1)
         before = text[:m.start()]
         label_match = re.search(r"\\label\{([^}]+)\}\s*$", before)
@@ -241,7 +269,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         line = lines[i]
 
         # Check if this line has \lean{name}
-        lean_match = re.search(r"\\lean\{([\w']+)\}", line)
+        lean_match = re.search(r"\\lean\{([\w'.]+)\}", line)
         if lean_match:
             name = lean_match.group(1)
             decl = decls.get(name)
@@ -320,7 +348,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         line = lines[i]
         new_lines.append(line)
 
-        lean_match = re.search(r"\\lean\{([\w']+)\}", line)
+        lean_match = re.search(r"\\lean\{([\w'.]+)\}", line)
         if lean_match:
             name = lean_match.group(1)
             decl = decls.get(name)
@@ -371,7 +399,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         new_lines.append(line)
 
         # Track which \lean{} entry we're in
-        lean_match = re.search(r"\\lean\{([\w']+)\}", line)
+        lean_match = re.search(r"\\lean\{([\w'.]+)\}", line)
         if lean_match:
             current_lean_name = lean_match.group(1)
 
@@ -404,7 +432,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     current_text = "\n".join(new_lines)
     label_renames: dict[str, str] = {}  # old_label -> new_label
     for m_iter in re.finditer(
-        r"\\label\{((?:lem|thm|def):([^}]+))\}\s*\n\s*\\lean\{([\w']+)\}",
+        r"\\label\{((?:lem|thm|def):([^}]+))\}\s*\n\s*\\lean\{([\w'.]+)\}",
         current_text,
     ):
         old_label = m_iter.group(1)
@@ -425,7 +453,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     # First, rebuild the label map from the current state of the file
     current_text = "\n".join(new_lines)
     lean_name_to_label = {}
-    for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w']+)\}", current_text):
+    for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w'.]+)\}", current_text):
         lean_name_to_label[m_iter.group(2)] = m_iter.group(1)
 
     # Pre-populate lean_name_to_label with fallback labels for ALL known Lean declarations.
@@ -450,7 +478,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
         line = lines[i]
 
         # Track current \lean{} entry
-        lean_match = re.search(r"\\lean\{([\w']+)\}", line)
+        lean_match = re.search(r"\\lean\{([\w'.]+)\}", line)
         if lean_match:
             current_lean_name = lean_match.group(1)
             new_lines.append(line)
@@ -517,7 +545,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     # The main body is everything before the Additional declarations section marker.
     current_text = "\n".join(new_lines)
     lean_name_to_label = {}
-    for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w']+)\}", current_text):
+    for m_iter in re.finditer(r"\\label\{([^}]+)\}\s*\n\s*\\lean\{([\w'.]+)\}", current_text):
         lean_name_to_label[m_iter.group(2)] = m_iter.group(1)
 
     # Split into main body (user-curated) and Additional declarations (auto-generated).
@@ -526,14 +554,14 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
     if _section_pos >= 0:
         _main_body_text = current_text[:_section_pos]
         _old_additional_lean_names = set(
-            re.findall(r"\\lean\{([\w']+)\}", current_text[_section_pos:])
+            re.findall(r"\\lean\{([\w'.]+)\}", current_text[_section_pos:])
         )
     else:
         _main_body_text = current_text
         _old_additional_lean_names = set()
 
     # Declarations that are in the main body (user-placed, don't touch).
-    _main_body_lean_names = set(re.findall(r"\\lean\{([\w']+)\}", _main_body_text))
+    _main_body_lean_names = set(re.findall(r"\\lean\{([\w'.]+)\}", _main_body_text))
 
     # All declarations that should live in Additional declarations.
     _additional_decls = {
@@ -616,7 +644,7 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
 def _find_lean_name_backwards(lines: list[str], from_idx: int) -> str | None:
     """Look backwards from from_idx to find the nearest \\lean{name}."""
     for j in range(from_idx, max(from_idx - 20, -1), -1):
-        m = re.search(r"\\lean\{([\w']+)\}", lines[j])
+        m = re.search(r"\\lean\{([\w'.]+)\}", lines[j])
         if m:
             return m.group(1)
         # Stop if we hit a \begin{env} (we've gone too far back)
@@ -661,6 +689,8 @@ def _ascii_label(name: str) -> str:
     result = name
     for uni, asc in _UNICODE_TO_ASCII.items():
         result = result.replace(uni, asc)
+    # Replace dots (namespace separators) with hyphens for LaTeX label safety
+    result = result.replace(".", "-")
     return result
 
 
@@ -691,7 +721,7 @@ def _kind_to_label_prefix(kind: str) -> str:
 
 def update_lean_decls(final_tex: str, dry_run: bool = False):
     """Regenerate lean_decls from final content.tex."""
-    names = sorted(set(re.findall(r"\\lean\{([\w']+)\}", final_tex)))
+    names = sorted(set(re.findall(r"\\lean\{([\w'.]+)\}", final_tex)))
     content = "\n".join(names) + "\n"
     if not dry_run:
         LEAN_DECLS.write_text(content)

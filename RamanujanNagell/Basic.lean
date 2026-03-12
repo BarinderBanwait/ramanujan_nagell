@@ -1340,17 +1340,8 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
         -- 5. Prove that -(2 * 7 * term) = 2 * term * (-7)^(j+1)
         --    ring can handle this easily (since (-7)^(j+1) includes a -7 factor)
         ring]
-
-      -- rw [show (Finset.filter Even (Finset.range (d + 1))) =
-      --   Finset.image (fun j => 2 * j) (Finset.range (d / 2 + 1)) from by
-      --   ext k; simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
-      --   constructor
-      --   · rintro ⟨hk, j, hj⟩; exact ⟨j, by omega, hj⟩
-      --   · rintro ⟨j, hj, rfl⟩; exact ⟨by omega, ⟨j, rfl⟩⟩]
-
       -- 1. Align the syntax: Turn "¬Odd" into "Even" in the goal
       simp_rw [← nat_even_iff_not_odd]
-
       -- 2. Now perform the set rewrite
       rw [show Finset.filter Even (Finset.range (d + 1)) =
              Finset.image (fun j => 2 * j) (Finset.range (d / 2 + 1)) from by
@@ -1364,7 +1355,6 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
         -- Right to Left: If k = 2*m and m < d/2+1, then k is even and k < d+1
         · rintro ⟨m, hm, rfl⟩
           refine ⟨by omega, ⟨m, two_mul m⟩⟩] -- Use two_mul to switch 2*m back to m+m
-
       rw [Finset.sum_image (fun a _ b _ hab => by omega)]
       rw [show d / 2 + 1 = (d / 2) + 1 from rfl]
       rw [Finset.sum_range_succ']
