@@ -27,8 +27,16 @@ LEAN_DIR = PROJECT_ROOT / "RamanujanNagell"
 CONTENT_TEX = PROJECT_ROOT / "blueprint" / "src" / "content.tex"
 LEAN_DECLS = PROJECT_ROOT / "blueprint" / "lean_decls"
 
-# Only scan primary source files (skip test/playground/backup)
-SCAN_FILES = ["Basic.lean", "Helpers.lean"]
+# Only scan primary source files (skip test/playground/backup).
+# Each entry is either a filename string (scan all non-private decls) or a
+# (filename, allowlist_set) tuple (only include names in the allowlist).
+SCAN_FILES = [
+    "Basic.lean",
+    "Helpers.lean",
+    "QuadraticIntegers/FieldIsomorphism.lean",
+    "QuadraticIntegers/RingOfIntegers.lean",
+    ("QuadraticIntegers/QuadraticIntegerROI.lean", {"d_1"}),
+]
 
 # Declaration regex: matches lemma, theorem, def, abbrev at start of line
 # Handles optional prefixes: noncomputable, private, protected, @[...]
@@ -74,7 +82,12 @@ def parse_lean_files() -> dict[str, LeanDecl]:
     """Parse Lean files and return dict of name -> LeanDecl."""
     decls: dict[str, LeanDecl] = {}
 
-    for filename in SCAN_FILES:
+    for entry in SCAN_FILES:
+        if isinstance(entry, tuple):
+            filename, allowlist = entry
+        else:
+            filename, allowlist = entry, None
+
         filepath = LEAN_DIR / filename
         if not filepath.exists():
             print(f"  WARNING: {filepath} not found, skipping")
@@ -91,6 +104,10 @@ def parse_lean_files() -> dict[str, LeanDecl]:
             name = m.group(2)
 
             if name in SKIP_NAMES:
+                continue
+
+            # If an allowlist is specified, only include names in it
+            if allowlist is not None and name not in allowlist:
                 continue
 
             # Skip commented-out declarations

@@ -2,10 +2,13 @@
 Copyright (c) 2026 Barinder S. Banwait. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Attribution: This file contains material adapted from
-  ~/Documents/QuadraticIntegers/QuadraticIntegers/RingOfIntegers.lean
-by Brasca et al. We include the `trace_and_norm` and `d_1` sections needed
-to prove `ring_of_integers_neg7`.
+Attribution: This file is essentially a port of the content of `RingOfIntegers.lean`
+in the mathlib3 repository:
+https://github.com/sacerdot/QuadraticIntegers/blob/main/QuadraticIntegers/RingOfIntegers.lean
+
+by Brasca and Monticone. We include the `trace_and_norm` and `d_1` sections needed
+to prove `ring_of_integers_neg7`. We are grateful to Riccardo Brasca for helping with
+some parts of the formalization.
 -/
 
 import Mathlib.Algebra.QuadraticAlgebra.Basic
@@ -44,6 +47,34 @@ instance field : Fact (∀ (r : ℚ), r ^ 2 ≠ d + 0 * r) := by
     subst hs <;>
     exact absurd alt.1 (by norm_num)
 
+@[simp]
+lemma re_ratCast (q : ℚ) : (q : K).re = q := by
+  have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
+  rw [this, congr_fun coe_algebraMap q, re_coe]
+
+@[simp]
+lemma im_ratCast (q : ℚ) : (q : K).im = 0 := by
+  have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
+  rw [this, congr_fun coe_algebraMap q, im_coe]
+
+lemma ratCast_eq_coe (q : ℚ) : (q : K) = QuadraticAlgebra.coe q := by
+  have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
+  rw [this, congr_fun coe_algebraMap q]
+
+-- The IntCast ℤ → K goes through ℤ → ℚ → K (via Rat.cast), so re_intCast/im_intCast
+-- (which are rfl for QuadraticAlgebra.intCast) don't apply directly.
+-- We need versions for the composed cast.
+@[simp]
+lemma re_intCast_K (n : ℤ) : (↑n : K).re = ↑n := by
+  show (↑n : K).re = (↑n : ℚ)
+  rw [show (↑n : K) = (↑(↑n : ℚ) : K) from by push_cast; ring]
+  exact re_ratCast _
+
+@[simp]
+lemma im_intCast_K (n : ℤ) : (↑n : K).im = 0 := by
+  rw [show (↑n : K) = (↑(↑n : ℚ) : K) from by push_cast; ring]
+  exact im_ratCast _
+
 section trace_and_norm
 
 variable {a b : ℚ}
@@ -55,9 +86,9 @@ lemma rational_iff : z ∈ range (algebraMap ℚ K) ↔ b = 0 := by
   constructor
   · rintro ⟨y, hy⟩
     have h := congr_arg QuadraticAlgebra.im hy
-    simp only [omega_im, im_add, im_smul, coe_algebraMap, im_coe, smul_eq_mul,
+    simp only [omega_im, im_add, im_smul, coe_algebraMap, im_coe, im_ratCast, smul_eq_mul,
                mul_one, zero_add] at h
-    sorry
+    exact h.symm
   · rintro rfl; exact ⟨a, by simp⟩
 
 lemma minpoly (hb : b ≠ 0) : minpoly ℚ z = X ^ 2 - C (2 * a) * X + C (a ^ 2 - d * b ^ 2) := by
@@ -101,7 +132,10 @@ lemma trace : trace ℚ K z = 2 * a := by
 
 lemma norm : norm ℚ z = a ^ 2 - d * b ^ 2 := by
     rcases eq_or_ne b 0 with rfl | h
-    · sorry -- rw [smul_zero, add_zero, ← coe_algebraMap, Algebra.norm_algebraMap, finrank_eq_two]
+    · simp only [zero_smul, add_zero]
+      rw [show (↑a : K) = algebraMap ℚ K a from (eq_ratCast _ a).symm,
+          Algebra.norm_algebraMap, finrank_eq_two]
+      ring
     · let pb := PowerBasis.ofAdjoinEqTop' (IsIntegral.isIntegral z)
         (by simpa using adjoin_z_eq_top h)
       have : z = pb.gen := by simp [pb]
@@ -202,51 +236,49 @@ lemma d_1_int {a b : ℚ} (hz : IsIntegral ℤ (a + b • (ω : K))) (ha : ∃ (
 
 theorem d_1 : IsIntegralClosure S ℤ K := by
   refine ⟨fun ⟨a₁, b₁⟩ ⟨a₂, b₂⟩ h ↦ ?_, @fun ⟨a, b⟩ ↦ ⟨fun hz ↦ ?_, fun ⟨x, hx⟩ ↦ ?_⟩⟩
-  · simp only [mk_eq_add_smul_omega, algebraMap_int_eq, eq_intCast, zsmul_eq_mul, map_add,
+  · simp only [mk_eq_add_smul_omega, zsmul_eq_mul, map_add,
     map_intCast, map_mul] at h
-    rcases QuadraticAlgebra.ext_iff.1 h with ⟨hre, him⟩
-    simp only [algebraMap_S_K_omega, re_add, re_intCast, re_mul, omega_re, re_one, zero_add,
-      mul_one, im_add, omega_im, im_one, add_zero, im_intCast, mul_zero, im_mul, zero_mul] at hre him
+    -- After mk_eq_add_smul_omega, ↑a₁ in S is QuadraticAlgebra.coe which equals Int.cast
+    simp only [show ∀ n : ℤ, (QuadraticAlgebra.coe n : S) = (↑n : S) from fun n => rfl] at h
+    have hre := congr_arg QuadraticAlgebra.re h
+    have him := congr_arg QuadraticAlgebra.im h
+    simp only [algebraMap_S_K_omega, re_add, re_mul, omega_re, re_one,
+      im_add, omega_im, im_one, im_mul, mul_one, mul_zero,
+      zero_mul, zero_add, add_zero, map_intCast, re_intCast_K, im_intCast_K,
+      ] at hre him
     have h2re : (2⁻¹ : K).re = (2 : ℚ)⁻¹ := by
-      conv_lhs => rw [show (2⁻¹ : K) = algebraMap ℚ K 2⁻¹ from by simp]
-      rw [coe_algebraMap, re_coe]
+      conv_lhs => rw [show (2⁻¹ : K) = (↑(2⁻¹ : ℚ) : K) from by push_cast; ring]
+      exact re_ratCast _
     have h2im : (2⁻¹ : K).im = 0 := by
-      conv_lhs => rw [show (2⁻¹ : K) = algebraMap ℚ K 2⁻¹ from by simp]
-      rw [coe_algebraMap, im_coe]
-    have hmap1 : (algebraMap S K ↑a₁).re = (↑a₁ : ℚ) := by
-      rw [map_intCast]; exact re_intCast a₁
-    have hmap2 : (algebraMap S K ↑a₁).im = 0 := by
-      rw [map_intCast]; exact im_intCast a₁
-    have hmap3 : (algebraMap S K ↑a₂).re = (↑a₂ : ℚ) := by
-      rw [map_intCast]; exact re_intCast a₂
-    have hmap4 : (algebraMap S K ↑a₂).im = 0 := by
-      rw [map_intCast]; exact im_intCast a₂
+      conv_lhs => rw [show (2⁻¹ : K) = (↑(2⁻¹ : ℚ) : K) from by push_cast; ring]
+      exact im_ratCast _
     rw [h2re, h2im] at hre him
     simp only [mul_zero, add_zero] at hre him
+    -- him : ↑b₁ * 2⁻¹ = ↑b₂ * 2⁻¹ in ℚ
     have hb : b₁ = b₂ := by
-      -- exact_mod_cast mul_right_cancel₀ (show (2 : ℚ)⁻¹ ≠ 0 by norm_num) him
-      apply mul_right_cancel₀
-      norm_num
-      exact ne_zero_of_eq_one rfl
-      sorry
+      exact_mod_cast mul_right_cancel₀ (show (2 : ℚ)⁻¹ ≠ 0 by norm_num) him
     have ha : a₁ = a₂ := by
-      exact_mod_cast show (a₁ : ℚ) = a₂ by sorry  -- linarith [show (b₁ : ℚ) = b₂ from by exact_mod_cast hb]
+      have hb' : (b₁ : ℚ) = b₂ := by exact_mod_cast hb
+      exact_mod_cast show (a₁ : ℚ) = a₂ by linarith
     exact QuadraticAlgebra.ext ha hb
-  · rw [mk_eq_add_smul_omega] at ⊢ hz
-    by_cases ha : ∃ (A : ℤ), A = a
-    · sorry -- exact d_1_int (a := a) (b := b) hz ha
-    · let z' := a + b • (ω : K) - algebraMap S K ω
-      sorry
-      -- obtain ⟨A, hA⟩ := a_half_int (a := a) (b := b) hz ha
-      -- obtain ⟨B, hB⟩ := two_b_int hz
-      -- have hz' : IsIntegral ℤ z' := hz.sub easy_incl_d_1
-      -- rsuffices ⟨y, hy⟩ : ∃ y, (algebraMap S K) y = z'
-      -- · exact ⟨y + ω, by simp [hy, z']⟩
-      -- have H : z' = ↑(a - 2⁻¹) + (b - 2⁻¹) • (ω : K) := by
-      --   simp [z', algebraMap_S_K_omega, Algebra.smul_def]
-      --   grind
-      -- rw [H] at hz' ⊢
-      -- exact d_1_int (a := a - 2⁻¹) (b := b - 2⁻¹) hz' (a_half_int (a := a) (b := b) hz ha)
+  · have key : (⟨a, b⟩ : K) = ↑a + b • (ω : K) := by
+      rw [ratCast_eq_coe]
+      exact mk_eq_add_smul_omega a b
+    rw [key]
+    by_cases ha : ∃ (A : ℤ), A = (a : ℚ)
+    · exact d_1_int (key ▸ hz) ha
+    · let z' := ↑a + b • (ω : K) - algebraMap S K ω
+      have hz_conv : IsIntegral ℤ (↑a + b • (ω : K)) := key ▸ hz
+      obtain ⟨A, hA⟩ := a_half_int hz_conv ha
+      obtain ⟨B, hB⟩ := two_b_int hz_conv
+      have hz' : IsIntegral ℤ z' := hz_conv.sub easy_incl_d_1
+      rsuffices ⟨y, hy⟩ : ∃ y, (algebraMap S K) y = z'
+      · exact ⟨y + ω, by simp [hy, z']⟩
+      have H : z' = ↑(a - 2⁻¹) + (b - 2⁻¹) • (ω : K) := by
+        simp [z', algebraMap_S_K_omega, Algebra.smul_def]
+        grind
+      rw [H] at hz' ⊢
+      exact d_1_int hz' (a_half_int hz_conv ha)
   · exact hx ▸ (IsIntegral.isIntegral x).algebraMap
 
 end d_1
