@@ -600,7 +600,9 @@ def update_content_tex(decls: dict[str, LeanDecl], dry_run: bool = False):
             desc = decl.docstring if decl.docstring else "TODO: add description"
             fully_proved = not decl.has_sorry
 
-            new_lines.append(f"\\begin{{{env}}}[{_latex_escape_title(name)}]")
+            # Use bare name (after last dot) as display title
+            bare_name = name.split(".")[-1]
+            new_lines.append(f"\\begin{{{env}}}[{_latex_escape_title(bare_name)}]")
             new_lines.append(f"  \\label{{{label_prefix}:{ascii_name}}}")
             new_lines.append(f"  \\lean{{{name}}}")
 
