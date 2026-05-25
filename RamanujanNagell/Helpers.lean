@@ -350,10 +350,9 @@ lemma K_discriminant : discr K = -7 := by
       = (!![2, 1; 1, -3] : Matrix (Fin 2) (Fin 2) ℤ).det := congr_arg Matrix.det h_mat
     _ = -7 := by rw [Matrix.det_fin_two_of]; norm_num
 
-set_option maxHeartbeats 400000 in -- long proof with many case splits and polynomial checks
-private lemma hno_cube_aux : ∀ z : 𝓞 K, z ^ 2 + z + 1 ≠ 0 := by
-  intro z hz_eq
-  -- Build a power basis for 𝓞 K / ℤ with generator θ
+-- Coordinate extraction: every element of 𝓞 K has integer coordinates in the basis {1, ω}
+private lemma int_coords (z : 𝓞 K) :
+    ∃ m n : ℤ, (z : K) = ⟨(m : ℚ), (n : ℚ)⟩ := by
   have h_int : IsIntegral ℤ θ := RingOfIntegers.isIntegral θ
   let pb := PowerBasis.ofAdjoinEqTop' h_int span_eq_top
   have h_gen : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
@@ -363,15 +362,12 @@ private lemma hno_cube_aux : ∀ z : 𝓞 K, z ^ 2 + z + 1 ≠ 0 := by
     change (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = pb.dim at h1
     have h3 : (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = 2 := by compute_degree!
     linarith
-  -- Integer coordinates: z = m·1 + n·θ  in the basis {pb.basis 0 = 1, pb.basis 1 = θ}
   set m : ℤ := pb.basis.repr z ⟨0, by omega⟩
   set n : ℤ := pb.basis.repr z ⟨1, by omega⟩
-  -- Basis elements: pb.basis 0 = 1, pb.basis 1 = θ = ω
   have hb0 : pb.basis ⟨0, by omega⟩ = (1 : 𝓞 K) := by
     rw [pb.basis_eq_pow]; simp
   have hb1 : pb.basis ⟨1, by omega⟩ = θ := by
     rw [pb.basis_eq_pow, h_gen]; simp
-  -- Coordinate representation: z = m • 1 + n • θ
   have hz : z = m • pb.basis ⟨0, by omega⟩ + n • pb.basis ⟨1, by omega⟩ := by
     apply pb.basis.repr.injective
     ext ⟨j, hj⟩
@@ -386,352 +382,96 @@ private lemma hno_cube_aux : ∀ z : 𝓞 K, z ^ 2 + z + 1 ≠ 0 := by
     rcases hj2 with rfl | rfl <;>
       rw [eval0, eval1] <;>
       simp [m, n, Fin.ext_iff]
-  -- Lift equation to K and record (z : K) = ⟨(m : ℚ), (n : ℚ)⟩
-  have hz_K : (z : K) = ⟨(m : ℚ), (n : ℚ)⟩ := by
-    have hcoe : (z : K) = m • (1 : K) + n • (ω : K) := by
-      have h := congr_arg ((↑) : 𝓞 K → K) hz
-      simp only [map_add, hb0, hb1] at h
-      exact h
-    rw [hcoe]
-    ext
-    · simp [re_add, omega_re]
-    · simp [im_add, omega_im]
-  have hz_eq_K : (z : K) ^ 2 + (z : K) + 1 = 0 := by exact_mod_cast hz_eq
-  have hcomputed : (⟨(m : ℚ), (n : ℚ)⟩ : K) ^ 2 + ⟨(m : ℚ), (n : ℚ)⟩ + 1 = 0 := by
-    rw [← hz_K]; exact hz_eq_K
-  -- Substituting into z² + z + 1 = 0 yields two ℤ equations
-  have hre : m ^ 2 - 2 * n ^ 2 + m + 1 = 0 := by
-    have h := congr_arg (·.re) hcomputed
-    simp only [sq, re_add, re_mul, re_one, re_zero] at h
-    norm_num at h
-    norm_cast at h
-    linear_combination h
-  have him : n * (2 * m + n + 1) = 0 := by
-    have h := congr_arg (·.im) hcomputed
-    simp only [sq, im_add, im_mul, im_one, im_zero] at h
-    have key : (n : ℚ) * (2 * m + n + 1) = 0 := by linarith
-    exact_mod_cast key
-  -- Case split on the imaginary-part equation
-  rcases mul_eq_zero.mp him with hn0 | h2mn
-  · -- n = 0: reduces to m² + m + 1 = 0, no integer solution
-    have hm_eq : m ^ 2 + m + 1 = 0 := by nlinarith [sq_nonneg n, hn0]
-    nlinarith [sq_nonneg (2 * m + 1)]
-  · -- 2m + n + 1 = 0: reduces to 7m² + 7m + 1 = 0, impossible mod 7
-    have hn_val : n = -2 * m - 1 := by linarith
-    have hn2 : n ^ 2 = 4 * m ^ 2 + 4 * m + 1 := by nlinarith [sq_nonneg (n + 2 * m + 1)]
-    have h7 : 7 * m ^ 2 + 7 * m + 1 = 0 := by nlinarith [hre, hn2]
-    have h7dvd1 : (7 : ℤ) ∣ 1 := ⟨-(m ^ 2 + m), by linarith⟩
-    exact absurd h7dvd1 (by intro ⟨x, hx⟩; omega)
+  refine ⟨m, n, ?_⟩
+  have hcoe : (z : K) = m • (1 : K) + n • (ω : K) := by
+    have h := congr_arg ((↑) : 𝓞 K → K) hz
+    simp only [map_add, hb0, hb1] at h
+    exact h
+  rw [hcoe]
+  ext
+  · simp [re_add, omega_re]
+  · simp [im_add, omega_im]
 
-set_option maxHeartbeats 400000 in -- long proof with many case splits and polynomial checks
-private lemma hno_i_aux : ∀ z : 𝓞 K, z ^ 2 + 1 ≠ 0 := by
-  intro z hz_eq
-  -- Build a power basis for 𝓞 K / ℤ with generator θ
-  have h_int : IsIntegral ℤ θ := RingOfIntegers.isIntegral θ
-  let pb := PowerBasis.ofAdjoinEqTop' h_int span_eq_top
-  have h_gen : pb.gen = θ := PowerBasis.ofAdjoinEqTop'_gen h_int span_eq_top
-  have h_dim : pb.dim = 2 := by
-    have h1 := pb.natDegree_minpoly
-    rw [h_gen, my_minpoly] at h1
-    change (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = pb.dim at h1
-    have h3 : (X ^ 2 - X + C (2 : ℤ) : ℤ[X]).natDegree = 2 := by compute_degree!
-    linarith
-  -- Integer coordinates: z = m·1 + n·θ  in the basis {pb.basis 0 = 1, pb.basis 1 = θ}
-  set m : ℤ := pb.basis.repr z ⟨0, by omega⟩
-  set n : ℤ := pb.basis.repr z ⟨1, by omega⟩
-  -- Basis elements: pb.basis 0 = 1, pb.basis 1 = θ = ω
-  have hb0 : pb.basis ⟨0, by omega⟩ = (1 : 𝓞 K) := by
-    rw [pb.basis_eq_pow]; simp
-  have hb1 : pb.basis ⟨1, by omega⟩ = θ := by
-    rw [pb.basis_eq_pow, h_gen]; simp
-  -- Coordinate representation: z = m • 1 + n • θ
-  have hz : z = m • pb.basis ⟨0, by omega⟩ + n • pb.basis ⟨1, by omega⟩ := by
-    apply pb.basis.repr.injective
-    ext ⟨j, hj⟩
-    simp only [LinearEquiv.map_add, LinearEquiv.map_smul,
-               Finsupp.add_apply, Finsupp.smul_apply,
-               smul_eq_mul]
-    have hj2 : j = 0 ∨ j = 1 := by omega
-    have eval0 : pb.basis.repr (pb.basis ⟨0, by omega⟩) = Finsupp.single ⟨0, by omega⟩ 1 :=
-      LinearEquiv.apply_symm_apply pb.basis.repr _
-    have eval1 : pb.basis.repr (pb.basis ⟨1, by omega⟩) = Finsupp.single ⟨1, by omega⟩ 1 :=
-      LinearEquiv.apply_symm_apply pb.basis.repr _
-    rcases hj2 with rfl | rfl <;>
-      rw [eval0, eval1] <;>
-      simp [m, n, Fin.ext_iff]
-  -- Lift equation to K and record (z : K) = ⟨(m : ℚ), (n : ℚ)⟩
-  have hz_K : (z : K) = ⟨(m : ℚ), (n : ℚ)⟩ := by
-    have hcoe : (z : K) = m • (1 : K) + n • (ω : K) := by
-      have h := congr_arg ((↑) : 𝓞 K → K) hz
-      simp only [map_add, hb0, hb1] at h
-      exact h
-    rw [hcoe]
-    ext
-    · simp [re_add, omega_re]
-    · simp [im_add, omega_im]
-  have hz_eq_K : (z : K) ^ 2 + 1 = 0 := by exact_mod_cast hz_eq
-  have hcomputed : (⟨(m : ℚ), (n : ℚ)⟩ : K) ^ 2 + 1 = 0 := by
-    rw [← hz_K]; exact hz_eq_K
-  -- Substituting into z² + 1 = 0 yields two ℤ equations
-  have hre : m ^ 2 - 2 * n ^ 2 + 1 = 0 := by
-    have h := congr_arg (·.re) hcomputed
-    simp only [sq, re_add, re_mul, re_one, re_zero] at h
-    norm_num at h
-    norm_cast at h
-    linear_combination h
-  have him : n * (2 * m + n) = 0 := by
-    have h := congr_arg (·.im) hcomputed
-    simp only [sq, im_add, im_mul, im_one, im_zero] at h
-    have key : (n : ℚ) * (2 * m + n) = 0 := by linarith
-    exact_mod_cast key
-  -- Case split on the imaginary-part equation
-  rcases mul_eq_zero.mp him with hn0 | h2mn
-  · -- n = 0: reduces to m² + 1 = 0, no integer solution
-    have hm_eq : m ^ 2 + 1 = 0 := by nlinarith [sq_nonneg n, hn0]
-    nlinarith [sq_nonneg m]
-  · -- 2m + n = 0: reduces to 7m² = 1, impossible mod 7
-    have hn_val : n = -2 * m := by linarith
-    have hn2 : n ^ 2 = 4 * m ^ 2 := by rw [hn_val]; ring
-    have h7 : 7 * m ^ 2 = 1 := by nlinarith [hre, hn2]
-    have h7dvd1 : (7 : ℤ) ∣ 1 := ⟨m ^ 2, by linarith⟩
-    exact absurd h7dvd1 (by intro ⟨x, hx⟩; omega)
+-- The norm form of K = QuadraticAlgebra ℚ (-2) 1 on integer coordinates
+private lemma norm_form (m n : ℤ) :
+    QuadraticAlgebra.norm (⟨(m : ℚ), (n : ℚ)⟩ : K) =
+      ((m ^ 2 + m * n + 2 * n ^ 2 : ℤ) : ℚ) := by
+  simp [QuadraticAlgebra.norm]; push_cast; ring
 
+-- The Algebra.norm on a QuadraticAlgebra coincides with the QuadraticAlgebra.norm
+lemma algebra_norm_eq_quadratic_norm (z : K) : Algebra.norm ℚ z = QuadraticAlgebra.norm z := by
+  have h_alg : (QuadraticAlgebra.instAlgebra : Algebra ℚ K) = DivisionRing.toRatAlgebra :=
+    Subsingleton.elim _ _
+  have : @Algebra.norm ℚ K _ _ DivisionRing.toRatAlgebra z =
+      @Algebra.norm ℚ K _ _ QuadraticAlgebra.instAlgebra z := by
+    rw [h_alg]
+  rw [this]
+  rw [@Algebra.norm_apply ℚ K _ _ QuadraticAlgebra.instAlgebra]
+  rw [← QuadraticAlgebra.det_toLinearMap_eq_norm]
+  congr 1
+
+-- Local helper: Algebra.norm is a unit iff the element is a unit
+lemma norm_isUnit_iff (x : 𝓞 K) : IsUnit (Algebra.norm ℤ x) ↔ IsUnit x := by
+  constructor <;> intro h <;> contrapose! h;
+  · have h_norm_not_unit : ∀ y : 𝓞 K, ¬IsUnit y → ¬IsUnit (Algebra.norm ℤ y) := by
+      intro y hy; intro H; have := H.exists_left_inv; obtain ⟨ z, hz ⟩ := this; simp_all +decide [ Algebra.norm ] ;
+      have h_det_zero : ¬IsUnit (LinearMap.mul ℤ (𝓞 K) y) := by
+        intro h_inv
+        have h_inv_mul : ∃ z : 𝓞 K, y * z = 1 := by
+          obtain ⟨ z, hz ⟩ := h_inv.exists_right_inv;
+          exact ⟨ z 1, by simpa using congr_arg ( fun f => f 1 ) hz ⟩;
+        exact hy (isUnit_iff_exists_inv.mpr h_inv_mul)
+      apply h_det_zero;
+      exact (LinearMap.isUnit_iff_isUnit_det ((LinearMap.mul ℤ (𝓞 K)) y)).mpr H;
+    exact h_norm_not_unit x h;
+  · contrapose! h with hx;
+    exact IsUnit.map (Algebra.norm ℤ) hx
+
+-- Units of 𝓞 K are ±1, via the norm form (Stoll's argument).
+-- The key identity is 4·N(m + nω) = (2m + n)² + 7n², which is a positive-definite
+-- form over ℤ. So N = ±1 forces n = 0 and m = ±1.
 lemma units_pm_one : ∀ u : Rˣ, u = 1 ∨ u = -1 := by
   intro u
-  -- Step 1: reduce to "u is a root of unity in K"
-  suffices h_torsion : u ∈ NumberField.Units.torsion K by
-    -- u has finite order (torsion = elements of finite order)
-    have h_fin : IsOfFinOrder u := (CommGroup.mem_torsion Rˣ u).mp h_torsion
-    -- KEY fact: orderOf u divides 2.
-    -- Proof sketch: any primitive nth root of unity ζ in K satisfies φ(n) ≤ [K:ℚ] = 2,
-    -- so n ∈ {1,2,3,4,6}. But n ∈ {3,4,6} would force K = ℚ(ζ₃) or ℚ(i),
-    -- which have discriminants -3 or -4, contradicting disc(K) = -7.
-    have h_div2 : orderOf u ∣ 2 := by
-      have h_pos : 0 < orderOf u := orderOf_pos_iff.mpr h_fin
-      -- φ(orderOf u) ≤ [K:ℚ] = 2 (IsPrimitiveRoot.totient_le_degree_minpoly + my_minpoly)
-      have h_totient_le : Nat.totient (orderOf u) ≤ 2 := by
-        -- Rewrite orderOf u as orderOf (u : R) via orderOf_units
-        rw [← orderOf_units (y := u)]
-        -- (u : R) is a primitive (orderOf (u : R))-th root of unity
-        have h_prim : IsPrimitiveRoot (u : R) (orderOf (u : R)) := IsPrimitiveRoot.orderOf _
-        -- φ(orderOf (u:R)) ≤ natDegree (minpoly ℤ (u:R))
-        have h1 : Nat.totient (orderOf (u : R)) ≤ (minpoly ℤ (u : R)).natDegree :=
-          IsPrimitiveRoot.totient_le_degree_minpoly h_prim
-        -- natDegree (minpoly ℤ (u:R)) ≤ 2 via Cayley-Hamilton for the left-multiplication map
-        have h2' : (minpoly ℤ (u : R)).natDegree ≤ 2 := by
-          set lm := Algebra.lmul ℤ R (u : R)
-          -- Cayley-Hamilton: aeval lm lm.charpoly = 0
-          have h_cayham : aeval lm lm.charpoly = 0 := LinearMap.aeval_self_charpoly lm
-          -- aeval commutes with algebra hom lmul
-          have h_aeval_lmul : aeval lm lm.charpoly =
-              Algebra.lmul ℤ R (aeval (u : R) lm.charpoly) :=
-            Polynomial.aeval_algHom_apply (Algebra.lmul ℤ R) (u : R) lm.charpoly
-          -- Therefore aeval (u:R) lm.charpoly = 0
-          have h_aeval_zero : aeval (u : R) lm.charpoly = 0 := by
-            -- lmul ℤ R applied to (aeval (u:R) charpoly) equals 0 as a linear map
-            have h_key : Algebra.lmul ℤ R (aeval (u : R) lm.charpoly) = 0 :=
-              h_aeval_lmul.symm.trans h_cayham
-            -- Evaluate both sides at 1 to extract the element equation
-            have h1 := LinearMap.congr_fun h_key 1
-            simp [Algebra.lmul] at h1
-            exact h1
-          -- minpoly ℤ (u:R) divides charpoly of lm
-          have h_int : IsIntegral ℤ (u : R) := Algebra.IsIntegral.isIntegral _
-          have h_dvd : minpoly ℤ (u : R) ∣ lm.charpoly :=
-            minpoly.isIntegrallyClosed_dvd h_int h_aeval_zero
-          have h_ne : lm.charpoly ≠ 0 := (LinearMap.charpoly_monic lm).ne_zero
-          -- charpoly has degree = finrank ℤ R = 2
-          have h_deg : lm.charpoly.natDegree = 2 := by
-            rw [LinearMap.charpoly_natDegree, NumberField.RingOfIntegers.rank K]
-            convert K_degree_2 using 2
-            exact Subsingleton.elim _ _
-          linarith [Polynomial.natDegree_le_of_dvd h_dvd h_ne]
-        omega
-      -- For n ≥ 7, φ(n) ≥ 4 > 2, so orderOf u ≤ 6
-      have h_le6 : orderOf u ≤ 6 := by
-        by_contra h
-        push_neg at h
-        have hn7 : 7 ≤ orderOf u := h
-        have hphi2 : φ (orderOf u) = 2 := by
-          have hev := Nat.totient_even (show 2 < orderOf u by omega)
-          have hpos := Nat.totient_pos.2 h_pos
-          obtain ⟨k, hk⟩ := hev; omega
-        have h_primes_le3 : ∀ p, p.Prime → p ∣ orderOf u → p ≤ 3 := by
-          intro p hp hpd
-          have hdvd := Nat.totient_dvd_of_dvd hpd
-          rw [Nat.totient_prime hp, hphi2] at hdvd
-          have := Nat.le_of_dvd (by norm_num) hdvd; omega
-        have h_no8 : ¬ 8 ∣ orderOf u := fun h8 => by
-          have hdvd := Nat.totient_dvd_of_dvd h8
-          have h8phi : φ 8 = 4 := by decide
-          rw [h8phi, hphi2] at hdvd; omega
-        have h_no9 : ¬ 9 ∣ orderOf u := fun h9 => by
-          have hdvd := Nat.totient_dvd_of_dvd h9
-          have h9phi : φ 9 = 6 := by decide
-          rw [h9phi, hphi2] at hdvd; omega
-        have h_not_prime : ¬ (orderOf u).Prime := fun hp => by
-          have := Nat.totient_prime hp; omega
-        have aux : ∀ n' : ℕ, 1 < n' → ¬ 2 ∣ n' → (∀ p, p.Prime → p ∣ n' → p ≤ 3) → 3 ∣ n' := by
-          intro n' hn' hodd hle3
-          obtain ⟨p, hp, hpn⟩ := Nat.exists_prime_and_dvd (show n' ≠ 1 by omega)
-          have hple3 := hle3 p hp hpn
-          have hge2 := hp.two_le
-          have hoddp : ¬ 2 ∣ p := fun h2 => hodd (h2.trans hpn)
-          have : p = 3 := by omega
-          exact this ▸ hpn
-        by_cases hn_odd : ¬ 2 ∣ orderOf u
-        · have h3n : 3 ∣ orderOf u := aux _ (by omega) hn_odd h_primes_le3
-          have hmin3 : (orderOf u).minFac = 3 := by
-            have hmp := Nat.minFac_prime (show orderOf u ≠ 1 by omega)
-            have hmd := Nat.minFac_dvd (orderOf u)
-            have hle3 := h_primes_le3 _ hmp hmd
-            have hodd_mf : ¬ 2 ∣ (orderOf u).minFac := fun h => hn_odd (h.trans hmd)
-            have hge2 := hmp.two_le
-            have hne2 : (orderOf u).minFac ≠ 2 := by
-              intro heq; apply hodd_mf; rw [heq]
-            omega
-          have h9le : 9 ≤ orderOf u := by
-            have hsq := Nat.minFac_sq_le_self (show 0 < orderOf u by omega) h_not_prime
-            rw [hmin3] at hsq; linarith
-          obtain ⟨j, hj⟩ := h3n
-          have hn3_dvd : orderOf u / 3 ∣ orderOf u := ⟨3, by omega⟩
-          have hn3_gt1 : 1 < orderOf u / 3 := by omega
-          have hn3_odd : ¬ 2 ∣ orderOf u / 3 := fun h2 => hn_odd (h2.trans hn3_dvd)
-          have hn3_primes : ∀ p, p.Prime → p ∣ orderOf u / 3 → p ≤ 3 :=
-            fun p hp hpd => h_primes_le3 p hp (hpd.trans hn3_dvd)
-          have h3n3 : 3 ∣ orderOf u / 3 := aux _ hn3_gt1 hn3_odd hn3_primes
-          obtain ⟨k, hk⟩ := h3n3
-          exact h_no9 ⟨k, by omega⟩
-        · push_neg at hn_odd
-          have hn2_dvd : orderOf u / 2 ∣ orderOf u := by
-            obtain ⟨j, hj⟩ := hn_odd; exact ⟨2, by omega⟩
-          have hn2_gt1 : 1 < orderOf u / 2 := by omega
-          have hn2_primes : ∀ p, p.Prime → p ∣ orderOf u / 2 → p ≤ 3 :=
-            fun p hp hpd => h_primes_le3 p hp (hpd.trans hn2_dvd)
-          by_cases h3n : 3 ∣ orderOf u
-          · obtain ⟨m, hm⟩ := h3n
-            obtain ⟨j, hj⟩ := hn_odd
-            have hn12 : 12 ≤ orderOf u := by omega
-            have hn3_dvd : orderOf u / 3 ∣ orderOf u := ⟨3, by omega⟩
-            have hn3_gt1 : 1 < orderOf u / 3 := by omega
-            have hm_even : 2 ∣ m := ⟨j / 3, by omega⟩
-            have hn3_even : 2 ∣ orderOf u / 3 := by
-              have heq : orderOf u / 3 = m := by omega
-              rw [heq]; exact hm_even
-            have hn3_primes : ∀ p, p.Prime → p ∣ orderOf u / 3 → p ≤ 3 :=
-              fun p hp hpd => h_primes_le3 p hp (hpd.trans hn3_dvd)
-            by_cases h3n3 : 3 ∣ orderOf u / 3
-            · obtain ⟨k, hk⟩ := h3n3
-              exact h_no9 ⟨k, by omega⟩
-            · obtain ⟨j2, hj2⟩ := hn3_even
-              have hn3_eq_m : orderOf u / 3 = m := by omega
-              have hn6_dvd : orderOf u / 6 ∣ orderOf u / 3 := ⟨2, by omega⟩
-              have hn6_dvd_n : orderOf u / 6 ∣ orderOf u := hn6_dvd.trans hn3_dvd
-              have hn6_gt1 : 1 < orderOf u / 6 := by omega
-              have hn6_primes : ∀ p, p.Prime → p ∣ orderOf u / 6 → p ≤ 3 :=
-                fun p hp hpd => h_primes_le3 p hp (hpd.trans hn6_dvd_n)
-              have hn6_not3 : ¬ 3 ∣ orderOf u / 6 := fun h36 => h3n3 (h36.trans hn6_dvd)
-              have h2n6 : 2 ∣ orderOf u / 6 := by
-                by_contra hodd6
-                exact hn6_not3 (aux _ hn6_gt1 hodd6 hn6_primes)
-              obtain ⟨k, hk⟩ := h2n6
-              have h12n : 12 ∣ orderOf u := ⟨k, by omega⟩
-              have h12phi : φ 12 = 4 := by decide
-              have hdvd12 := Nat.totient_dvd_of_dvd h12n
-              rw [h12phi, hphi2] at hdvd12; omega
-          · have h2n2_not3 : ¬ 3 ∣ orderOf u / 2 := fun h => h3n (h.trans hn2_dvd)
-            have h4n : 4 ∣ orderOf u := by
-              have h2n2 : 2 ∣ orderOf u / 2 := by
-                by_contra hodd2
-                exact h2n2_not3 (aux _ hn2_gt1 hodd2 hn2_primes)
-              obtain ⟨j, hj⟩ := hn_odd; obtain ⟨k, hk⟩ := h2n2
-              exact ⟨k, by omega⟩
-            have hn4_dvd : orderOf u / 4 ∣ orderOf u := by
-              obtain ⟨j, hj⟩ := h4n; exact ⟨4, by omega⟩
-            have hn4_gt1 : 1 < orderOf u / 4 := by omega
-            have hn4_primes : ∀ p, p.Prime → p ∣ orderOf u / 4 → p ≤ 3 :=
-              fun p hp hpd => h_primes_le3 p hp (hpd.trans hn4_dvd)
-            have h4n_not3 : ¬ 3 ∣ orderOf u / 4 := fun h => h3n (h.trans hn4_dvd)
-            have h8n : 8 ∣ orderOf u := by
-              have h2n4 : 2 ∣ orderOf u / 4 := by
-                by_contra hodd4
-                exact h4n_not3 (aux _ hn4_gt1 hodd4 hn4_primes)
-              obtain ⟨j, hj⟩ := h4n; obtain ⟨k, hk⟩ := h2n4
-              exact ⟨k, by omega⟩
-            exact h_no8 h8n
-      -- K has no cube roots of unity (K ≇ ℚ(ζ₃) = ℚ(√-3), since -7 ≠ -3):
-      have hno_cube : ∀ z : R, z ^ 2 + z + 1 ≠ 0 := hno_cube_aux
-      -- K has no square root of -1 (K ≇ ℚ(i), since -7 ≠ -4):
-      have hno_i : ∀ z : R, z ^ 2 + 1 ≠ 0 := hno_i_aux
-      -- Helper: lift u^k = 1 in Rˣ to (↑u : R)^k = 1
-      have lift_pow : ∀ k : ℕ, u ^ k = 1 → (u : R) ^ k = 1 := fun k hk => by
-        have := congr_arg Units.val hk; simpa using this
-      -- Helper: orderOf u = k → (↑u : R) ≠ 1 (for k ≥ 2)
-      have ne_one_R : orderOf u ≥ 2 → (u : R) ≠ 1 := fun hk heq => by
-        have hU1 : u = 1 := Units.val_inj.mp heq
-        simp [hU1, orderOf_one] at hk
-      -- Helper: orderOf u = k → (↑u : R)^2 ≠ 1 (for k ∤ 2)
-      have sq_ne_one_R : ¬ orderOf u ∣ 2 → (u : R) ^ 2 ≠ 1 := fun hnd heq => by
-        have hU2 : u ^ 2 = 1 := Units.val_inj.mp (by simpa using heq)
-        exact hnd (orderOf_dvd_iff_pow_eq_one.mpr hU2)
-      -- Case analysis: orderOf u ∈ {1, 2, 3, 4, 5, 6}
-      have h1 : 1 ≤ orderOf u := h_pos
-      interval_cases h : orderOf u
-      · norm_num  -- 1 ∣ 2
-      · norm_num  -- 2 ∣ 2
-      · -- n = 3: (↑u)^2 + (↑u) + 1 = 0 in R, contradicts hno_cube
-        exfalso; apply hno_cube (u : R)
-        have hR3 : (u : R) ^ 3 = 1 := lift_pow 3 (h ▸ pow_orderOf_eq_one u)
-        have hne : (u : R) ≠ 1 := ne_one_R (by omega)
-        have fac : ((u : R) - 1) * ((u : R) ^ 2 + (u : R) + 1) = 0 := by
-          have eq : ((u : R) - 1) * ((u : R) ^ 2 + (u : R) + 1) = (u : R) ^ 3 - 1 := by ring
-          rw [eq, hR3]; ring
-        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne)
-      · -- n = 4: (↑u)^2 + 1 = 0, contradicts hno_i
-        exfalso; apply hno_i (u : R)
-        have hR4 : (u : R) ^ 4 = 1 := lift_pow 4 (h ▸ pow_orderOf_eq_one u)
-        have hne2 : (u : R) ^ 2 ≠ 1 := sq_ne_one_R (by norm_num)
-        have fac : ((u : R) ^ 2 - 1) * ((u : R) ^ 2 + 1) = 0 := by
-          have eq : ((u : R) ^ 2 - 1) * ((u : R) ^ 2 + 1) = (u : R) ^ 4 - 1 := by ring
-          rw [eq, hR4]; ring
-        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne2)
-      · -- n = 5: φ(5) = 4 > 2, contradicts h_totient_le
-        exfalso
-        have : (5 : ℕ).totient = 4 := by decide
-        omega
-      · -- n = 6: (↑u)^2 satisfies X^2 + X + 1 = 0, contradicts hno_cube
-        exfalso; apply hno_cube ((u : R) ^ 2)
-        have hR6 : (u : R) ^ 6 = 1 := lift_pow 6 (h ▸ pow_orderOf_eq_one u)
-        have hne2 : (u : R) ^ 2 ≠ 1 := sq_ne_one_R (by norm_num)
-        have fac : ((u : R) ^ 2 - 1) * (((u : R) ^ 2) ^ 2 + (u : R) ^ 2 + 1) = 0 := by
-          have eq : ((u : R) ^ 2 - 1) * (((u : R) ^ 2) ^ 2 + (u : R) ^ 2 + 1)
-                  = (u : R) ^ 6 - 1 := by ring
-          rw [eq, hR6]; ring
-        exact (mul_eq_zero.mp fac).resolve_left (sub_ne_zero.mpr hne2)
-    -- Deduce u^2 = 1 in Rˣ
-    have h_sq : u ^ 2 = 1 := orderOf_dvd_iff_pow_eq_one.mp h_div2
-    -- Lift to R: (↑u : R)^2 = 1
-    have h_sq_R : (u : R) ^ 2 = 1 := by
-      have : ((u ^ 2 : Rˣ) : R) = ((1 : Rˣ) : R) := congr_arg Units.val h_sq
-      simpa using this
-    -- In R (integral domain), a^2 = 1 ↔ a = 1 ∨ a = -1
-    rcases sq_eq_one_iff.mp h_sq_R with h | h
-    · left;  exact Units.val_inj.mp h
-    · right; exact Units.val_inj.mp (by simp [h])
-  -- Step 2: card(InfinitePlace K) = 1 (since nrRealPlaces = 0, nrComplexPlaces = 1)
-  have h_card : Fintype.card (InfinitePlace K) = 1 := by
-    rw [card_eq_nrRealPlaces_add_nrComplexPlaces, K_nrRealPlaces_zero, K_nrComplexPlaces_2]
-  -- Step 3: unit rank of K is 0
-  have h_rank : NumberField.Units.rank K = 0 := by
-    simp [NumberField.Units.rank, h_card]
-  -- Step 4: apply Dirichlet — every unit = torsion × ∏ fundSystem^eᵢ
-  obtain ⟨⟨ζ, e⟩, h_eq, _⟩ := NumberField.Units.exist_unique_eq_mul_prod K u
-  -- With rank 0, the index type Fin (rank K) = Fin 0 is empty, so the product collapses to 1
-  haveI h_empty : IsEmpty (Fin (NumberField.Units.rank K)) := by
-    rw [h_rank]; exact inferInstance
-  simp only [Finset.univ_eq_empty, Finset.prod_empty, mul_one] at h_eq
-  -- h_eq : u = ↑ζ, and ζ ∈ torsion K by construction
-  exact h_eq ▸ ζ.prop
+  -- Step 1: u is a unit in R, so Algebra.norm ℤ u is a unit in ℤ, i.e. ±1
+  have hu : IsUnit (Algebra.norm ℤ (u : R)) := (norm_isUnit_iff _).mpr (Units.isUnit u)
+  rw [Int.isUnit_iff] at hu
+  -- Step 2: get integer coordinates for (u : K) = ⟨m, n⟩
+  obtain ⟨m, n, hmn⟩ := int_coords (u : R)
+  -- Step 3: bridge Algebra.norm ℤ to QuadraticAlgebra.norm via ℚ
+  have h_norm_bridge : (Algebra.norm ℤ (u : R) : ℚ) =
+      QuadraticAlgebra.norm ((u : R) : K) :=
+    (Algebra.coe_norm_int _).trans (algebra_norm_eq_quadratic_norm _)
+  rw [hmn, norm_form] at h_norm_bridge
+  -- Step 4: the norm equation holds over ℤ
+  have h_norm_int : m ^ 2 + m * n + 2 * n ^ 2 = Algebra.norm ℤ (u : R) := by
+    exact_mod_cast h_norm_bridge.symm
+  -- Step 5: completing the square — 4·norm = (2m + n)² + 7n²
+  have h_csq : ∀ v : ℤ, m ^ 2 + m * n + 2 * n ^ 2 = v →
+      4 * v = (2 * m + n) ^ 2 + 7 * n ^ 2 := by intro v hv; nlinarith
+  -- Step 6: case split on norm = 1 or norm = -1
+  rcases hu with h1 | hm1
+  · -- norm = 1: forces n = 0, then m = ±1
+    have hv := h_csq 1 (by linarith [h_norm_int, h1])
+    have hn : n = 0 := by nlinarith [sq_nonneg (2 * m + n), sq_nonneg n]
+    have hm : m = 1 ∨ m = -1 := by
+      have : m ^ 2 = 1 := by nlinarith [h_norm_int, h1, hn]
+      have : m ^ 2 - 1 = 0 := by omega
+      have : (m - 1) * (m + 1) = 0 := by nlinarith
+      rcases mul_eq_zero.mp this with h | h <;> omega
+    -- Reconstruct (u : K) = ±1 and lift to Rˣ
+    subst hn
+    have hmK1 : ({ re := ((1 : ℤ) : ℚ), im := ((0 : ℤ) : ℚ) } : K) = ↑(↑(1 : Rˣ) : R) := by
+      ext <;> simp
+    have hmKm1 : ({ re := ((-1 : ℤ) : ℚ), im := ((0 : ℤ) : ℚ) } : K) = ↑(↑(-1 : Rˣ) : R) := by
+      ext <;> simp
+    rcases hm with rfl | rfl
+    · left; exact Units.val_inj.mp (Subtype.coe_injective (hmn.trans hmK1))
+    · right; exact Units.val_inj.mp (Subtype.coe_injective (hmn.trans hmKm1))
+  · -- norm = -1: 4·(-1) = (2m+n)² + 7n², impossible since RHS ≥ 0
+    exfalso
+    have hv := h_csq (-1) (by linarith [h_norm_int, hm1])
+    have : 0 ≤ (2 * m + n) ^ 2 + 7 * n ^ 2 := by positivity
+    linarith
 
 lemma class_number_one_PID : IsPrincipalIdealRing R := by
   apply isPrincipalIdealRing_of_abs_discr_lt
@@ -747,18 +487,6 @@ lemma class_number_one_PID : IsPrincipalIdealRing R := by
 lemma class_number_one : UniqueFactorizationMonoid R :=
   haveI := class_number_one_PID
   inferInstance
-
--- The Algebra.norm on a QuadraticAlgebra coincides with the QuadraticAlgebra.norm
-lemma algebra_norm_eq_quadratic_norm (z : K) : Algebra.norm ℚ z = QuadraticAlgebra.norm z := by
-  have h_alg : (QuadraticAlgebra.instAlgebra : Algebra ℚ K) = DivisionRing.toRatAlgebra :=
-    Subsingleton.elim _ _
-  have : @Algebra.norm ℚ K _ _ DivisionRing.toRatAlgebra z =
-      @Algebra.norm ℚ K _ _ QuadraticAlgebra.instAlgebra z := by
-    rw [h_alg]
-  rw [this]
-  rw [@Algebra.norm_apply ℚ K _ _ QuadraticAlgebra.instAlgebra]
-  rw [← QuadraticAlgebra.det_toLinearMap_eq_norm]
-  congr 1
 
 lemma exponent : exponent θ = 1 := by
   rw [exponent_eq_one_iff, span_eq_top]
@@ -779,25 +507,6 @@ lemma two_factorisation_R : θ * (1 - θ) = 2 := by
       ext <;> simp
     _ = 2 := by ring
 
-
--- Local helper: Algebra.norm is a unit iff the element is a unit
-lemma norm_isUnit_iff (x : 𝓞 K) : IsUnit (Algebra.norm ℤ x) ↔ IsUnit x := by
-  constructor <;> intro h <;> contrapose! h;
-  · -- By definition of norm, if $x$ is not a unit, then its norm $N(x)$ is not a unit in $\mathbb{Z}$.
-    have h_norm_not_unit : ∀ y : 𝓞 K, ¬IsUnit y → ¬IsUnit (Algebra.norm ℤ y) := by
-      intro y hy; intro H; have := H.exists_left_inv; obtain ⟨ z, hz ⟩ := this; simp_all +decide [ Algebra.norm ] ;
-      -- Since $y$ is not a unit, the linear map $mul y$ is not invertible, hence its determinant is zero.
-      have h_det_zero : ¬IsUnit (LinearMap.mul ℤ (𝓞 K) y) := by
-        intro h_inv
-        have h_inv_mul : ∃ z : 𝓞 K, y * z = 1 := by
-          obtain ⟨ z, hz ⟩ := h_inv.exists_right_inv;
-          exact ⟨ z 1, by simpa using congr_arg ( fun f => f 1 ) hz ⟩;
-        exact hy (isUnit_iff_exists_inv.mpr h_inv_mul)
-      apply h_det_zero;
-      exact (LinearMap.isUnit_iff_isUnit_det ((LinearMap.mul ℤ (𝓞 K)) y)).mpr H;
-    exact h_norm_not_unit x h;
-  · contrapose! h with hx;
-    exact IsUnit.map (Algebra.norm ℤ) hx
 
 -- Local lemma equating the norm to the constant term of the minimal polynomial (up to sign)
 lemma norm_eq_coeff_zero_minpoly (x : 𝓞 K) (h_deg : (minpoly ℤ x).natDegree = 2) :
