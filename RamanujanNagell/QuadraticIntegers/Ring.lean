@@ -20,18 +20,22 @@ Status of Stoll's claims (each is a literal `rfl` in this file):
   ✓ `norm θ' = 2`
 
 The norm-form proof of `units_pm_one` (was 89 lines in the latest Helpers.lean
-revision, 380 lines in the version before Stoll suggested it) reduces to ~15
+revision, 380 lines in the version before Stoll suggested it) reduces to ~30
 lines via the `4·N = (2x+y)² + 7y²` identity.
 
-The substantive remaining work is the `EuclideanDomain` instance, which is
-the GaussianInt-style construction with one extra subtlety: at the corner
-`(1/2, 1/2)` of the fundamental parallelogram, naive rounding gives `norm = 1`
-exactly (not `< 1`), so the rounding rule needs a small adjustment. That work
-is staged separately and is not in this prototype.
+The `EuclideanDomain R` instance is constructed in full via smart rounding:
+pick `n := round(s.im / N)`, then `m := round((s.re/N) + (im residual)/2)`. This
+"shifted re-rounding" handles the corner `(1/2, 1/2)` where naive independent
+rounding would give `norm = 1` exactly. With this choice the remainder always
+satisfies `16·norm(rem) ≤ 11·norm(b)`. From `EuclideanDomain R`, both
+`IsPrincipalIdealRing R` and `UniqueFactorizationMonoid R` follow immediately,
+giving `theta_prime` and `theta'_prime`.
 -/
 
 import Mathlib.Algebra.QuadraticAlgebra.Basic
 import Mathlib.Algebra.QuadraticAlgebra.NormDeterminant
+import Mathlib.Algebra.Order.Round
+import Mathlib.Data.Rat.Floor
 import Mathlib.RingTheory.PrincipalIdealDomain
 import Mathlib.RingTheory.UniqueFactorizationDomain.Defs
 
@@ -183,36 +187,214 @@ lemma theta'_irreducible : Irreducible θ' := by
     · exact Or.inl (isUnit_of_norm_one h)
     · exact Or.inr (isUnit_of_norm_one h)
 
-/-! ## EuclideanDomain (TODO: replace `sorry` with the GaussianInt-style construction)
+/-! ## EuclideanDomain instance
 
-The recipe follows `Mathlib/NumberTheory/Zsqrtd/GaussianInt.lean:229`: embed
-into `K = QuadraticAlgebra ℚ (-2) 1`, define `div` by rounding to nearest lattice
-point of `R`, define `mod` as `a - b * (a / b)`, then prove
-`|norm (a % b)| < |norm b|`. The proof reduces to: for any `z ∈ K`, the nearest
-element of `R` has `norm (z - nearest z) < 1`.
+Construction follows the GaussianInt template (mathlib
+`NumberTheory/Zsqrtd/GaussianInt.lean:229`), specialized to the integer ring
+`R = ℤ[(1+√-7)/2]`. The subtlety relative to Gaussian integers: the
+norm-form `x² + xy + 2y²` over the fundamental parallelogram `[-1/2, 1/2]²`
+peaks at `1` exactly at the corners `(±1/2, ±1/2)`, so naive nearest-integer
+rounding can give `norm = 1`, not `< 1`. The fix: rather than rounding each
+coordinate independently, round the `im` component first (`n := round(im/N)`),
+then round the `re` component shifted by half the residual:
+`m := round((re/N) + (im/N - n) / 2)`. Let `u := re - N·m`, `v := im - N·n`.
+Then `|v| ≤ N/2` and `|2u + v| ≤ N`, so
+  `4 · (u² + uv + 2v²) = (2u+v)² + 7v² ≤ N² + 7N²/4 = 11N²/4 < 4N²`,
+giving `u² + uv + 2v² < N²`, i.e. `N · norm(rem) < N²`, i.e. `norm(rem) < N`.
 
-For our `(a, b) = (-2, 1)`, the maximum of `x² + xy + 2y²` over the fundamental
-parallelogram `[-1/2, 1/2]²` is exactly 1, attained at the corners. So naive
-rounding sometimes gives `norm = 1` (not `< 1`). The fix: at those corners,
-shift to a different lattice point — the standard argument for the Heegner-style
-imaginary norm-Euclidean rings of discriminant `-7`.
+The proof below is sorry-free. -/
 
-Until that lands, the instance is `sorry`-ed below. Downstream lemmas (PID, UFD,
-`Prime θ`, `Prime θ'`) consume only the `EuclideanDomain` API, so they will
-become non-`sorry` automatically once the instance is filled in. -/
+/-- Positive-definiteness: `norm z = 0 ↔ z = 0` over `R`. -/
+lemma norm_eq_zero_iff (z : R) : QuadraticAlgebra.norm z = 0 ↔ z = 0 := by
+  refine ⟨fun h => ?_, fun h => h ▸ QuadraticAlgebra.norm_zero⟩
+  have h4 := four_norm_eq z
+  rw [h] at h4
+  have hv : z.im = 0 := by nlinarith [sq_nonneg (2 * z.re + z.im), sq_nonneg z.im]
+  have hu : z.re = 0 := by nlinarith [h4, hv, sq_nonneg z.re]
+  exact QuadraticAlgebra.ext hu hv
+
+lemma norm_pos {z : R} (hz : z ≠ 0) : 0 < QuadraticAlgebra.norm z := by
+  rcases lt_or_eq_of_le (norm_nonneg z) with h | h
+  · exact h
+  · exact absurd ((norm_eq_zero_iff z).mp h.symm) hz
+
+/-- `b * star b` equals the norm cast back into `R`. Cornerstone of the
+norm-cancellation argument below. -/
+private lemma b_mul_star_eq_norm (b : R) :
+    b * star b = ((QuadraticAlgebra.norm b : ℤ) : R) := by
+  apply QuadraticAlgebra.ext
+  · simp only [QuadraticAlgebra.re_mul, QuadraticAlgebra.re_star, QuadraticAlgebra.im_star,
+      QuadraticAlgebra.re_intCast, QuadraticAlgebra.norm_def, Int.cast_id]
+    ring
+  · simp only [QuadraticAlgebra.im_mul, QuadraticAlgebra.re_star, QuadraticAlgebra.im_star,
+      QuadraticAlgebra.im_intCast]
+    ring
+
+/-- The algebraic core of the Euclidean argument:
+    `N · (a − b·q) = b · (a · star b − N · q)` for any `q : R`. -/
+private lemma N_mul_rem_eq (a b q : R) :
+    ((QuadraticAlgebra.norm b : ℤ) : R) * (a - b * q) =
+      b * (a * star b - ((QuadraticAlgebra.norm b : ℤ) : R) * q) := by
+  have hbs := b_mul_star_eq_norm b
+  calc ((QuadraticAlgebra.norm b : ℤ) : R) * (a - b * q)
+      = (b * star b) * (a - b * q) := by rw [← hbs]
+    _ = b * (a * star b - (b * star b) * q) := by ring
+    _ = b * (a * star b - ((QuadraticAlgebra.norm b : ℤ) : R) * q) := by rw [hbs]
+
+/-- Taking norms of the identity above and cancelling one `N` from both sides:
+    `N · norm(a − b·q) = norm(a · star b − N · q)`. -/
+private lemma N_mul_norm_rem_eq (a b q : R) (hb : b ≠ 0) :
+    QuadraticAlgebra.norm b * QuadraticAlgebra.norm (a - b * q) =
+      QuadraticAlgebra.norm (a * star b - ((QuadraticAlgebra.norm b : ℤ) : R) * q) := by
+  have hN_pos : 0 < QuadraticAlgebra.norm b := norm_pos hb
+  have hN_ne : QuadraticAlgebra.norm b ≠ 0 := hN_pos.ne'
+  have h_key := N_mul_rem_eq a b q
+  have h_norm : QuadraticAlgebra.norm
+      (((QuadraticAlgebra.norm b : ℤ) : R) * (a - b * q)) =
+      QuadraticAlgebra.norm
+      (b * (a * star b - ((QuadraticAlgebra.norm b : ℤ) : R) * q)) := by
+    rw [h_key]
+  rw [map_mul, map_mul, QuadraticAlgebra.norm_intCast] at h_norm
+  -- h_norm : N^2 * norm (a-b*q) = N * norm (a·star b - N·q); cancel N.
+  have h_sq : (QuadraticAlgebra.norm b) ^ 2 =
+              QuadraticAlgebra.norm b * QuadraticAlgebra.norm b := sq _
+  have : QuadraticAlgebra.norm b *
+         (QuadraticAlgebra.norm b * QuadraticAlgebra.norm (a - b * q)) =
+         QuadraticAlgebra.norm b *
+         QuadraticAlgebra.norm (a * star b - ((QuadraticAlgebra.norm b : ℤ) : R) * q) := by
+    rw [← mul_assoc, ← h_sq]
+    exact h_norm
+  exact mul_left_cancel₀ hN_ne this
+
+/-- The "smart-rounded" quotient: pick `n` rounding `s.im / N`, then pick `m`
+rounding `s.re / N` shifted by half the `n`-residual. -/
+noncomputable def quot (a b : R) : R :=
+  let N : ℤ := QuadraticAlgebra.norm b
+  if N = 0 then 0
+  else
+    let s : R := a * star b
+    let n : ℤ := round ((s.im : ℚ) / N)
+    let m : ℤ := round ((2 * (s.re : ℚ) + s.im - N * n) / (2 * N))
+    ⟨m, n⟩
+
+noncomputable def rem (a b : R) : R := a - b * quot a b
+
+@[simp] lemma quot_zero (a : R) : quot a 0 = 0 := by unfold quot; simp
+
+lemma quot_mul_add_rem_eq (a b : R) : b * quot a b + rem a b = a := by
+  unfold rem; ring
+
+/-- Norm bound: `16 · norm (rem a b) ≤ 11 · norm b`. -/
+private lemma sixteen_norm_rem_le (a b : R) (hb : b ≠ 0) :
+    16 * QuadraticAlgebra.norm (rem a b) ≤ 11 * QuadraticAlgebra.norm b := by
+  set N := QuadraticAlgebra.norm b with hN_def
+  have hN_pos : 0 < N := norm_pos hb
+  have hN_ne : N ≠ 0 := hN_pos.ne'
+  -- Unfold `quot a b` to `⟨m, n⟩`.
+  set s : R := a * star b with hs_def
+  set n : ℤ := round ((s.im : ℚ) / N) with hn_def
+  set m : ℤ := round ((2 * (s.re : ℚ) + s.im - N * n) / (2 * N)) with hm_def
+  have hquot : quot a b = (⟨m, n⟩ : R) := by
+    change (if QuadraticAlgebra.norm b = 0 then (0 : R) else _) = _
+    rw [if_neg hN_ne]
+  -- Integer residuals u, v.
+  set u : ℤ := s.re - N * m with hu_def
+  set v : ℤ := s.im - N * n with hv_def
+  have hNq_pos : (0 : ℚ) < N := by exact_mod_cast hN_pos
+  have hNq : (N : ℚ) ≠ 0 := hNq_pos.ne'
+  have h2Nq_pos : (0 : ℚ) < 2 * N := by linarith
+  -- Bound 1: |2v| ≤ N  (i.e. (2v)² ≤ N²)
+  have hv_bd : (2 * v) ^ 2 ≤ N ^ 2 := by
+    have habs : |(s.im : ℚ) / N - n| ≤ 1 / 2 := abs_sub_round _
+    have heq : ((s.im : ℚ) / N - n) * (2 * N) = ((2 * v : ℤ) : ℚ) := by
+      push_cast [hv_def]; field_simp
+    have h_abs_2v : |((2 * v : ℤ) : ℚ)| ≤ N := by
+      rw [← heq, abs_mul, abs_of_pos h2Nq_pos]
+      have := mul_le_mul_of_nonneg_right habs h2Nq_pos.le
+      linarith
+    have h_sq : ((2 * v : ℤ) : ℚ) ^ 2 ≤ (N : ℚ) ^ 2 := by
+      have hsa : ((2 * v : ℤ) : ℚ) ^ 2 = |((2 * v : ℤ) : ℚ)| ^ 2 := (sq_abs _).symm
+      rw [hsa]
+      exact sq_le_sq' (by linarith [abs_nonneg ((2 * v : ℤ) : ℚ)]) h_abs_2v
+    exact_mod_cast h_sq
+  -- Bound 2: |2u + v| ≤ N  (i.e. (2u+v)² ≤ N²)
+  have huv_bd : (2 * u + v) ^ 2 ≤ N ^ 2 := by
+    have habs : |(2 * (s.re : ℚ) + s.im - N * n) / (2 * N) - m| ≤ 1 / 2 := abs_sub_round _
+    have heq : ((2 * (s.re : ℚ) + s.im - N * n) / (2 * N) - m) * (2 * N) =
+               ((2 * u + v : ℤ) : ℚ) := by
+      push_cast [hu_def, hv_def]; field_simp; ring
+    have h_abs : |((2 * u + v : ℤ) : ℚ)| ≤ N := by
+      rw [← heq, abs_mul, abs_of_pos h2Nq_pos]
+      have := mul_le_mul_of_nonneg_right habs h2Nq_pos.le
+      linarith
+    have h_sq : ((2 * u + v : ℤ) : ℚ) ^ 2 ≤ (N : ℚ) ^ 2 := by
+      have hsa : ((2 * u + v : ℤ) : ℚ) ^ 2 = |((2 * u + v : ℤ) : ℚ)| ^ 2 := (sq_abs _).symm
+      rw [hsa]
+      exact sq_le_sq' (by linarith [abs_nonneg ((2 * u + v : ℤ) : ℚ)]) h_abs
+    exact_mod_cast h_sq
+  -- N · norm (rem a b) = u² + u·v + 2·v²
+  have h_chain : N * QuadraticAlgebra.norm (rem a b) = u ^ 2 + u * v + 2 * v ^ 2 := by
+    unfold rem
+    rw [hquot]
+    have h := N_mul_norm_rem_eq a b (⟨m, n⟩ : R) hb
+    rw [h]
+    -- Now compute norm (a * star b - (N : R) * ⟨m, n⟩) explicitly.
+    have hre : (a * star b - ((N : ℤ) : R) * (⟨m, n⟩ : R)).re = u := by
+      change s.re - (((N : ℤ) : R) * (⟨m, n⟩ : R)).re = u
+      push_cast [hu_def]
+      change s.re - (N * m + (-2) * 0 * n) = s.re - N * m
+      ring
+    have him : (a * star b - ((N : ℤ) : R) * (⟨m, n⟩ : R)).im = v := by
+      change s.im - (((N : ℤ) : R) * (⟨m, n⟩ : R)).im = v
+      push_cast [hv_def]
+      change s.im - (N * n + 0 * m + 1 * 0 * n) = s.im - N * n
+      ring
+    rw [QuadraticAlgebra.norm_def, hre, him]; ring
+  -- Combine: 16·(u² + uv + 2v²) = 4·(2u+v)² + 7·(2v)² ≤ 11·N²
+  have h_alg : 16 * (u ^ 2 + u * v + 2 * v ^ 2) = 4 * (2 * u + v) ^ 2 + 7 * (2 * v) ^ 2 := by
+    ring
+  have h_bd : 16 * (u ^ 2 + u * v + 2 * v ^ 2) ≤ 11 * N ^ 2 := by
+    rw [h_alg]; nlinarith [hv_bd, huv_bd]
+  -- 16·N·norm rem = 16·(u² + uv + 2v²) ≤ 11·N² ⇒ 16·norm rem ≤ 11·N
+  have hN_sq : N ^ 2 = N * N := sq N
+  nlinarith [h_chain, h_bd, hN_pos]
+
+private noncomputable def measure (a : R) : ℕ := Int.natAbs (QuadraticAlgebra.norm a)
+
+private lemma natAbs_norm_rem_lt (a : R) {b : R} (hb : b ≠ 0) :
+    measure (rem a b) < measure b := by
+  unfold measure
+  have hN_pos : 0 < QuadraticAlgebra.norm b := norm_pos hb
+  have hr_nn : 0 ≤ QuadraticAlgebra.norm (rem a b) := norm_nonneg _
+  have h_bd := sixteen_norm_rem_le a b hb
+  have hr_lt : QuadraticAlgebra.norm (rem a b) < QuadraticAlgebra.norm b := by linarith
+  zify
+  rw [abs_of_nonneg hr_nn, abs_of_nonneg hN_pos.le]
+  exact hr_lt
+
+private lemma norm_mul_left_not_lt (a : R) {b : R} (hb : b ≠ 0) :
+    ¬ measure (a * b) < measure a := by
+  unfold measure
+  have hN_pos : 0 < QuadraticAlgebra.norm b := norm_pos hb
+  have ha_nn : 0 ≤ QuadraticAlgebra.norm a := norm_nonneg a
+  have hab : QuadraticAlgebra.norm (a * b) =
+             QuadraticAlgebra.norm a * QuadraticAlgebra.norm b := map_mul _ _ _
+  have hab_nn : 0 ≤ QuadraticAlgebra.norm (a * b) := hab ▸ mul_nonneg ha_nn hN_pos.le
+  intro h
+  zify at h
+  rw [abs_of_nonneg hab_nn, abs_of_nonneg ha_nn, hab] at h
+  nlinarith [ha_nn, hN_pos]
 
 noncomputable instance instEuclideanDomain : EuclideanDomain R where
-  quotient := sorry
-  quotient_zero := sorry
-  remainder := sorry
-  quotient_mul_add_remainder_eq := sorry
-  r := sorry
-  r_wellFounded := sorry
-  remainder_lt := sorry
-  mul_left_not_lt := sorry
+  quotient := quot
+  quotient_zero := quot_zero
+  remainder := rem
+  quotient_mul_add_remainder_eq := quot_mul_add_rem_eq
+  r := fun a b => measure a < measure b
+  r_wellFounded := (_root_.measure measure).wf
+  remainder_lt := natAbs_norm_rem_lt
+  mul_left_not_lt := norm_mul_left_not_lt
 
--- These derived instances are immediate from `EuclideanDomain`; they become
--- unconditional once the `sorry`s above are filled.
 instance : IsPrincipalIdealRing R := EuclideanDomain.to_principal_ideal_domain
 
 instance : UniqueFactorizationMonoid R := inferInstance
