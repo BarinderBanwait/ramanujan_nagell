@@ -50,16 +50,16 @@ instance field : Fact (∀ (r : ℚ), r ^ 2 ≠ d + 0 * r) := by
 @[simp]
 lemma re_ratCast (q : ℚ) : (q : K).re = q := by
   have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
-  rw [this, congr_fun coe_algebraMap q, re_coe]
+  rw [this, congr_fun C_eq_algebraMap.symm q, re_C]
 
 @[simp]
 lemma im_ratCast (q : ℚ) : (q : K).im = 0 := by
   have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
-  rw [this, congr_fun coe_algebraMap q, im_coe]
+  rw [this, congr_fun C_eq_algebraMap.symm q, im_C]
 
-lemma ratCast_eq_coe (q : ℚ) : (q : K) = QuadraticAlgebra.coe q := by
+lemma ratCast_eq_coe (q : ℚ) : (q : K) = QuadraticAlgebra.C q := by
   have : (q : K) = algebraMap ℚ K q := (eq_ratCast (algebraMap ℚ K) q).symm
-  rw [this, congr_fun coe_algebraMap q]
+  rw [this, congr_fun C_eq_algebraMap.symm q]
 
 -- The IntCast ℤ → K goes through ℤ → ℚ → K (via Rat.cast), so re_intCast/im_intCast
 -- (which are rfl for QuadraticAlgebra.intCast) don't apply directly.
@@ -86,7 +86,7 @@ lemma rational_iff : z ∈ range (algebraMap ℚ K) ↔ b = 0 := by
   constructor
   · rintro ⟨y, hy⟩
     have h := congr_arg QuadraticAlgebra.im hy
-    simp only [omega_im, im_add, im_smul, coe_algebraMap, im_coe, im_ratCast, smul_eq_mul,
+    simp only [omega_im, im_add, im_smul, im_ratCast, smul_eq_mul,
                mul_one, zero_add] at h
     exact h.symm
   · rintro rfl; exact ⟨a, by simp⟩
@@ -238,14 +238,12 @@ theorem d_1 : IsIntegralClosure S ℤ K := by
   refine ⟨fun ⟨a₁, b₁⟩ ⟨a₂, b₂⟩ h ↦ ?_, @fun ⟨a, b⟩ ↦ ⟨fun hz ↦ ?_, fun ⟨x, hx⟩ ↦ ?_⟩⟩
   · simp only [mk_eq_add_smul_omega, zsmul_eq_mul, map_add,
     map_intCast, map_mul] at h
-    -- After mk_eq_add_smul_omega, ↑a₁ in S is QuadraticAlgebra.coe which equals Int.cast
-    simp only [show ∀ n : ℤ, (QuadraticAlgebra.coe n : S) = (↑n : S) from fun n => rfl] at h
     have hre := congr_arg QuadraticAlgebra.re h
     have him := congr_arg QuadraticAlgebra.im h
     simp only [algebraMap_S_K_omega, re_add, re_mul, omega_re, re_one,
       im_add, omega_im, im_one, im_mul, mul_one, mul_zero,
-      zero_mul, zero_add, add_zero, map_intCast, re_intCast_K, im_intCast_K,
-      ] at hre him
+      zero_mul, zero_add, add_zero, re_intCast_K, im_intCast_K,
+      Mathlib.Tactic.Algebra.Int.algebraMap_eq_cast, map_intCast] at hre him
     have h2re : (2⁻¹ : K).re = (2 : ℚ)⁻¹ := by
       conv_lhs => rw [show (2⁻¹ : K) = (↑(2⁻¹ : ℚ) : K) from by push_cast; ring]
       exact re_ratCast _
