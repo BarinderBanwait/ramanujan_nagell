@@ -608,11 +608,6 @@ lemma lemma_A_binomial_valuation (d l : ℕ) (hd : d > 0)
     have := dvd_sub h_contra h_tail
     simpa using this
 
-lemma lemma_B_binomial_valuation (d l : ℕ) (hd : d > 0)
-    (h_div : (7 : ℤ) ^ l ∣ ↑d) (h_ndiv : ¬ (7 : ℤ) ^ (l + 1) ∣ ↑d) :
-    (7 : ℤ) ^ l ∣ binomial_B d ∧ ¬ (7 : ℤ) ^ (l + 1) ∣ binomial_B d := by
-  exact lemma_A_binomial_valuation d l hd h_div h_ndiv
-
 /-- A'_d = Σ_{j=0}^{d/2-1} C(d, 2(j+1)) · (-7)^j. -/
 noncomputable def binomial_A' (d : ℕ) : ℤ :=
   ∑ j ∈ Finset.range (d / 2), (d.choose (2 * (j + 1)) : ℤ) * (-7) ^ j
@@ -1055,9 +1050,6 @@ theorem odd_case_only_three_values :
 lemma sq_odd_then_odd :
   ∀ (x : ℤ), Odd (x ^ 2) → Odd (x) := by
   simp [parity_simps]
-
-theorem not_odd_two_pow (n : ℕ) : n ≠ 0 → ¬Odd ((2 : ℕ) ^ n) := by
-  cases n <;> simp [pow_succ]
 
 lemma two_pow_min_seven_odd :
   ∀ (n : ℕ), n ≠ 0 → Odd ( (2 : ℤ) ^ n - 7 ) := by

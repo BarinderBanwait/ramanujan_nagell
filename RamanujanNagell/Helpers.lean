@@ -50,15 +50,9 @@ lemma theta_sq : θ ^ 2 = θ - 2 := rfl
 
 lemma theta_mul_theta' : θ * θ' = 2 := rfl
 
-lemma theta'_mul_theta : θ' * θ = 2 := rfl
-
 lemma theta_add_theta' : θ + θ' = 1 := rfl
 
 lemma theta'_eq_one_sub_theta : θ' = 1 - θ := rfl
-
-lemma norm_theta : QuadraticAlgebra.norm θ = 2 := rfl
-
-lemma norm_theta' : QuadraticAlgebra.norm θ' = 2 := rfl
 
 /-- For backward compatibility with the old Helpers API. -/
 lemma two_factorisation_R : θ * (1 - θ) = 2 := rfl
@@ -331,6 +325,9 @@ private lemma norm_mul_left_not_lt (a : R) {b : R} (hb : b ≠ 0) :
   rw [abs_of_nonneg hab_nn, abs_of_nonneg ha_nn, hab] at h
   nlinarith [ha_nn, hN_pos]
 
+/-- `R` is a Euclidean domain. Division of `a` by `b ≠ 0` uses smart rounding of
+`a · star b / N(b)` (round the `im` coordinate first, then shift-round `re`),
+which guarantees `16 · N(rem) ≤ 11 · N(b)`, hence a strictly smaller norm. -/
 noncomputable instance instEuclideanDomain : EuclideanDomain R where
   quotient := quot
   quotient_zero := quot_zero
@@ -341,9 +338,12 @@ noncomputable instance instEuclideanDomain : EuclideanDomain R where
   remainder_lt := natAbs_norm_rem_lt
   mul_left_not_lt := norm_mul_left_not_lt
 
-instance : IsPrincipalIdealRing R := EuclideanDomain.to_principal_ideal_domain
+/-- `R` is a principal ideal ring, since every Euclidean domain is one. -/
+instance instPrincipalIdealRing : IsPrincipalIdealRing R :=
+  EuclideanDomain.to_principal_ideal_domain
 
-instance : UniqueFactorizationMonoid R := inferInstance
+/-- `R` is a unique factorization domain, since every principal ideal ring is one. -/
+instance instUniqueFactorizationMonoid : UniqueFactorizationMonoid R := inferInstance
 
 /-! ## θ, θ' are prime -/
 
