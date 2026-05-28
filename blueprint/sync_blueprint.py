@@ -43,7 +43,7 @@ SCAN_FILES = [
 # Lean identifiers can contain apostrophes ('), subscripts, and Unicode
 DECL_RE = re.compile(
     r"^(?:(?:noncomputable|private|protected)\s+)*"
-    r"(lemma|theorem|def|abbrev)\s+([\w']+)",
+    r"(lemma|theorem|def|abbrev|instance)\s+([\w']+)",
     re.MULTILINE,
 )
 
@@ -53,13 +53,29 @@ NAMESPACE_END_RE = re.compile(r"^end\s+([\w']+)", re.MULTILINE)
 
 # Docstring regex: /-- ... -/ immediately before a declaration
 DOCSTRING_RE = re.compile(
-    r"/--\s*(.*?)\s*-/\s*\n(?=(?:(?:noncomputable|private|protected)\s+)*(?:lemma|theorem|def|abbrev)\s)",
+    r"/--\s*(.*?)\s*-/\s*\n(?=(?:(?:noncomputable|private|protected)\s+)*(?:lemma|theorem|def|abbrev|instance)\s)",
     re.DOTALL,
 )
 
 # Skip declarations that are internal/not blueprint-relevant
 SKIP_NAMES = {
     "f_minpoly",  # internal abbrev
+}
+
+# Dependency edges the textual scanner CANNOT see, because they flow through
+# typeclass resolution rather than a named reference in the proof body.
+# Maps a declaration to the extra declarations it depends on; these are merged
+# (union) into the auto-detected `\uses` so the dependency graph stays correct.
+#
+# The EuclideanDomain -> PID -> UFD chain is resolved by `inferInstance` /
+# `EuclideanDomain.to_principal_ideal_domain`, and `theta_prime`/`theta'_prime`
+# apply `UniqueFactorizationMonoid.irreducible_iff_prime` — none of which name
+# our instances textually. This is the heart of the proof, so wire it by hand.
+EXTRA_USES = {
+    "instPrincipalIdealRing": {"instEuclideanDomain"},
+    "instUniqueFactorizationMonoid": {"instPrincipalIdealRing"},
+    "theta_prime": {"instUniqueFactorizationMonoid"},
+    "theta'_prime": {"instUniqueFactorizationMonoid"},
 }
 
 
@@ -190,12 +206,14 @@ def parse_lean_files() -> dict[str, LeanDecl]:
         # Also skip the first line (the declaration signature itself)
         body_lines = body_no_comments.split("\n")
         body_for_refs = "\n".join(body_lines[1:]) if len(body_lines) > 1 else ""
-        refs = []
+        refs = set()
         for other_name in all_names:
             if other_name != decl.name and re.search(
                 r"(?<!\w)" + re.escape(other_name) + r"(?!\w)", body_for_refs
             ):
-                refs.append(other_name)
+                refs.add(other_name)
+        # Merge in semantic (typeclass) edges the scanner cannot detect.
+        refs |= EXTRA_USES.get(decl.name, set()) & all_names
         decl.references = sorted(refs)
 
     return decls
@@ -704,7 +722,7 @@ def _latex_escape_title(name: str) -> str:
 def _kind_to_env(kind: str) -> str:
     if kind in ("def", "abbrev"):
         return "definition"
-    if kind == "theorem":
+    if kind in ("theorem", "instance"):
         return "theorem"
     return "lemma"
 
@@ -712,7 +730,7 @@ def _kind_to_env(kind: str) -> str:
 def _kind_to_label_prefix(kind: str) -> str:
     if kind in ("def", "abbrev"):
         return "def"
-    if kind == "theorem":
+    if kind in ("theorem", "instance"):
         return "thm"
     return "lem"
 
