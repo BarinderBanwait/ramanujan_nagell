@@ -6,11 +6,6 @@ Authors: Barinder S. Banwait
 
 import RamanujanNagell.Helpers
 
-set_option linter.style.longLine false
-
-open Polynomial QuadraticAlgebra Algebra Nat
-  UniqueFactorizationMonoid
-
 /-!
 # The Ramanujan-Nagell equation
 
@@ -19,6 +14,11 @@ domain (see `Helpers.lean`); in particular it is a PID and a UFD. The proof
 below uses these facts together with `units_pm_one`, `theta_irreducible`,
 `theta'_irreducible`, and the UFD scaffolding `ufd_power_association`.
 -/
+
+set_option linter.style.longLine false
+
+open Polynomial QuadraticAlgebra Algebra Nat
+  UniqueFactorizationMonoid
 
 /-- The conjugate factors `(x ± √-7)/2` lie in `R` (since `x` is odd) and
     their product equals `(x²+7)/4 = 2^m = θ^m · θ'^m`. -/
@@ -216,7 +216,6 @@ lemma eliminate_x_conclude (α β : R) (m : ℕ)
     subst hβ
     linear_combination -h_diff
 
-set_option maxHeartbeats 400000 in
 /-- The minus sign must hold in the disjunction. Proved by reducing modulo θ'²: if
     `2θ - 1 = θ^m - θ'^m`, then `θ^m - θ ≡ θ'^m - θ' (mod θ'²)`, and combining with
     `θ^m ≡ θ (mod θ'²)` (for odd m) and `θ'^m ≡ 0 (mod θ'²)` (m ≥ 2) forces θ'² ∣ θ',
@@ -290,7 +289,7 @@ lemma reduction_divide_by_4 :
 
 /-- From `-2θ + 1 = θ^m - θ'^m`, expand via the binomial theorem and reduce
     modulo 7 to obtain `-2^(m-1) ≡ m (mod 7)`. -/
-lemma expand_by_binomial (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
+lemma expand_by_binomial (m : ℕ) (hm_ge : m ≥ 3)
     (h : -2 * θ + 1 = θ ^ m - θ' ^ m) :
     -(2 : ℤ) ^ (m - 1) % 7 = (m : ℤ) % 7 := by
   -- Working in R now (no K detour). Let α := 2θ - 1; then α² = -7.
@@ -347,11 +346,7 @@ lemma expand_by_binomial (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
       have h2 : ((-(2 : ℤ) ^ m : ℤ) : R) = ((2 * S : ℤ) : R) := by
         push_cast; exact h1
       have h3 : -(2 : ℤ) ^ m = 2 * S := by
-        have hinj : Function.Injective ((↑) : ℤ → R) := by
-          intro a b hab
-          have hre := congrArg QuadraticAlgebra.re hab
-          simp at hre
-          exact hre
+        have hinj : Function.Injective ((↑) : ℤ → R) := Int.cast_injective
         exact hinj h2
       have h6 : (2 : ℤ) ^ m = 2 * 2 ^ (m - 1) := by
         conv_lhs => rw [← Nat.sub_add_cancel (show 1 ≤ m by omega)]
@@ -411,7 +406,6 @@ lemma expand_by_binomial (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
           simp only [Odd.neg_pow ⟨j, rfl⟩, sub_neg_eq_add]
           have hpow : α ^ (2 * j + 1) = α * (α ^ 2) ^ j := by ring_nf
           rw [hpow, hα_sq]
-          push_cast
           ring
       have hne : α ≠ 0 := by
         intro h0; rw [h0, zero_pow two_ne_zero] at hα_sq
@@ -425,10 +419,7 @@ lemma expand_by_binomial (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
       have hST_R : (S : R) = (T : R) :=
         mul_left_cancel₀ h2α_ne (hS.symm.trans hR_identity)
       have hST_int : S = T := by
-        have hinj : Function.Injective ((↑) : ℤ → R) := by
-          intro a b hab
-          have hre := congrArg QuadraticAlgebra.re hab
-          simp at hre; exact hre
+        have hinj : Function.Injective ((↑) : ℤ → R) := Int.cast_injective
         exact hinj hST_R
       rw [hST_int]
       exact hT_mod
@@ -451,7 +442,7 @@ lemma odd_case_mod_seven_constraint :
         obtain ⟨k, hk⟩ := hn_odd; exact ⟨k - 1, by omega⟩
       have hm_ge : n - 2 ≥ 3 := by omega
       have h_theta := main_m_condition x (n - 2) hm_odd hm_ge h_div
-      have h_mod := expand_by_binomial (n - 2) hm_odd hm_ge h_theta
+      have h_mod := expand_by_binomial (n - 2) hm_ge h_theta
       rw [show n - 3 = (n - 2) - 1 from by omega]
       rw [show ((n : ℤ) - 2) = ((n - 2 : ℕ) : ℤ) from by omega]
       exact h_mod
@@ -538,7 +529,7 @@ private lemma j_gt_padicValNat_two_mul_add_one (j : ℕ) (hj : j ≥ 1) :
     j > padicValNat 7 (2 * j + 1) := by
   set m := padicValNat 7 (2 * j + 1)
   by_contra h_le
-  push_neg at h_le
+  push Not at h_le
   have h_dvd : 7 ^ m ∣ (2 * j + 1) := pow_padicValNat_dvd
   have h_le2 : 7 ^ m ≤ 2 * j + 1 := Nat.le_of_dvd (by omega) h_dvd
   have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
@@ -555,9 +546,9 @@ private lemma higher_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
   have hC_ne : C ≠ 0 := by omega
   have hk_ne : k ≠ 0 := by omega
   have h_absorb : d * (d - 1).choose (2 * j) = C * k := by
-    have hds : (d - 1).succ = d := Nat.succ_pred_eq_of_pos hd
-    have h := Nat.succ_mul_choose_eq (d - 1) (2 * j)
-    rw [hds] at h; convert h using 2 <;> omega
+    have hds : d - 1 + 1 = d := by omega
+    have h := Nat.add_one_mul_choose_eq (d - 1) (2 * j)
+    rw [hds] at h; exact h
   have h_dvd_prod : 7 ^ l ∣ C * k := by
     rw [← h_absorb]; exact dvd_trans h_div (dvd_mul_right d _)
   have h_val_prod : l ≤ padicValNat 7 (C * k) :=
@@ -622,9 +613,9 @@ private lemma higher_even_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
   have hC_ne : C ≠ 0 := by omega
   have hk_ne : k ≠ 0 := by omega
   have h_absorb : d * (d - 1).choose (2 * j + 1) = C * k := by
-    have hds : (d - 1).succ = d := Nat.succ_pred_eq_of_pos hd
-    have h := Nat.succ_mul_choose_eq (d - 1) (2 * j + 1)
-    rw [hds] at h; convert h using 2 <;> omega
+    have hds : d - 1 + 1 = d := by omega
+    have h := Nat.add_one_mul_choose_eq (d - 1) (2 * j + 1)
+    rw [hds] at h; exact h
   have h_dvd_prod : 7 ^ l ∣ C * k := by
     rw [← h_absorb]; exact dvd_trans h_div (dvd_mul_right d _)
   have h_val_prod : l ≤ padicValNat 7 (C * k) :=
@@ -635,7 +626,7 @@ private lemma higher_even_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
     rw [hk_def]
     set m := padicValNat 7 (2 * (j + 1))
     by_contra h_le
-    push_neg at h_le
+    push Not at h_le
     have h_dvd : 7 ^ m ∣ (2 * (j + 1)) := pow_padicValNat_dvd
     have h_le2 : 7 ^ m ≤ 2 * (j + 1) := Nat.le_of_dvd (by omega) h_dvd
     have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
@@ -741,7 +732,6 @@ lemma trace_seq_eq (n : ℕ) : (trace_seq n : R) = θ ^ n + θ' ^ n := by
     rw [key, h_sum, h_prod]
     ring
 
-set_option maxHeartbeats 400000 in
 private lemma trace_seq_mod7_period (m : ℕ) :
     trace_seq m % 7 = trace_seq (m % 3) % 7 := by
   induction m using Nat.strongRecOn with
@@ -770,7 +760,7 @@ private lemma trace_seq_mod7_period (m : ℕ) :
 lemma trace_seq_not_dvd_seven (n : ℕ) : ¬((7 : ℤ) ∣ trace_seq n) := by
   intro ⟨k, hk⟩
   have h := trace_seq_mod7_period n
-  rw [hk] at h; simp [Int.mul_emod] at h
+  rw [hk] at h; simp only [Int.mul_emod_right] at h
   have : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
   rcases this with h0 | h1 | h2
   · rw [h0] at h; simp [trace_seq] at h
@@ -877,7 +867,7 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
       · intro j hj
         simp only [Odd.neg_pow ⟨j, rfl⟩]
         have hpow : α ^ (2 * j + 1) = α * (α ^ 2) ^ j := by ring_nf
-        rw [hpow, hα_sq]; push_cast; ring
+        rw [hpow, hα_sq]; ring
     have h_sum_binom : (2 * θ) ^ d + (2 * (1 - θ)) ^ d =
         2 * (1 - 7 * ((A'_d : ℤ) : R)) := by
       rw [hbinom_plus, hbinom_minus, ← Finset.sum_add_distrib]
@@ -922,7 +912,7 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
       apply Finset.sum_congr rfl
       intro j _
       have : α ^ (2 * (j + 1)) = (α ^ 2) ^ (j + 1) := by ring_nf
-      rw [this, hα_sq]; push_cast; ring
+      rw [this, hα_sq]; ring
     have h_in_R : 2 * (P : R) * ((binomial_B d : ℤ) : R) =
         2 * ((1 : R) - 7 * ((A'_d : ℤ) : R) - (2 : R) ^ d) := by
       have h_sub1 : (P : R) * (θ ^ d - θ' ^ d) =
@@ -946,10 +936,7 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
           α * (2 * (1 - 7 * ((A'_d : ℤ) : R) - (2 : R) ^ d)) := by
         linear_combination h_scaled
       exact mul_left_cancel₀ hα_ne h_cancel
-    have hinj : Function.Injective ((↑) : ℤ → R) := by
-      intro a b hab
-      have hre := congrArg QuadraticAlgebra.re hab
-      simp at hre; exact hre
+    have hinj : Function.Injective ((↑) : ℤ → R) := Int.cast_injective
     apply hinj
     have h_lhs : ((P * binomial_B d : ℤ) : R) = (P : R) * ((binomial_B d : ℤ) : R) := by
       push_cast; ring
@@ -1087,7 +1074,7 @@ lemma ramanujan_nagell_even_pow_factors :
   have h_sum_pos : (2^k + x) + (2^k - x) > 0 := by linarith
   have h_both_pos : 2^k + x > 0 ∧ 2^k - x > 0 := by
     by_contra h_neg
-    push_neg at h_neg
+    push Not at h_neg
     rcases le_or_gt (2^k + x) 0 with ha | ha
     · rcases le_or_gt (2^k - x) 0 with hb | hb
       · linarith
@@ -1224,7 +1211,7 @@ theorem RamanujanNagell :
   intro x n h
   have n_ge_3 : n ≥ 3 := by
     by_contra h_lt
-    push_neg at h_lt
+    push Not at h_lt
     have h_sq_nonneg : 0 ≤ x ^ 2 := sq_nonneg x
     have h_pow_bound : (2 : ℤ) ^ n ≤ 4 := by
       match n with
