@@ -334,23 +334,6 @@ lemma theta'_prime : Prime θ' :=
 These lemmas combine `units_pm_one` with `UniqueFactorizationMonoid R` to give
 the key dichotomy `α * β = θ^m · θ'^m ∧ IsCoprime α β → α = ±θ^m ∨ α = ±θ'^m`. -/
 
-lemma theta_theta'_not_associated : ¬ Associated θ θ' := by
-  rintro ⟨u, hu⟩
-  rcases units_pm_one u with rfl | rfl
-  · -- θ = θ' · 1 = θ', compare re-components: 0 ≠ 1
-    simpa [θ, θ'] using congrArg QuadraticAlgebra.re hu
-  · -- θ = θ' · (-1) = -θ', compare re-components: 0 ≠ -1
-    simpa [θ, θ'] using congrArg QuadraticAlgebra.re hu
-
-lemma theta_not_dvd_theta' : ¬ (θ ∣ θ') := by
-  intro h
-  exact theta_theta'_not_associated (theta_irreducible.associated_of_dvd theta'_irreducible h)
-
-lemma theta'_not_dvd_theta : ¬ (θ' ∣ θ) := by
-  intro h
-  exact theta_theta'_not_associated
-    (theta'_irreducible.associated_of_dvd theta_irreducible h).symm
-
 lemma theta_pow_dvd_of_coprime_prod (α β : R) (m : ℕ)
     (h_prod : α * β = θ ^ m * θ' ^ m)
     (h_coprime : IsCoprime α β) :

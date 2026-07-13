@@ -215,39 +215,6 @@ norm), this gives that $\theta$ and $\theta'$ are irreducible, hence prime
 (Lemmas \ref{lem:theta_irreducible}, \ref{lem:theta'_irreducible},
 \ref{lem:theta_prime}, \ref{lem:theta'_prime}).
 
-\section{Parity lemmas}
-
-\begin{lemma}[Odd square implies odd root]
-  \label{lem:sq_odd_then_odd}
-  \lean{sq_odd_then_odd}
-  \leanok
-  If $x^2$ is odd, then $x$ is odd.
-\end{lemma}
-\begin{proof}\leanok
-  Contrapositive: if $x$ is even then $x^2$ is even.
-\end{proof}
-
-\begin{lemma}[$2^n - 7$ is odd]
-  \label{lem:two_pow_min_seven_odd}
-  \lean{two_pow_min_seven_odd}
-  \leanok
-  For all $n \neq 0$, the integer $2^n - 7$ is odd.
-\end{lemma}
-\begin{proof}\leanok
-  $2^n$ is even and $7$ is odd, so their difference is odd.
-\end{proof}
-
-\begin{lemma}[$x$ is odd]
-  \label{lem:x_is_odd}
-  \lean{x_is_odd}
-  \uses{lem:sq_odd_then_odd, lem:two_pow_min_seven_odd}
-  \leanok
-  If $x^2 + 7 = 2^n$ with $n \neq 0$, then $x$ is odd.
-\end{lemma}
-\begin{proof}\leanok
-  $x^2 = 2^n - 7$ is odd, so $x$ is odd.
-\end{proof}
-
 \section{The even case}
 
 When $n$ is even, say $n = 2k$, the equation becomes $x^2 + 7 = 2^{2k}$, which factors
@@ -435,19 +402,6 @@ lemmas (exercises), followed by a sign-determination step.
 
 The mod $42$ constraint narrows $m = n - 2$ to three residue classes.
 To show that each class contains at most one solution, we use a $7$-adic argument.
-
-\begin{lemma}[Corollary C: theta expression is universal]
-  \label{lem:corollary_C}
-  \lean{corollary_C}
-  \uses{lem:main_m_condition, def:theta, def:theta'}
-  \leanok
-  Any two solutions of the Ramanujan--Nagell equation produce the same
-  theta expression: if $(x_1^2 + 7)/4 = 2^{m_1}$ and $(x_2^2 + 7)/4 = 2^{m_2}$
-  for odd $m_1, m_2 \geq 3$, then $\theta^{m_1} - \theta'^{\,m_1} = \theta^{m_2} - \theta'^{\,m_2}$.
-\end{lemma}
-\begin{proof}\leanok
-  Both sides equal $-2\theta + 1$ by the main $m$-condition.
-\end{proof}
 
 \begin{definition}[Binomial sum $B_d$]
   \label{def:binomial_B}
@@ -661,7 +615,6 @@ A single generic lemma handles all five cases: it takes an equation $x^2 = a^2$
 \begin{proof}
   \leanok
   First, one shows $n \geq 3$ by bounding $2^n \geq x^2 + 7 \geq 7$.
-  Then $x$ must be odd (Lemma~\ref{lem:x_is_odd}).
 
   \textbf{Case 1: $n$ even.} Write $n = 2k$. Then $(2^k+x)(2^k-x) = 7$.
   By Lemma~\ref{lem:ramanujan_nagell_even_pow_factors}, the only possibility is $2^k = 4$,
@@ -797,17 +750,6 @@ A single generic lemma handles all five cases: it takes an equation $x^2 = a^2$
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta'\_not\_dvd\_theta]
-  \label{lem:theta'_not_dvd_theta}
-  \lean{theta'_not_dvd_theta}
-  \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
 \begin{lemma}[theta'\_prime]
   \label{lem:theta'_prime}
   \lean{theta'_prime}
@@ -830,23 +772,12 @@ A single generic lemma handles all five cases: it takes an equation $x^2 = a^2$
   Proof in Lean source.
 \end{proof}
 
-\begin{lemma}[theta\_not\_dvd\_theta']
-  \label{lem:theta_not_dvd_theta'}
-  \lean{theta_not_dvd_theta'}
-  \uses{lem:theta'_irreducible, lem:theta_irreducible, lem:theta_theta'_not_associated}
-  \leanok
-  TODO: add description
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
 \begin{lemma}[theta\_pow\_dvd\_of\_coprime\_prod]
   \label{lem:theta_pow_dvd_of_coprime_prod}
   \lean{theta_pow_dvd_of_coprime_prod}
   \uses{lem:theta_prime, def:theta, def:theta'}
   \leanok
-  TODO: add description
+  The integer ring `ℤ[(1 + √-7)/2]`, packaged as `QuadraticAlgebra ℤ (-2) 1`. -/
 \end{lemma}
 \begin{proof}\leanok
   Proof in Lean source.
@@ -856,17 +787,6 @@ A single generic lemma handles all five cases: it takes an equation $x^2 = a^2$
   \label{lem:theta_prime}
   \lean{theta_prime}
   \uses{thm:instUniqueFactorizationMonoid, lem:theta_irreducible}
-  \leanok
-  The integer ring `ℤ[(1 + √-7)/2]`, packaged as `QuadraticAlgebra ℤ (-2) 1`. -/
-\end{lemma}
-\begin{proof}\leanok
-  Proof in Lean source.
-\end{proof}
-
-\begin{lemma}[theta\_theta'\_not\_associated]
-  \label{lem:theta_theta'_not_associated}
-  \lean{theta_theta'_not_associated}
-  \uses{lem:units_pm_one, def:theta, def:theta'}
   \leanok
   The integer ring `ℤ[(1 + √-7)/2]`, packaged as `QuadraticAlgebra ℤ (-2) 1`. -/
 \end{lemma}

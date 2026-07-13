@@ -457,16 +457,6 @@ theorem odd_case_only_three_values_mod_42 :
 
 /-! ## Skeleton for the uniqueness argument -/
 
-lemma corollary_C (x₁ x₂ : ℤ) (m₁ m₂ : ℕ)
-    (h₁_odd : Odd m₁) (h₂_odd : Odd m₂)
-    (h₁_ge : m₁ ≥ 3) (h₂_ge : m₂ ≥ 3)
-    (h₁_eq : (x₁ ^ 2 + 7) / 4 = 2 ^ m₁)
-    (h₂_eq : (x₂ ^ 2 + 7) / 4 = 2 ^ m₂) :
-    θ ^ m₁ - θ' ^ m₁ = θ ^ m₂ - θ' ^ m₂ := by
-  have h1 := main_m_condition x₁ m₁ h₁_odd h₁_ge h₁_eq
-  have h2 := main_m_condition x₂ m₂ h₂_odd h₂_ge h₂_eq
-  rw [← h1, ← h2]
-
 /-- B_d = Σ_{j=0}^{(d-1)/2} C(d, 2j+1) · (-7)^j. -/
 noncomputable def binomial_B (d : ℕ) : ℤ :=
   ∑ j ∈ Finset.range ((d + 1) / 2), (d.choose (2 * j + 1)) * (-7) ^ j
@@ -961,29 +951,6 @@ theorem odd_case_only_three_values :
   · have : m = 13 := (at_most_one_m_per_class 13 m (by decide) hm_odd
       (by omega) hm_ge (by omega) theta_eq_at_13 h_theta).symm
     omega
-
-lemma sq_odd_then_odd :
-  ∀ (x : ℤ), Odd (x ^ 2) → Odd (x) := by
-  simp [parity_simps]
-
-lemma two_pow_min_seven_odd :
-  ∀ (n : ℕ), n ≠ 0 → Odd ( (2 : ℤ) ^ n - 7 ) := by
-  intro n hn
-  have hn' : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr hn
-  have h_even : Even ((2 : ℤ) ^ n) := by
-    obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_le hn'
-    rw [hm, add_comm, pow_add, pow_one, mul_comm]
-    exact even_two_mul ((2 : ℤ) ^ m)
-  obtain ⟨k, hk⟩ := h_even
-  use k - 4
-  omega
-
-lemma x_is_odd :
-  ∀ x : ℤ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 7 = 2 ^ n →
-    x % 2 = 1 := by
-    intros x n hn h
-    have m : (x ^ 2) = 2 ^ n - 7 := eq_tsub_of_add_eq h
-    exact Int.odd_iff.mp (sq_odd_then_odd x (m.symm ▸ two_pow_min_seven_odd n hn))
 
 lemma ramanujan_nagell_even_pow_factors :
   ∀ x : ℤ , ∀ k : ℕ, (2^k + x) * (2^k - x) = 7 →
