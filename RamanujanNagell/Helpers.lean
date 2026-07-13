@@ -70,10 +70,7 @@ lemma four_norm_eq (z : R) :
   rw [QuadraticAlgebra.norm_def]; ring
 
 lemma norm_nonneg (z : R) : 0 ≤ QuadraticAlgebra.norm z := by
-  have h := four_norm_eq z
-  have h1 : 0 ≤ (2 * z.re + z.im) ^ 2 := sq_nonneg _
-  have h2 : 0 ≤ 7 * z.im ^ 2 := by positivity
-  linarith
+  nlinarith [four_norm_eq z, sq_nonneg (2 * z.re + z.im), sq_nonneg z.im]
 
 lemma norm_eq_zero_iff (z : R) : QuadraticAlgebra.norm z = 0 ↔ z = 0 := by
   refine ⟨fun h => ?_, fun h => h ▸ QuadraticAlgebra.norm_zero⟩
@@ -83,10 +80,8 @@ lemma norm_eq_zero_iff (z : R) : QuadraticAlgebra.norm z = 0 ↔ z = 0 := by
   have hu : z.re = 0 := by nlinarith [h4, hv, sq_nonneg z.re]
   exact QuadraticAlgebra.ext hu hv
 
-lemma norm_pos {z : R} (hz : z ≠ 0) : 0 < QuadraticAlgebra.norm z := by
-  rcases lt_or_eq_of_le (norm_nonneg z) with h | h
-  · exact h
-  · exact absurd ((norm_eq_zero_iff z).mp h.symm) hz
+lemma norm_pos {z : R} (hz : z ≠ 0) : 0 < QuadraticAlgebra.norm z :=
+  (norm_nonneg z).lt_of_ne' (mt (norm_eq_zero_iff z).mp hz)
 
 /-! ## Units are ±1 -/
 
@@ -98,24 +93,16 @@ lemma units_pm_one (u : Rˣ) : u = 1 ∨ u = -1 := by
     set y := (u : R).im
     have hcoord : (u : R) = ⟨x, y⟩ := by apply QuadraticAlgebra.ext <;> rfl
     have hn' : x ^ 2 + x * y + 2 * y ^ 2 = 1 := by
-      rw [show x = (⟨x, y⟩ : R).re from rfl, show y = (⟨x, y⟩ : R).im from rfl,
-          ← norm_eq]
-      rw [← hcoord]; exact hn
+      rw [← norm_eq, ← hcoord]; exact hn
     have h_csq : (2 * x + y) ^ 2 + 7 * y ^ 2 = 4 := by linarith
     have hy : y = 0 := by nlinarith [sq_nonneg y, sq_nonneg (2 * x + y)]
     have hx2 : x ^ 2 = 1 := by nlinarith
     have hx : x = 1 ∨ x = -1 := by
       have hfact : (x - 1) * (x + 1) = 0 := by linarith [hx2]
-      rcases mul_eq_zero.mp hfact with h | h
-      · left; omega
-      · right; omega
+      rcases mul_eq_zero.mp hfact with h | h <;> omega
     rcases hx with hx1 | hx1
-    · left
-      apply Units.ext
-      rw [hcoord, hx1, hy]; rfl
-    · right
-      apply Units.ext
-      rw [hcoord, hx1, hy]; rfl
+    · exact Or.inl (Units.ext (by rw [hcoord, hx1, hy]; rfl))
+    · exact Or.inr (Units.ext (by rw [hcoord, hx1, hy]; rfl))
   · exfalso
     have := norm_nonneg (u : R)
     omega
@@ -124,48 +111,37 @@ lemma units_pm_one (u : Rˣ) : u = 1 ∨ u = -1 := by
 
 private lemma norm_factor_dichotomy {m n : ℤ} (hm : 0 ≤ m) (hn : 0 ≤ n) (hmn : m * n = 2) :
     m = 1 ∨ n = 1 := by
-  have hm_pos : 0 < m := by
-    rcases lt_or_eq_of_le hm with h | h
-    · exact h
-    · exfalso; rw [← h, zero_mul] at hmn; exact absurd hmn (by decide)
-  have hn_pos : 0 < n := by
-    rcases lt_or_eq_of_le hn with h | h
-    · exact h
-    · exfalso; rw [← h, mul_zero] at hmn; exact absurd hmn (by decide)
+  have hm_pos : 0 < m := by nlinarith [hmn]
+  have hn_pos : 0 < n := by nlinarith [hmn]
   have hm_le : m ≤ 2 := by nlinarith
   interval_cases m
   · left; rfl
   · right; linarith
 
-private lemma isUnit_of_norm_one {a : R} (h : QuadraticAlgebra.norm a = 1) : IsUnit a := by
-  apply QuadraticAlgebra.isUnit_iff_norm_isUnit.mpr
-  rw [h]; exact isUnit_one
+private lemma isUnit_of_norm_one {a : R} (h : QuadraticAlgebra.norm a = 1) : IsUnit a :=
+  QuadraticAlgebra.isUnit_iff_norm_isUnit.mpr (h.symm ▸ isUnit_one)
 
 lemma theta_irreducible : Irreducible θ := by
   refine ⟨?_, ?_⟩
   · intro hu
-    have h1 : IsUnit (QuadraticAlgebra.norm θ) := QuadraticAlgebra.isUnit_iff_norm_isUnit.mp hu
-    have h2 : IsUnit (2 : ℤ) := h1
+    have h2 : IsUnit (2 : ℤ) := QuadraticAlgebra.isUnit_iff_norm_isUnit.mp hu
     exact absurd (Int.isUnit_iff.mp h2) (by decide)
   · intro a b hab
     have hnab : QuadraticAlgebra.norm a * QuadraticAlgebra.norm b = 2 := by
       rw [← map_mul, ← hab]; rfl
-    rcases norm_factor_dichotomy (norm_nonneg a) (norm_nonneg b) hnab with h | h
-    · exact Or.inl (isUnit_of_norm_one h)
-    · exact Or.inr (isUnit_of_norm_one h)
+    exact (norm_factor_dichotomy (norm_nonneg a) (norm_nonneg b) hnab).imp
+      isUnit_of_norm_one isUnit_of_norm_one
 
 lemma theta'_irreducible : Irreducible θ' := by
   refine ⟨?_, ?_⟩
   · intro hu
-    have h1 : IsUnit (QuadraticAlgebra.norm θ') := QuadraticAlgebra.isUnit_iff_norm_isUnit.mp hu
-    have h2 : IsUnit (2 : ℤ) := h1
+    have h2 : IsUnit (2 : ℤ) := QuadraticAlgebra.isUnit_iff_norm_isUnit.mp hu
     exact absurd (Int.isUnit_iff.mp h2) (by decide)
   · intro a b hab
     have hnab : QuadraticAlgebra.norm a * QuadraticAlgebra.norm b = 2 := by
       rw [← map_mul, ← hab]; rfl
-    rcases norm_factor_dichotomy (norm_nonneg a) (norm_nonneg b) hnab with h | h
-    · exact Or.inl (isUnit_of_norm_one h)
-    · exact Or.inr (isUnit_of_norm_one h)
+    exact (norm_factor_dichotomy (norm_nonneg a) (norm_nonneg b) hnab).imp
+      isUnit_of_norm_one isUnit_of_norm_one
 
 /-! ## EuclideanDomain instance via smart rounding
 
@@ -362,11 +338,9 @@ lemma theta_theta'_not_associated : ¬ Associated θ θ' := by
   rintro ⟨u, hu⟩
   rcases units_pm_one u with rfl | rfl
   · -- θ = θ' · 1 = θ', compare re-components: 0 ≠ 1
-    have h := congrArg QuadraticAlgebra.re hu
-    simp [θ, θ'] at h
+    simpa [θ, θ'] using congrArg QuadraticAlgebra.re hu
   · -- θ = θ' · (-1) = -θ', compare re-components: 0 ≠ -1
-    have h := congrArg QuadraticAlgebra.re hu
-    simp [θ, θ'] at h
+    simpa [θ, θ'] using congrArg QuadraticAlgebra.re hu
 
 lemma theta_not_dvd_theta' : ¬ (θ ∣ θ') := by
   intro h
@@ -499,8 +473,6 @@ lemma ufd_power_association (α β : R) (m : ℕ)
     (h_prod : α * β = θ ^ m * θ' ^ m)
     (h_coprime : IsCoprime α β)
     (hα : ¬IsUnit α) (hβ : ¬IsUnit β) :
-    (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) := by
-  have h_assoc := ufd_associated_dichotomy α β m h_prod h_coprime hα hβ
-  rcases h_assoc with h_left | h_right
-  · left; exact associated_eq_or_neg α (θ ^ m) h_left
-  · right; exact associated_eq_or_neg α (θ' ^ m) h_right
+    (α = θ ^ m ∨ α = -(θ ^ m)) ∨ (α = θ' ^ m ∨ α = -(θ' ^ m)) :=
+  (ufd_associated_dichotomy α β m h_prod h_coprime hα hβ).imp
+    (associated_eq_or_neg α (θ ^ m)) (associated_eq_or_neg α (θ' ^ m))

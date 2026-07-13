@@ -55,17 +55,12 @@ lemma factors_in_R_with_product (x : ℤ) (m : ℕ) (hm_ge : m ≥ 3)
   -- α = k + θ, β = k + θ' = k + (1 - θ)
   refine ⟨(k : R) + θ, (k : R) + (1 - θ), ?_, ?_⟩
   · -- (k+θ)(k+(1-θ)) = k²+k+θ(1-θ) = k²+k+2 = 2^m = θ^m·(1-θ)^m
-    have h_two_R : (k : R) ^ 2 + (k : R) + 2 = (2 : R) ^ m := by
-      have := congr_arg (fun n : ℤ => (n : R)) h
-      push_cast at this
-      exact this
-    have hθ' : θ' = 1 - θ := theta'_eq_one_sub_theta
     calc ((k : R) + θ) * ((k : R) + (1 - θ))
         = (k : R) ^ 2 + (k : R) + θ * (1 - θ) := by ring
       _ = (k : R) ^ 2 + (k : R) + 2 := by rw [two_factorisation_R]
-      _ = (2 : R) ^ m := h_two_R
+      _ = (2 : R) ^ m := by exact_mod_cast h
       _ = θ ^ m * (1 - θ) ^ m := by rw [← mul_pow, two_factorisation_R]
-      _ = θ ^ m * θ' ^ m := by rw [← hθ']
+      _ = θ ^ m * θ' ^ m := by rw [← theta'_eq_one_sub_theta]
   · -- (k + θ) - (k + (1-θ)) = 2θ - 1
     ring
 
@@ -82,9 +77,8 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
     -- (2θ - 1)² = -7 ≠ 0
     have : (0 : R) ^ 2 = (2 * θ - 1) ^ 2 := by rw [h_diff]
     have hsq : (2 * θ - 1) ^ 2 = -7 := by
-      have hsq2 : θ ^ 2 = θ - 2 := theta_sq
       calc (2 * θ - 1) ^ 2 = 4 * θ ^ 2 - 4 * θ + 1 := by ring
-        _ = 4 * (θ - 2) - 4 * θ + 1 := by rw [hsq2]
+        _ = 4 * (θ - 2) - 4 * θ + 1 := by rw [theta_sq]
         _ = -7 := by ring
     rw [hsq] at this
     -- 0 = -7 in R
@@ -115,19 +109,10 @@ lemma conjugate_factors_coprime (α β : R) (m : ℕ)
       rw [← h_norm_two]; exact map_dvd _ h_p_dvd_two
     have h_dvd_seven : QuadraticAlgebra.norm p ∣ 7 := by
       rw [← h_norm_diff]; exact map_dvd _ h_p_dvd_diff
-    have h_np_nn : 0 ≤ QuadraticAlgebra.norm p := norm_nonneg p
     have h_np_dvd_one : QuadraticAlgebra.norm p ∣ 1 := by
-      have h_natabs_4 : (QuadraticAlgebra.norm p).natAbs ∣ 4 := Int.natAbs_dvd_natAbs.mpr h_dvd_four
-      have h_natabs_7 : (QuadraticAlgebra.norm p).natAbs ∣ 7 := Int.natAbs_dvd_natAbs.mpr h_dvd_seven
-      have h_gcd : Nat.gcd 4 7 = 1 := by decide
-      have h_dvd_gcd := Nat.dvd_gcd h_natabs_4 h_natabs_7
-      rw [h_gcd] at h_dvd_gcd
-      have : (QuadraticAlgebra.norm p).natAbs = 1 := eq_one_of_dvd_one h_dvd_gcd
-      have h1 : (QuadraticAlgebra.norm p).natAbs ∣ 1 := this ▸ dvd_refl _
-      exact_mod_cast Int.natAbs_dvd_natAbs.mp h1
-    have h_unit : IsUnit p := by
-      apply QuadraticAlgebra.isUnit_iff_norm_isUnit.mpr
-      exact isUnit_of_dvd_one h_np_dvd_one
+      simpa using dvd_sub (h_dvd_four.mul_left 2) h_dvd_seven
+    have h_unit : IsUnit p :=
+      QuadraticAlgebra.isUnit_iff_norm_isUnit.mpr (isUnit_of_dvd_one h_np_dvd_one)
     exact hp.not_unit h_unit
 
 /-- If `α = ±1`, then `α - β` has im-component 0, but `2θ - 1` has im 2. -/
@@ -137,10 +122,9 @@ lemma factor_not_unit_left (α β : R) (m : ℕ)
     ¬IsUnit α := by
   by_contra h_unit
   have h_cases : α = 1 ∨ α = -1 := by
-    have := units_pm_one h_unit.unit; simpa [Units.ext_iff] using this
-  have hθ' : θ' = 1 - θ := theta'_eq_one_sub_theta
+    simpa [Units.ext_iff] using units_pm_one h_unit.unit
   have h2m : θ ^ m * θ' ^ m = (2 : R) ^ m := by
-    rw [hθ', ← mul_pow, two_factorisation_R]
+    rw [theta'_eq_one_sub_theta, ← mul_pow, two_factorisation_R]
   rw [h2m] at h_prod
   have h2m_im : ((2 : R) ^ m).im = 0 := by
     rw [show (2 : R) ^ m = (((2 ^ m : ℕ) : ℤ) : R) from by push_cast; ring]
@@ -163,10 +147,9 @@ lemma factor_not_unit_right (α β : R) (m : ℕ)
     ¬IsUnit β := by
   by_contra h_unit
   have h_cases : β = 1 ∨ β = -1 := by
-    have := units_pm_one h_unit.unit; simpa [Units.ext_iff] using this
-  have hθ' : θ' = 1 - θ := theta'_eq_one_sub_theta
+    simpa [Units.ext_iff] using units_pm_one h_unit.unit
   have h2m : θ ^ m * θ' ^ m = (2 : R) ^ m := by
-    rw [hθ', ← mul_pow, two_factorisation_R]
+    rw [theta'_eq_one_sub_theta, ← mul_pow, two_factorisation_R]
   rw [h2m] at h_prod
   have h2m_im : ((2 : R) ^ m).im = 0 := by
     rw [show (2 : R) ^ m = (((2 ^ m : ℕ) : ℤ) : R) from by push_cast; ring]
@@ -231,11 +214,7 @@ lemma must_have_minus_sign (m : ℕ) (hm_odd : Odd m) (hm_ge : m ≥ 3)
     have step3 : θ' ^ 2 ∣ (θ ^ 2 - 1) := by
       have h_eq : θ ^ 2 - 1 = θ' * (θ' - 2) := by rw [hθ']; ring
       rw [h_eq, sq]
-      apply mul_dvd_mul_left
-      have h_dvd_2 : θ' ∣ (2 : R) := by
-        refine ⟨θ, ?_⟩
-        rw [mul_comm]; exact theta_mul_theta'.symm
-      exact dvd_sub dvd_rfl h_dvd_2
+      exact mul_dvd_mul_left θ' (dvd_sub dvd_rfl (Dvd.intro_left θ theta_mul_theta'))
     have step4 : θ' ^ 2 ∣ (θ ^ m - θ) := by
       obtain ⟨k, hk⟩ := hm_odd
       have h_eq : θ ^ m - θ = θ * ((θ ^ 2) ^ k - 1) := by
@@ -295,16 +274,18 @@ lemma expand_by_binomial (m : ℕ) (hm_ge : m ≥ 3)
   -- Working in R now (no K detour). Let α := 2θ - 1; then α² = -7.
   set α : R := 2 * θ - 1 with hα_def
   have hα_sq : α ^ 2 = -7 := by
-    have h_theta_sq : θ ^ 2 = θ - 2 := theta_sq
     calc α ^ 2 = 4 * θ ^ 2 - 4 * θ + 1 := by rw [hα_def]; ring
-      _ = 4 * (θ - 2) - 4 * θ + 1 := by rw [h_theta_sq]
+      _ = 4 * (θ - 2) - 4 * θ + 1 := by rw [theta_sq]
       _ = -7 := by ring
-  have hθ' : θ' = 1 - θ := theta'_eq_one_sub_theta
+  have hne : α ≠ 0 := by
+    intro h0; rw [h0, zero_pow two_ne_zero] at hα_sq
+    have : ((0 : ℤ) : R) = ((-7 : ℤ) : R) := by exact_mod_cast hα_sq
+    have := congrArg QuadraticAlgebra.re this; simp at this
   -- step1 : -2^m·α = (2θ)^m - (2(1-θ))^m
   have step1 : -(2 : R) ^ m * α = (2 * θ) ^ m - (2 * (1 - θ)) ^ m := by
     have hexp : θ ^ m - θ' ^ m = -α := by
       rw [hα_def]; linear_combination -h
-    rw [mul_pow, mul_pow, ← hθ']
+    rw [mul_pow, mul_pow, ← theta'_eq_one_sub_theta]
     linear_combination -(2 : R) ^ m * hexp
   -- ∃ q : ℤ, -2^(m-1) = m + 7*q
   have step2 : ∃ q : ℤ, -(2 : ℤ) ^ (m - 1) = ↑m + 7 * q := by
@@ -337,17 +318,11 @@ lemma expand_by_binomial (m : ℕ) (hm_ge : m ≥ 3)
       ring
     obtain ⟨S, hS⟩ := hdiff
     have hcancel : -(2 : ℤ) ^ (m - 1) = S := by
-      have hne : α ≠ 0 := by
-        intro h0; rw [h0, zero_pow two_ne_zero] at hα_sq
-        have : ((0 : ℤ) : R) = ((-7 : ℤ) : R) := by exact_mod_cast hα_sq
-        have := congrArg QuadraticAlgebra.re this; simp at this
       have h1 : -(2 : R) ^ m = 2 * (S : R) :=
         mul_right_cancel₀ hne (by linear_combination step1.trans hS)
       have h2 : ((-(2 : ℤ) ^ m : ℤ) : R) = ((2 * S : ℤ) : R) := by
         push_cast; exact h1
-      have h3 : -(2 : ℤ) ^ m = 2 * S := by
-        have hinj : Function.Injective ((↑) : ℤ → R) := Int.cast_injective
-        exact hinj h2
+      have h3 : -(2 : ℤ) ^ m = 2 * S := Int.cast_injective h2
       have h6 : (2 : ℤ) ^ m = 2 * 2 ^ (m - 1) := by
         conv_lhs => rw [← Nat.sub_add_cancel (show 1 ≤ m by omega)]
         rw [pow_succ]; ring
@@ -407,10 +382,6 @@ lemma expand_by_binomial (m : ℕ) (hm_ge : m ≥ 3)
           have hpow : α ^ (2 * j + 1) = α * (α ^ 2) ^ j := by ring_nf
           rw [hpow, hα_sq]
           ring
-      have hne : α ≠ 0 := by
-        intro h0; rw [h0, zero_pow two_ne_zero] at hα_sq
-        have : ((0 : ℤ) : R) = ((-7 : ℤ) : R) := by exact_mod_cast hα_sq
-        have := congrArg QuadraticAlgebra.re this; simp at this
       have h2_ne : (2 : R) ≠ 0 := by
         intro h0
         have := congrArg QuadraticAlgebra.re h0
@@ -418,9 +389,7 @@ lemma expand_by_binomial (m : ℕ) (hm_ge : m ≥ 3)
       have h2α_ne : (2 : R) * α ≠ 0 := mul_ne_zero h2_ne hne
       have hST_R : (S : R) = (T : R) :=
         mul_left_cancel₀ h2α_ne (hS.symm.trans hR_identity)
-      have hST_int : S = T := by
-        have hinj : Function.Injective ((↑) : ℤ → R) := Int.cast_injective
-        exact hinj hST_R
+      have hST_int : S = T := Int.cast_injective hST_R
       rw [hST_int]
       exact hT_mod
     obtain ⟨q, hq⟩ := hmod
@@ -462,37 +431,25 @@ theorem odd_case_only_three_values_mod_42 :
       rw [hn3_eq] at h_mod7
       have hm_mod6 : m % 6 = 1 ∨ m % 6 = 3 ∨ m % 6 = 5 := by
         obtain ⟨k, hk⟩ := hm_odd; omega
+      have hcast : (↑n : ℤ) - 2 = ↑m := by omega
+      rw [hcast] at h_mod7
+      have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
+        intro q; induction q with
+        | zero => norm_num
+        | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
       rcases hm_mod6 with h6 | h6 | h6
       · right; right
-        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
-        rw [hcast] at h_mod7
-        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
-          intro q; induction q with
-          | zero => norm_num
-          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
         have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 1 := by
           obtain ⟨q, hq⟩ : 6 ∣ (m - 1) := ⟨(m - 1) / 6, by omega⟩
           rw [show (m : ℕ) - 1 = 6 * q from by omega, pow_mul]
           exact h64 q
         omega
       · left
-        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
-        rw [hcast] at h_mod7
-        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
-          intro q; induction q with
-          | zero => norm_num
-          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
         have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 4 := by
           obtain ⟨q, hq⟩ : ∃ q, m - 1 = 6 * q + 2 := ⟨(m - 1) / 6, by omega⟩
           rw [hq, pow_add, pow_mul, Int.mul_emod, h64 q]; norm_num
         omega
       · right; left
-        have hcast : (↑n : ℤ) - 2 = ↑m := by omega
-        rw [hcast] at h_mod7
-        have h64 : ∀ q : ℕ, ((2 : ℤ) ^ 6) ^ q % 7 = 1 := by
-          intro q; induction q with
-          | zero => norm_num
-          | succ q ih => rw [pow_succ, Int.mul_emod, ih]; norm_num
         have h_pow_mod : (2 : ℤ) ^ (m - 1) % 7 = 2 := by
           obtain ⟨q, hq⟩ : ∃ q, m - 1 = 6 * q + 4 := ⟨(m - 1) / 6, by omega⟩
           rw [hq, pow_add, pow_mul, Int.mul_emod, h64 q]; norm_num
@@ -533,8 +490,7 @@ private lemma j_gt_padicValNat_two_mul_add_one (j : ℕ) (hj : j ≥ 1) :
   have h_dvd : 7 ^ m ∣ (2 * j + 1) := pow_padicValNat_dvd
   have h_le2 : 7 ^ m ≤ 2 * j + 1 := Nat.le_of_dvd (by omega) h_dvd
   have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
-  exact absurd (Nat.lt_of_lt_of_le (seven_pow_gt_two_mul_add_one j hj) (le_refl _))
-    (not_lt.mpr (le_trans h_le3 h_le2))
+  exact absurd (seven_pow_gt_two_mul_add_one j hj) (not_lt.mpr (le_trans h_le3 h_le2))
 
 private lemma higher_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
     (h_div : 7 ^ l ∣ d) (hk : 2 * j + 1 ≤ d) :
@@ -542,8 +498,7 @@ private lemma higher_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
   haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
   set C := d.choose (2 * j + 1) with hC_def
   set k := 2 * j + 1 with hk_def
-  have hC_pos : C > 0 := Nat.choose_pos hk
-  have hC_ne : C ≠ 0 := by omega
+  have hC_ne : C ≠ 0 := (Nat.choose_pos hk).ne'
   have hk_ne : k ≠ 0 := by omega
   have h_absorb : d * (d - 1).choose (2 * j) = C * k := by
     have hds : d - 1 + 1 = d := by omega
@@ -609,8 +564,7 @@ private lemma higher_even_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
   haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
   set C := d.choose (2 * (j + 1)) with hC_def
   set k := 2 * (j + 1) with hk_def
-  have hC_pos : C > 0 := Nat.choose_pos hk
-  have hC_ne : C ≠ 0 := by omega
+  have hC_ne : C ≠ 0 := (Nat.choose_pos hk).ne'
   have hk_ne : k ≠ 0 := by omega
   have h_absorb : d * (d - 1).choose (2 * j + 1) = C * k := by
     have hds : d - 1 + 1 = d := by omega
@@ -631,12 +585,8 @@ private lemma higher_even_term_nat_dvd (d l j : ℕ) (hd : d > 0) (hj : j ≥ 1)
     have h_le2 : 7 ^ m ≤ 2 * (j + 1) := Nat.le_of_dvd (by omega) h_dvd
     have h_le3 : 7 ^ j ≤ 7 ^ m := Nat.pow_le_pow_right (by norm_num) h_le
     have h_gt : 7 ^ j > 2 * j + 1 := seven_pow_gt_two_mul_add_one j hj
-    have h_eq : 7 ^ j = 2 * (j + 1) := by omega
-    have h_even : Even (7 ^ j) := by
-      rw [h_eq]
-      simp
-    have h_not_even : ¬ Even (7 ^ j) := by grind
-    exact h_not_even h_even
+    obtain ⟨t, ht⟩ := (Odd.pow (by decide) : Odd (7 ^ j))
+    omega
   have h_val_pow : padicValNat 7 (C * 7 ^ j) = padicValNat 7 C + j := by
     rw [padicValNat.mul hC_ne (by positivity), padicValNat.prime_pow]
   exact (padicValNat_dvd_iff_le (mul_ne_zero hC_ne (by positivity))).mpr (by omega)
@@ -704,8 +654,7 @@ lemma even_binomial_valuation (d l : ℕ) (hd : d > 0)
   · intro h_contra
     apply h_f0_ndiv
     rw [h_split] at h_contra
-    have := dvd_sub h_contra h_tail
-    simpa using this
+    simpa using dvd_sub h_contra h_tail
 
 /-- a(n) = θ^n + θ'^n, an integer recurrence. -/
 def trace_seq : ℕ → ℤ
@@ -720,16 +669,13 @@ lemma trace_seq_eq (n : ℕ) : (trace_seq n : R) = θ ^ n + θ' ^ n := by
     ring
   | case2 =>
     simp only [trace_seq, Int.cast_one, pow_one]
-    have h_theta' : θ' = 1 - θ := theta'_eq_one_sub_theta
-    rw [h_theta']; ring
+    rw [theta'_eq_one_sub_theta]; ring
   | case3 n ih1 ih2 =>
     simp only [trace_seq, Int.cast_sub, Int.cast_mul, Int.cast_ofNat]
     rw [ih1, ih2]
-    have h_prod : θ * θ' = 2 := theta_mul_theta'
-    have h_sum : θ + θ' = 1 := theta_add_theta'
     have key : θ ^ (n + 2) + θ' ^ (n + 2) =
         (θ + θ') * (θ ^ (n + 1) + θ' ^ (n + 1)) - θ * θ' * (θ ^ n + θ' ^ n) := by ring
-    rw [key, h_sum, h_prod]
+    rw [key, theta_add_theta', theta_mul_theta']
     ring
 
 private lemma trace_seq_mod7_period (m : ℕ) :
@@ -762,13 +708,9 @@ lemma trace_seq_not_dvd_seven (n : ℕ) : ¬((7 : ℤ) ∣ trace_seq n) := by
   have h := trace_seq_mod7_period n
   rw [hk] at h; simp only [Int.mul_emod_right] at h
   have : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
-  rcases this with h0 | h1 | h2
-  · rw [h0] at h; simp [trace_seq] at h
-  · rw [h1] at h; simp [trace_seq] at h
-  · rw [h2] at h; simp [trace_seq] at h
+  rcases this with h3 | h3 | h3 <;> rw [h3] at h <;> simp [trace_seq] at h
 
-lemma nat_even_iff_not_odd (n : ℕ) : Even n ↔ ¬ Odd n := by
-  exact Iff.symm not_odd_iff_even
+lemma nat_even_iff_not_odd (n : ℕ) : Even n ↔ ¬ Odd n := Iff.symm not_odd_iff_even
 
 /-- Each residue class mod 42 has at most one m solving the equation. -/
 lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
@@ -809,11 +751,7 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
   have h_identity : P * binomial_B d = 1 - 7 * A'_d - (2 : ℤ) ^ d := by
     have h_theta' : θ' = 1 - θ := theta'_eq_one_sub_theta
     set α : R := 2 * θ - 1 with hα_def
-    have hα_sq : α ^ 2 = -7 := by
-      have h_theta_sq : θ ^ 2 = θ - 2 := theta_sq
-      calc α ^ 2 = 4 * θ ^ 2 - 4 * θ + 1 := by rw [hα_def]; ring
-        _ = 4 * (θ - 2) - 4 * θ + 1 := by rw [h_theta_sq]
-        _ = -7 := by ring
+    have hα_sq : α ^ 2 = -7 := by rw [hα_def]; linear_combination 4 * theta_sq
     have hα_ne : α ≠ 0 := by
       intro h0; rw [h0, zero_pow two_ne_zero] at hα_sq
       have h_re := congrArg QuadraticAlgebra.re hα_sq
@@ -827,7 +765,6 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
       linear_combination -2 * h_pow_eq
     have h_diff_eq : θ ^ m₁ - θ' ^ m₁ = -α := by
       rw [← h₁_theta, hα_def]; ring
-    have hP_R : (P : R) = θ ^ m₁ + θ' ^ m₁ := hP_eq
     -- Binomial expansions in R
     have hbinom_plus : (2 * θ) ^ d =
         ∑ k ∈ Finset.range (d + 1), ((d.choose k : ℤ) : R) * α ^ k := by
@@ -917,7 +854,7 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
         2 * ((1 : R) - 7 * ((A'_d : ℤ) : R) - (2 : R) ^ d) := by
       have h_sub1 : (P : R) * (θ ^ d - θ' ^ d) =
           α * (θ ^ d + θ' ^ d - 2) := by
-        rw [hP_R, h_cross, h_diff_eq]; ring
+        rw [hP_eq, h_cross, h_diff_eq]; ring
       have h_scaled : (P : R) * ((2 : R) ^ d * (θ ^ d - θ' ^ d)) =
           α * ((2 : R) ^ d * (θ ^ d + θ' ^ d) - (2 : R) ^ d * 2) := by
         calc (P : R) * ((2 : R) ^ d * (θ ^ d - θ' ^ d))
@@ -994,17 +931,14 @@ lemma at_most_one_m_per_class (m₁ m₂ : ℕ)
   exact h_Bd_ndiv (h_coprime.dvd_of_dvd_mul_left h_dvd_prod)
 
 /-- m = 3 is a solution: x = 5, (25+7)/4 = 8 = 2³. -/
-lemma theta_eq_at_3 : -2 * θ + 1 = θ ^ 3 - θ' ^ 3 := by
-  have h_div : ((5 : ℤ) ^ 2 + 7) / 4 = 2 ^ 3 := by norm_num
-  exact main_m_condition 5 3 ⟨1, by omega⟩ (by omega) h_div
+lemma theta_eq_at_3 : -2 * θ + 1 = θ ^ 3 - θ' ^ 3 :=
+  main_m_condition 5 3 ⟨1, by omega⟩ (by omega) (by norm_num)
 
-lemma theta_eq_at_5 : -2 * θ + 1 = θ ^ 5 - θ' ^ 5 := by
-  have h_div : ((11 : ℤ) ^ 2 + 7) / 4 = 2 ^ 5 := by norm_num
-  exact main_m_condition 11 5 ⟨2, by omega⟩ (by omega) h_div
+lemma theta_eq_at_5 : -2 * θ + 1 = θ ^ 5 - θ' ^ 5 :=
+  main_m_condition 11 5 ⟨2, by omega⟩ (by omega) (by norm_num)
 
-lemma theta_eq_at_13 : -2 * θ + 1 = θ ^ 13 - θ' ^ 13 := by
-  have h_div : ((181 : ℤ) ^ 2 + 7) / 4 = 2 ^ 13 := by norm_num
-  exact main_m_condition 181 13 ⟨6, by omega⟩ (by omega) h_div
+lemma theta_eq_at_13 : -2 * θ + 1 = θ ^ 13 - θ' ^ 13 :=
+  main_m_condition 181 13 ⟨6, by omega⟩ (by omega) (by norm_num)
 
 /-- For x² + 7 = 2ⁿ with odd n ≥ 5: n ∈ {5, 7, 15}. -/
 theorem odd_case_only_three_values :
@@ -1013,24 +947,18 @@ theorem odd_case_only_three_values :
   intro x n hn_odd hn_ge h_eq
   have h_mod := odd_case_only_three_values_mod_42 x n hn_odd hn_ge h_eq
   set m := n - 2 with hm_def
-  have hm_odd : Odd m := by
-    obtain ⟨k, hk⟩ := hn_odd
-    refine ⟨k - 1, ?_⟩
-    omega
+  have hm_odd : Odd m := Nat.Odd.sub_even (by omega) hn_odd (by decide)
   have hm_ge : m ≥ 3 := by omega
   have h_div := reduction_divide_by_4 x n hn_odd hn_ge h_eq
   have h_theta := main_m_condition x m hm_odd hm_ge h_div
   rcases h_mod with h3 | h5 | h13
-  · left
-    have : m = 3 := (at_most_one_m_per_class 3 m (by decide) hm_odd
+  · have : m = 3 := (at_most_one_m_per_class 3 m (by decide) hm_odd
       (by omega) hm_ge (by omega) theta_eq_at_3 h_theta).symm
     omega
-  · right; left
-    have : m = 5 := (at_most_one_m_per_class 5 m (by decide) hm_odd
+  · have : m = 5 := (at_most_one_m_per_class 5 m (by decide) hm_odd
       (by omega) hm_ge (by omega) theta_eq_at_5 h_theta).symm
     omega
-  · right; right
-    have : m = 13 := (at_most_one_m_per_class 13 m (by decide) hm_odd
+  · have : m = 13 := (at_most_one_m_per_class 13 m (by decide) hm_odd
       (by omega) hm_ge (by omega) theta_eq_at_13 h_theta).symm
     omega
 
@@ -1054,16 +982,8 @@ lemma x_is_odd :
   ∀ x : ℤ, ∀ n : ℕ, n ≠ 0 → x ^ 2 + 7 = 2 ^ n →
     x % 2 = 1 := by
     intros x n hn h
-    have m : (x^2) = 2^n - 7 := by
-      exact eq_tsub_of_add_eq h
-    have m₂ : (x ^ 2) % 2 = 1 := by
-      rw [m]
-      rw [← Int.odd_iff]
-      exact two_pow_min_seven_odd n hn
-    rw [← Int.odd_iff]
-    rw [← Int.odd_iff] at m₂
-    apply sq_odd_then_odd
-    exact m₂
+    have m : (x ^ 2) = 2 ^ n - 7 := eq_tsub_of_add_eq h
+    exact Int.odd_iff.mp (sq_odd_then_odd x (m.symm ▸ two_pow_min_seven_odd n hn))
 
 lemma ramanujan_nagell_even_pow_factors :
   ∀ x : ℤ , ∀ k : ℕ, (2^k + x) * (2^k - x) = 7 →
@@ -1095,31 +1015,7 @@ lemma ramanujan_nagell_even_pow_factors :
   have ha_ge_one : a ≥ 1 := by linarith
   have hb_ge_one : b ≥ 1 := by linarith
   have h_cases : (a = 1 ∧ b = 7) ∨ (a = 7 ∧ b = 1) := by
-    rcases (show a = 1 ∨ a = 2 ∨ a = 3 ∨ a = 4 ∨ a = 5 ∨ a = 6 ∨ a = 7 by omega) with
-      ha1 | ha2 | ha3 | ha4 | ha5 | ha6 | ha7
-    · left
-      refine ⟨ha1, ?_⟩
-      have : (1 : ℤ) * b = 7 := by rw [← ha1]; exact hab
-      linarith
-    · exfalso
-      have : (2 : ℤ) * b = 7 := by rw [← ha2]; exact hab
-      omega
-    · exfalso
-      have : (3 : ℤ) * b = 7 := by rw [← ha3]; exact hab
-      omega
-    · exfalso
-      have : (4 : ℤ) * b = 7 := by rw [← ha4]; exact hab
-      omega
-    · exfalso
-      have : (5 : ℤ) * b = 7 := by rw [← ha5]; exact hab
-      omega
-    · exfalso
-      have : (6 : ℤ) * b = 7 := by rw [← ha6]; exact hab
-      omega
-    · right
-      refine ⟨ha7, ?_⟩
-      have h7b : (7 : ℤ) * b = 7 := by simp only [ha7] at hab; exact hab
-      linarith
+    interval_cases a <;> omega
   rcases h_cases with ⟨ha_eq, hb_eq⟩ | ⟨ha_eq, hb_eq⟩
   · right
     simp only [ha_def, hb_def] at ha_eq hb_eq
@@ -1135,8 +1031,7 @@ lemma helper_1
   ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
   ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
   ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    have thing : x = 3 ∨ x = -3 := sq_eq_sq_iff_eq_or_eq_neg.mp h₁
-    rcases thing with h | h
+    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 3 ∨ x = -3) with h | h
     · right; right; left
       exact Prod.ext h h₂
     · right; right; right; left
@@ -1149,8 +1044,7 @@ lemma helper_2
   ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
   ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
   ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    have thing : x = 1 ∨ x = -1 := sq_eq_sq_iff_eq_or_eq_neg.mp h₁
-    rcases thing with h | h
+    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 1 ∨ x = -1) with h | h
     · left
       exact Prod.ext h h₂
     · right; left
@@ -1165,8 +1059,7 @@ lemma helper_3
   ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
   ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
   ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    have thing : x = 5 ∨ x = -5 := sq_eq_sq_iff_eq_or_eq_neg.mp h₁
-    rcases thing with h | h
+    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 5 ∨ x = -5) with h | h
     · right; right; right; right; left
       exact Prod.ext h h₂
     · right; right; right; right; right; left
@@ -1179,8 +1072,7 @@ lemma helper_4
   ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
   ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
   ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    have thing : x = 11 ∨ x = -11 := sq_eq_sq_iff_eq_or_eq_neg.mp h₁
-    rcases thing with h | h
+    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 11 ∨ x = -11) with h | h
     · right; right; right; right; right; right; left
       exact Prod.ext h h₂
     · right; right; right; right; right; right; right; left
@@ -1193,8 +1085,7 @@ lemma helper_5
   ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
   ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
   ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    have thing : x = 181 ∨ x = -181 := sq_eq_sq_iff_eq_or_eq_neg.mp h₁
-    rcases thing with h | h
+    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 181 ∨ x = -181) with h | h
     · right; right; right; right; right; right; right; right; left
       exact Prod.ext h h₂
     · right; right; right; right; right; right; right; right; right
@@ -1212,24 +1103,7 @@ theorem RamanujanNagell :
   have n_ge_3 : n ≥ 3 := by
     by_contra h_lt
     push Not at h_lt
-    have h_sq_nonneg : 0 ≤ x ^ 2 := sq_nonneg x
-    have h_pow_bound : (2 : ℤ) ^ n ≤ 4 := by
-      match n with
-      | 0 => norm_num
-      | 1 => norm_num
-      | 2 => norm_num
-      | n + 3 => omega
-    linarith
-  have h₂ : x % 2 = 1 := by
-    apply x_is_odd x n
-    · intro h'
-      rw [h', pow_zero] at h
-      have blah : x ^ 2 < 0  := by linarith
-      have blah2 : 0 ≤ x^2 := sq_nonneg x
-      apply lt_irrefl x
-      linarith
-    · exact h
-  rw [← Int.odd_iff] at h₂
+    interval_cases n <;> nlinarith [sq_nonneg x]
   rcases Nat.even_or_odd n with h₃ | h₃
   · rcases exists_eq_mul_right_of_dvd (even_iff_two_dvd.mp h₃) with ⟨k, hk⟩
     rw [hk] at h
@@ -1239,15 +1113,7 @@ theorem RamanujanNagell :
                             _ = 7 := by rw [← h]; ring
     have h₄' := ramanujan_nagell_even_pow_factors x k h₄
     have h₅ : (8 : ℤ) = (2 : ℤ) * (2 : ℤ) ^ k := by
-      rcases h₄' with ⟨h₄a, h₄b⟩ | ⟨h₄a, h₄b⟩
-      · calc
-          8 = 7 + 1 := by norm_num
-          _ = (2 ^ k + x) + (2 ^ k - x) := by rw [← h₄b, ← h₄a]
-          _ = 2 * 2 ^ k := by ring
-      · calc
-          8 = 7 + 1 := by norm_num
-          _ = (2 ^ k - x) + (2 ^ k + x) := by rw [← h₄a, ← h₄b]
-          _ = 2 * 2 ^ k := by ring
+      rcases h₄' with ⟨h₄a, h₄b⟩ | ⟨h₄a, h₄b⟩ <;> linarith
     have h₆ : 2 ^ k = 4 := by linarith
     have k_eq_2 : k = 2 := by
       have h₇ : 4 = 2 ^ 2 := by norm_num
@@ -1276,13 +1142,6 @@ theorem RamanujanNagell :
         contradiction
       have n_ge_5 : n ≥ 5 := omg n_ge_4 n_ne_4
       clear n_ge_4 n_ne_4 n_ge_3
-      let M : ℕ := n - 2
-      have M_ge_3 : M ≥ 3 := by
-        calc
-          M = n - 2 := by rfl
-          _ ≥ 5 - 2 := by omega
-          _ = 3 := by norm_num
-      have n_is_M_plus_2 : n = M + 2 := by omega
       have h_cases := odd_case_only_three_values x n h₃ n_ge_5 (by linarith : x ^ 2 + 7 = 2 ^ n)
       rcases h_cases with hn5 | hn7 | hn15
       · have x_sq : x ^ 2 = 25 := by
