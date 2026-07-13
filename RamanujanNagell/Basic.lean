@@ -1024,72 +1024,11 @@ lemma ramanujan_nagell_even_pow_factors :
     simp only [ha_def, hb_def] at ha_eq hb_eq
     exact ⟨hb_eq, ha_eq⟩
 
-lemma helper_1
-  {x : ℤ} {n : ℕ} (h₁ : x ^ 2 = 9) (h₂ : n = 4) :
-    (x, n) = (1, 3) ∨ (x, n) = (-1, 3)
-  ∨ (x, n) = (3, 4) ∨ (x, n) = (-3, 4)
-  ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
-  ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
-  ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 3 ∨ x = -3) with h | h
-    · right; right; left
-      exact Prod.ext h h₂
-    · right; right; right; left
-      exact Prod.ext h h₂
-
-lemma helper_2
-  {x : ℤ} {n : ℕ} (h₁ : x ^ 2 = 1) (h₂ : n = 3) :
-    (x, n) = (1, 3) ∨ (x, n) = (-1, 3)
-  ∨ (x, n) = (3, 4) ∨ (x, n) = (-3, 4)
-  ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
-  ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
-  ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 1 ∨ x = -1) with h | h
-    · left
-      exact Prod.ext h h₂
-    · right; left
-      exact Prod.ext h h₂
-
-lemma omg {n : ℕ} (n_ge_4 : n ≥ (4 : ℕ)) (n_ne_4 : n ≠ (4 : ℕ)) : n ≥ 5 := by omega
-
-lemma helper_3
-  {x : ℤ} {n : ℕ} (h₁ : x ^ 2 = 25) (h₂ : n = 5) :
-    (x, n) = (1, 3) ∨ (x, n) = (-1, 3)
-  ∨ (x, n) = (3, 4) ∨ (x, n) = (-3, 4)
-  ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
-  ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
-  ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 5 ∨ x = -5) with h | h
-    · right; right; right; right; left
-      exact Prod.ext h h₂
-    · right; right; right; right; right; left
-      exact Prod.ext h h₂
-
-lemma helper_4
-  {x : ℤ} {n : ℕ} (h₁ : x ^ 2 = 121) (h₂ : n = 7) :
-    (x, n) = (1, 3) ∨ (x, n) = (-1, 3)
-  ∨ (x, n) = (3, 4) ∨ (x, n) = (-3, 4)
-  ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
-  ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
-  ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 11 ∨ x = -11) with h | h
-    · right; right; right; right; right; right; left
-      exact Prod.ext h h₂
-    · right; right; right; right; right; right; right; left
-      exact Prod.ext h h₂
-
-lemma helper_5
-  {x : ℤ} {n : ℕ} (h₁ : x ^ 2 = 32761) (h₂ : n = 15) :
-    (x, n) = (1, 3) ∨ (x, n) = (-1, 3)
-  ∨ (x, n) = (3, 4) ∨ (x, n) = (-3, 4)
-  ∨ (x, n) = (5, 5) ∨ (x, n) = (-5, 5)
-  ∨ (x, n) = (11, 7) ∨ (x, n) = (-11, 7)
-  ∨ (x, n) = (181, 15) ∨ (x, n) = (-181, 15) := by
-    rcases (sq_eq_sq_iff_eq_or_eq_neg.mp h₁ : x = 181 ∨ x = -181) with h | h
-    · right; right; right; right; right; right; right; right; left
-      exact Prod.ext h h₂
-    · right; right; right; right; right; right; right; right; right
-      exact Prod.ext h h₂
+/-- Once `x² = a²` and `n = m` are pinned down, the solution pair is `(±a, m)`;
+    dispatching into the ten-element solution list is then mechanical. -/
+lemma solution_from_sq {x a : ℤ} {n m : ℕ} (h₁ : x ^ 2 = a ^ 2) (h₂ : n = m) :
+    (x, n) = (a, m) ∨ (x, n) = (-a, m) :=
+  (sq_eq_sq_iff_eq_or_eq_neg.mp h₁).imp (Prod.ext · h₂) (Prod.ext · h₂)
 
 /-- The Ramanujan-Nagell theorem. -/
 theorem RamanujanNagell :
@@ -1125,7 +1064,8 @@ theorem RamanujanNagell :
         x^2 = (2 : ℤ) ^ ((2 : ℕ) * k) - (7 : ℤ) := by linarith
           _ = 2^4 - 7 := by rw [k_eq_2]
           _ = 9 := by norm_num
-    exact helper_1 x_squared_eq_9 n_eq_4
+    have := solution_from_sq (a := 3) x_squared_eq_9 n_eq_4
+    tauto
   · have m := Nat.le.dest n_ge_3
     rcases m with _ | m
     · have n_eq_3 : n = 3 := by linarith
@@ -1134,14 +1074,10 @@ theorem RamanujanNagell :
           x^2 = (2 : ℤ) ^ n - (7 : ℤ) := by linarith
             _ = 2^3 - 7 := by rw [n_eq_3]
             _ = 1 := by norm_num
-      exact helper_2 x_squared_eq_1 n_eq_3
-    · have n_ge_4 : n ≥ 4 := by linarith
-      have n_ne_4 : n ≠ 4 := by
-        intro j
-        subst j
-        contradiction
-      have n_ge_5 : n ≥ 5 := omg n_ge_4 n_ne_4
-      clear n_ge_4 n_ne_4 n_ge_3
+      have := solution_from_sq (a := 1) x_squared_eq_1 n_eq_3
+      tauto
+    · have n_ge_5 : n ≥ 5 := by obtain ⟨j, hj⟩ := h₃; omega
+      clear n_ge_3
       have h_cases := odd_case_only_three_values x n h₃ n_ge_5 (by linarith : x ^ 2 + 7 = 2 ^ n)
       rcases h_cases with hn5 | hn7 | hn15
       · have x_sq : x ^ 2 = 25 := by
@@ -1149,16 +1085,19 @@ theorem RamanujanNagell :
             x ^ 2 = (2 : ℤ) ^ n - 7 := by linarith
               _ = 2 ^ 5 - 7 := by rw [hn5]
               _ = 25 := by norm_num
-        exact helper_3 x_sq hn5
+        have := solution_from_sq (a := 5) x_sq hn5
+        tauto
       · have x_sq : x ^ 2 = 121 := by
           calc
             x ^ 2 = (2 : ℤ) ^ n - 7 := by linarith
               _ = 2 ^ 7 - 7 := by rw [hn7]
               _ = 121 := by norm_num
-        exact helper_4 x_sq hn7
+        have := solution_from_sq (a := 11) x_sq hn7
+        tauto
       · have x_sq : x ^ 2 = 32761 := by
           calc
             x ^ 2 = (2 : ℤ) ^ n - 7 := by linarith
               _ = 2 ^ 15 - 7 := by rw [hn15]
               _ = 32761 := by norm_num
-        exact helper_5 x_sq hn15
+        have := solution_from_sq (a := 181) x_sq hn15
+        tauto

@@ -298,7 +298,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Coprimality]
   \label{lem:conjugate_factors_coprime}
   \lean{conjugate_factors_coprime}
-  \uses{def:R, lem:norm_eq, lem:norm_nonneg, lem:theta_mul_theta', lem:theta_sq, def:theta, def:theta'}
+  \uses{def:R, lem:norm_eq, lem:theta_mul_theta', lem:theta_sq, def:theta, def:theta'}
   \leanok
   The conjugate factors are coprime in $R$.
   The only prime factors of $2$ in $R$ are $\theta$ and $\theta'$
@@ -343,7 +343,7 @@ lemmas (exercises), followed by a sign-determination step.
 \begin{lemma}[Must have minus sign]
   \label{lem:must_have_minus_sign}
   \lean{must_have_minus_sign}
-  \uses{def:R, lem:theta'_eq_one_sub_theta, lem:theta'_irreducible, lem:theta_mul_theta', lem:units_pm_one, def:theta, def:theta'}
+  \uses{lem:theta'_eq_one_sub_theta, lem:theta'_irreducible, lem:theta_mul_theta', lem:units_pm_one, def:theta, def:theta'}
   \leanok
   If either $2\theta - 1 = \theta^m - \theta'^{\,m}$ or $-2\theta + 1 = \theta^m - \theta'^{\,m}$
   holds for odd $m \geq 3$, then in fact the minus sign must hold:
@@ -629,69 +629,29 @@ To show that each class contains at most one solution, we use a $7$-adic argumen
 
 \section{Main theorem}
 
-\begin{lemma}[Auxiliary: $n \geq 4$ and $n \neq 4$ implies $n \geq 5$]
-  \label{lem:omg}
-  \lean{omg}
-  \leanok
-  If $n \geq 4$ and $n \neq 4$, then $n \geq 5$.
-\end{lemma}
-\begin{proof}\leanok
-  Immediate by \texttt{omega}.
-\end{proof}
-
-\subsection{Direct computation helpers}
+\subsection{Direct computation}
 
 Once the possible values of $n$ are determined (either by the even-case factorization or
 the odd-case modular argument), it remains to solve for $x$ by direct computation.
-Each helper below takes an equation $x^2 = c$ (where $c = 2^n - 7$) and the value of $n$,
-then identifies the solution pair $(x, n)$ in the list of solutions.
+A single generic lemma handles all five cases: it takes an equation $x^2 = a^2$
+(where $a^2 = 2^n - 7$) and the value of $n$, and identifies the solution pair $(x, n)$.
 
-\begin{lemma}[Even case: $n = 4$, $x^2 = 9$]
-  \label{lem:helper_1}
-  \lean{helper_1}
+\begin{lemma}[Solving $x^2 = a^2$]
+  \label{lem:solution_from_sq}
+  \lean{solution_from_sq}
   \leanok
-  If $x^2 = 9$ and $n = 4$, then $(x, n) = (\pm 3, 4)$.
+  If $x^2 = a^2$ and $n = m$, then $(x, n) = (a, m)$ or $(x, n) = (-a, m)$.
 \end{lemma}
-\begin{proof}\leanok Solve $x^2 = 9$. \end{proof}
-
-\begin{lemma}[Odd case: $n = 3$, $x^2 = 1$]
-  \label{lem:helper_2}
-  \lean{helper_2}
-  \leanok
-  If $x^2 = 1$ and $n = 3$, then $(x, n) = (\pm 1, 3)$.
-\end{lemma}
-\begin{proof}\leanok Solve $x^2 = 1$. \end{proof}
-
-\begin{lemma}[Odd case: $n = 5$, $x^2 = 25$]
-  \label{lem:helper_3}
-  \lean{helper_3}
-  \leanok
-  If $x^2 = 25$ and $n = 5$, then $(x, n) = (\pm 5, 5)$.
-\end{lemma}
-\begin{proof}\leanok Solve $x^2 = 25$. \end{proof}
-
-\begin{lemma}[Odd case: $n = 7$, $x^2 = 121$]
-  \label{lem:helper_4}
-  \lean{helper_4}
-  \leanok
-  If $x^2 = 121$ and $n = 7$, then $(x, n) = (\pm 11, 7)$.
-\end{lemma}
-\begin{proof}\leanok Solve $x^2 = 121$. \end{proof}
-
-\begin{lemma}[Odd case: $n = 15$, $x^2 = 32761$]
-  \label{lem:helper_5}
-  \lean{helper_5}
-  \leanok
-  If $x^2 = 32761$ and $n = 15$, then $(x, n) = (\pm 181, 15)$.
-\end{lemma}
-\begin{proof}\leanok Solve $x^2 = 32761$. \end{proof}
+\begin{proof}\leanok
+  From $x^2 = a^2$ we get $x = a$ or $x = -a$.
+\end{proof}
 
 \subsection{The theorem}
 
 \begin{theorem}[Ramanujan--Nagell]
   \label{thm:RamanujanNagell}
   \lean{RamanujanNagell}
-  \uses{lem:helper_1, lem:helper_2, lem:helper_3, lem:helper_4, lem:helper_5, thm:odd_case_only_three_values, lem:omg, lem:ramanujan_nagell_even_pow_factors, lem:x_is_odd}
+  \uses{thm:odd_case_only_three_values, lem:ramanujan_nagell_even_pow_factors, lem:solution_from_sq}
   \leanok
   The only integer solutions to $x^2 + 7 = 2^n$ are
   \[
@@ -705,14 +665,14 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
 
   \textbf{Case 1: $n$ even.} Write $n = 2k$. Then $(2^k+x)(2^k-x) = 7$.
   By Lemma~\ref{lem:ramanujan_nagell_even_pow_factors}, the only possibility is $2^k = 4$,
-  giving $n = 4$ and $x = \pm 3$ (Lemma~\ref{lem:helper_1}).
+  giving $n = 4$ and $x = \pm 3$ (Lemma~\ref{lem:solution_from_sq}).
 
   \textbf{Case 2: $n$ odd, $n = 3$.} Direct computation gives $x^2 = 1$, so $x = \pm 1$
-  (Lemma~\ref{lem:helper_2}).
+  (Lemma~\ref{lem:solution_from_sq}).
 
   \textbf{Case 3: $n$ odd, $n \geq 5$.} By Theorem~\ref{thm:odd_case_only_three_values},
   $n \in \{5, 7, 15\}$, and direct computation gives the remaining solutions
-  (Lemmas~\ref{lem:helper_3}, \ref{lem:helper_4}, \ref{lem:helper_5}).
+  (Lemma~\ref{lem:solution_from_sq}).
 \end{proof}
 
 \section{Additional declarations}
@@ -829,7 +789,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
 \begin{lemma}[theta'\_irreducible]
   \label{lem:theta'_irreducible}
   \lean{theta'_irreducible}
-  \uses{lem:norm_nonneg, def:theta, def:theta'}
+  \uses{lem:norm_nonneg}
   \leanok
   TODO: add description
 \end{lemma}
@@ -862,7 +822,7 @@ then identifies the solution pair $(x, n)$ in the list of solutions.
 \begin{lemma}[theta\_irreducible]
   \label{lem:theta_irreducible}
   \lean{theta_irreducible}
-  \uses{lem:norm_nonneg, def:theta}
+  \uses{lem:norm_nonneg}
   \leanok
   TODO: add description
 \end{lemma}
