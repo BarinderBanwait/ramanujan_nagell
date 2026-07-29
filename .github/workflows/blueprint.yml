@@ -87,7 +87,7 @@ jobs:
             python3 -m venv env
             source env/bin/activate
             pip install --upgrade pip requests wheel
-            pip install pygraphviz
+            pip install "pygraphviz<2"
             pip install leanblueprint
             leanblueprint pdf
             mkdir -p home_page
